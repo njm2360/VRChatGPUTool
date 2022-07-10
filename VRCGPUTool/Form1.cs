@@ -390,6 +390,7 @@ namespace VRCGPUTool
             GPUTemp.Text = "GPU温度:" + g.CoreTemp.ToString() + "℃";
             //GPU電力制限
             datetime_now = DateTime.Now;
+            Console.WriteLine(datetime_now.ToString() + setting_time.ToString());
             if (datetime_now >= setting_time && limitstatus == false)
             {
                 limitstatus = true;
@@ -425,6 +426,8 @@ namespace VRCGPUTool
             }
             //設定時間をセット
             setting_time = check_time;
+
+            Console.WriteLine(setting_time.ToString());
         }
 
         private void PowerLimitSettingChanged(object sender, EventArgs e)
