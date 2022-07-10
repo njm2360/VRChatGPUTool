@@ -236,6 +236,17 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //nvidia-smiがインストールされていない環境をはじく
+            try
+            {
+                nvidia_smi("");
+            }
+            catch(FileNotFoundException)
+            {
+                MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください","エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+            }
+
             //直近のGPU使用率配列初期化
             for(int i = 0; i < recentutil.Length; i++)
             {
@@ -253,8 +264,6 @@ namespace VRCGPUTool
             GpuIndex.SelectedIndex = 0;
 
             //電力制限値の範囲を設定
-            //PowerLimitValue.Maximum = Convert.ToDecimal(GPU[0].PLimitMax);
-            //PowerLimitValue.Minimum = Convert.ToDecimal(GPU[0].PLimitMin);
             PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PowerLimit);
 
             StatusLimit.Text = gpuStatuses.First().PowerLimit.ToString() + "W";
@@ -364,6 +373,16 @@ namespace VRCGPUTool
                     //使用率が指定の範囲の場合寝落ちと判断
                     if(max_util - min_util < Convert.ToInt16(GPUusageThreshold.Value))
                     {
+                        limitstatus = false;
+                        LimitStatusText.Visible = false;
+                        //制限時に変更できないように無効化
+                        PowerLimitValue.Enabled = true;
+                        BeginTime.Enabled = true;
+                        TodayTime.Enabled = true;
+                        TomorrowTime.Enabled = true;
+                        LoadDefaultLimit.Enabled = true;
+                        ForceLimit.Enabled = true;
+                        //制限をかける
                         nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
                         StatusLimit.Text = PowerLimitValue.Value.ToString() + "W";
                     }

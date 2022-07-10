@@ -170,7 +170,6 @@
             // 
             // GPUreadTimer
             // 
-            this.GPUreadTimer.Enabled = false;
             this.GPUreadTimer.Interval = 1000;
             this.GPUreadTimer.Tick += new System.EventHandler(this.GPUreadTimer_Tick);
             // 
@@ -324,7 +323,7 @@
             this.Font = new System.Drawing.Font("Gadugi", 8.25F);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VRChat向け GPU電力制限ツール Ver 1.00";
+            this.Text = "VRChat向け GPU電力制限ツール Ver 1.11";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).EndInit();
