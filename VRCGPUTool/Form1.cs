@@ -90,11 +90,23 @@ namespace VRCGPUTool
             return output;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
             //アプリケーションのアップデート確認
             var client = new HttpClient();
-            var result = client.GetAsync(@"https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest");
+
+            var message = new HttpRequestMessage {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest"),
+            };
+
+            message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
+            var result = await client.SendAsync(message).ConfigureAwait(false);
+
+            result.EnsureSuccessStatusCode();
+
+            var result_s = await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            MessageBox.Show(result_s);
 
             //var json = result.Content.ReadAsStringAsync();
             //Console.WriteLine($"{(int)result.StatusCode} {result.StatusCode}");
