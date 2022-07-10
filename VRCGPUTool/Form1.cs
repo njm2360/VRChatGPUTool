@@ -61,13 +61,11 @@ namespace VRCGPUTool
         private void checkUpdateWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             if (e.Error != null)
             {
-                MessageBox.Show(e.Error.Message);
+                MessageBox.Show(string.Format("アップデートチェック中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
+                return;
             }
-            else
-            {
 
-                MessageBox.Show(((GitHubReleaseAPIStructure)e.Result).tag_name);
-            }
+            MessageBox.Show(((GitHubReleaseAPIStructure)e.Result).tag_name);
         }
 
         void refreshGPUStatus()
