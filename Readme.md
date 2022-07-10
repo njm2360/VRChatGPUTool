@@ -6,9 +6,9 @@ VRC向け GPU電力制限ツール
 
 ## 最新リリース
 
-[Download (GitHub)](https://github.com/Yanorei32/VRChatRejoinTool/releases/latest)
+[Download (GitHub)]()
 
-[Download (BOOTH)](https://yanorei32.booth.pm/items/1489700)
+[Download (BOOTH)]()
 
 
 ## 使用法
