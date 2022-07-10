@@ -121,7 +121,8 @@ namespace VRCGPUTool
             StatusLimit.Text = gpuStatuses.First().PLimit.ToString() + "W";
 
             //時間制限用
-            BeginTime.Value = DateTime.Now.AddHours(1);
+            BeginTime.Value = DateTime.Now.AddMinutes(15);
+            EndTime.Value = DateTime.Now.AddMinutes(30);
             
             //タイマー有効
             GPUreadTimer.Enabled = true;
@@ -142,16 +143,16 @@ namespace VRCGPUTool
 
         private void ForceUnlimit_Click(object sender, EventArgs e)
         {
+            //操作可能にするため表示
             limitstatus = false;
             LimitStatusText.Visible = false;
-            //制限時に変更できないように無効化
             PowerLimitValue.Enabled = true;
             BeginTime.Enabled = true;
             LoadDefaultLimit.Enabled = true;
             ForceLimit.Enabled = true;
 
             //設定時間を１時間後にセット（再度制限を防ぐ）
-            BeginTime.Value = DateTime.Now.AddHours(1);
+            BeginTime.Value = DateTime.Now.AddMinutes(15);
 
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
             nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID) ;
@@ -243,6 +244,21 @@ namespace VRCGPUTool
 
                 nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
                 StatusLimit.Text = PowerLimitValue.Value.ToString() + "W";
+            }
+            if(datetime_now.Hour == EndTime.Value.Hour && datetime_now.Minute == EndTime.Value.Minute && limitstatus)
+            {
+                //制限解除後は自動検出無効
+                AutoDetect.Checked = false;
+                //操作可能にするため表示
+                limitstatus = false;
+                LimitStatusText.Visible = false;
+                PowerLimitValue.Enabled = true;
+                BeginTime.Enabled = true;
+                LoadDefaultLimit.Enabled = true;
+                ForceLimit.Enabled = true;
+
+                nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID);
+                StatusLimit.Text = g.PLimitDefault.ToString() + "W";
             }
         }
 

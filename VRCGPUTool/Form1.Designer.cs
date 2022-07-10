@@ -49,6 +49,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.EndTime = new System.Windows.Forms.DateTimePicker();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -79,7 +81,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(12, 246);
+            this.label2.Location = new System.Drawing.Point(18, 259);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(269, 39);
             this.label2.TabIndex = 2;
@@ -88,7 +90,7 @@
             // PowerLimitValue
             // 
             this.PowerLimitValue.Font = new System.Drawing.Font("HGP創英角ｺﾞｼｯｸUB", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.PowerLimitValue.Location = new System.Drawing.Point(42, 307);
+            this.PowerLimitValue.Location = new System.Drawing.Point(48, 320);
             this.PowerLimitValue.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -104,7 +106,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(259, 323);
+            this.label3.Location = new System.Drawing.Point(266, 334);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(51, 39);
             this.label3.TabIndex = 4;
@@ -114,7 +116,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(321, 246);
+            this.label4.Location = new System.Drawing.Point(383, 259);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(299, 39);
             this.label4.TabIndex = 5;
@@ -124,7 +126,7 @@
             // 
             this.StatusLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.StatusLimit.ForeColor = System.Drawing.Color.Black;
-            this.StatusLimit.Location = new System.Drawing.Point(365, 307);
+            this.StatusLimit.Location = new System.Drawing.Point(455, 312);
             this.StatusLimit.Name = "StatusLimit";
             this.StatusLimit.Size = new System.Drawing.Size(227, 79);
             this.StatusLimit.TabIndex = 6;
@@ -134,7 +136,7 @@
             // ForceLimit
             // 
             this.ForceLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ForceLimit.Location = new System.Drawing.Point(345, 30);
+            this.ForceLimit.Location = new System.Drawing.Point(70, 446);
             this.ForceLimit.Name = "ForceLimit";
             this.ForceLimit.Size = new System.Drawing.Size(247, 44);
             this.ForceLimit.TabIndex = 7;
@@ -145,7 +147,7 @@
             // ForceUnlimit
             // 
             this.ForceUnlimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ForceUnlimit.Location = new System.Drawing.Point(345, 92);
+            this.ForceUnlimit.Location = new System.Drawing.Point(418, 446);
             this.ForceUnlimit.Name = "ForceUnlimit";
             this.ForceUnlimit.Size = new System.Drawing.Size(247, 44);
             this.ForceUnlimit.TabIndex = 8;
@@ -158,9 +160,9 @@
             this.GpuIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GpuIndex.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.GpuIndex.FormattingEnabled = true;
-            this.GpuIndex.Location = new System.Drawing.Point(44, 452);
+            this.GpuIndex.Location = new System.Drawing.Point(32, 509);
             this.GpuIndex.Name = "GpuIndex";
-            this.GpuIndex.Size = new System.Drawing.Size(458, 33);
+            this.GpuIndex.Size = new System.Drawing.Size(617, 33);
             this.GpuIndex.TabIndex = 9;
             this.GpuIndex.SelectedIndexChanged += new System.EventHandler(this.SelectGPUChanged);
             // 
@@ -171,7 +173,7 @@
             // 
             // LoadDefaultLimit
             // 
-            this.LoadDefaultLimit.Location = new System.Drawing.Point(63, 402);
+            this.LoadDefaultLimit.Location = new System.Drawing.Point(70, 399);
             this.LoadDefaultLimit.Name = "LoadDefaultLimit";
             this.LoadDefaultLimit.Size = new System.Drawing.Size(109, 25);
             this.LoadDefaultLimit.TabIndex = 10;
@@ -203,7 +205,7 @@
             // 
             this.GPUTemp.AutoSize = true;
             this.GPUTemp.Font = new System.Drawing.Font("Nirmala UI", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.GPUTemp.Location = new System.Drawing.Point(341, 157);
+            this.GPUTemp.Location = new System.Drawing.Point(414, 172);
             this.GPUTemp.Name = "GPUTemp";
             this.GPUTemp.Size = new System.Drawing.Size(251, 50);
             this.GPUTemp.TabIndex = 13;
@@ -214,7 +216,7 @@
             this.LimitStatusText.AutoSize = true;
             this.LimitStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LimitStatusText.ForeColor = System.Drawing.Color.Red;
-            this.LimitStatusText.Location = new System.Drawing.Point(391, 386);
+            this.LimitStatusText.Location = new System.Drawing.Point(484, 399);
             this.LimitStatusText.Name = "LimitStatusText";
             this.LimitStatusText.Size = new System.Drawing.Size(125, 39);
             this.LimitStatusText.TabIndex = 16;
@@ -262,18 +264,41 @@
             this.groupBox1.Controls.Add(this.GPUusageThreshold);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.AutoDetect);
-            this.groupBox1.Location = new System.Drawing.Point(19, 139);
+            this.groupBox1.Location = new System.Drawing.Point(19, 157);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(293, 86);
             this.groupBox1.TabIndex = 20;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "ベータ機能";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(377, 10);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(305, 39);
+            this.label8.TabIndex = 22;
+            this.label8.Text = "電力制限終了時間";
+            // 
+            // EndTime
+            // 
+            this.EndTime.CustomFormat = "H:mm";
+            this.EndTime.Font = new System.Drawing.Font("HGP創英角ｺﾞｼｯｸUB", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
+            this.EndTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.EndTime.Location = new System.Drawing.Point(433, 62);
+            this.EndTime.Name = "EndTime";
+            this.EndTime.ShowUpDown = true;
+            this.EndTime.Size = new System.Drawing.Size(218, 71);
+            this.EndTime.TabIndex = 21;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(625, 501);
+            this.ClientSize = new System.Drawing.Size(725, 564);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.EndTime);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.LimitStatusText);
             this.Controls.Add(this.GPUTemp);
@@ -293,7 +318,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VRChat向け GPU電力制限ツール Ver 1.20";
+            this.Text = "VRChat向け GPU電力制限ツール Ver 1.30";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).EndInit();
@@ -326,6 +351,8 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.DateTimePicker EndTime;
     }
 }
 
