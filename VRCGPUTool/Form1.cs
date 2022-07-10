@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace VRCGPUTool
 {
@@ -64,8 +65,21 @@ namespace VRCGPUTool
                 MessageBox.Show(string.Format("アップデートチェック中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
+            string tag_name = ((GitHubReleaseAPIStructure)e.Result).tag_name;
 
-            MessageBox.Show(((GitHubReleaseAPIStructure)e.Result).tag_name);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = "v" + fileVersionInfo.ProductVersion;
+
+            //更新があるかチェック
+            if(tag_name != version)
+            {
+                var res = MessageBox.Show("アップデートがあります\n最新バージョンは " + tag_name + " です\n\nアップデートページを開きますか?","アップデート",MessageBoxButtons.OKCancel);
+                if(res == DialogResult.OK)
+                {
+                    Process.Start(new ProcessStartInfo { FileName = "https://njm2360.booth.pm/items/3993173", UseShellExecute = true });
+                }
+            }
         }
 
         void refreshGPUStatus()
@@ -133,11 +147,12 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //アプデチェック
             checkUpdateWorker.RunWorkerAsync();
 
-            //var json = result.Content.ReadAsStringAsync();
-            //Console.WriteLine($"{(int)result.StatusCode} {result.StatusCode}");
-            //Console.WriteLine(json);
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            this.Text += fileVersionInfo.ProductVersion;
 
             //nvidia-smiがインストールされていない環境をはじく
             if (!System.IO.File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
@@ -153,10 +168,11 @@ namespace VRCGPUTool
             {
                 recentutil[i] = -1;
             }
-            //システムに搭載されているNvidiaGPUの数を取得
+
+            //全GPUステータスを更新
             refreshGPUStatus();
 
-            //各GPUのステータスを取得
+            //GPUリストを更新
             foreach (GpuStatus g in gpuStatuses)
             {
                 GpuIndex.Items.Add(g.Name);

@@ -318,7 +318,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VRChat向け GPU電力制限ツール Ver 1.30";
+            this.Text = "VRChat向け GPU電力制限ツール Ver ";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).EndInit();
