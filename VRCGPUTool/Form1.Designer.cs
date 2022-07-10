@@ -44,8 +44,6 @@
             this.AutoDetect = new System.Windows.Forms.CheckBox();
             this.label5 = new System.Windows.Forms.Label();
             this.GPUTemp = new System.Windows.Forms.Label();
-            this.TodayTime = new System.Windows.Forms.RadioButton();
-            this.TomorrowTime = new System.Windows.Forms.RadioButton();
             this.LimitStatusText = new System.Windows.Forms.Label();
             this.GPUusageThreshold = new System.Windows.Forms.NumericUpDown();
             this.label6 = new System.Windows.Forms.Label();
@@ -61,12 +59,11 @@
             this.BeginTime.CustomFormat = "H:mm";
             this.BeginTime.Font = new System.Drawing.Font("HGP創英角ｺﾞｼｯｸUB", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.BeginTime.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.BeginTime.Location = new System.Drawing.Point(105, 62);
+            this.BeginTime.Location = new System.Drawing.Point(63, 62);
             this.BeginTime.Name = "BeginTime";
             this.BeginTime.ShowUpDown = true;
-            this.BeginTime.Size = new System.Drawing.Size(207, 71);
+            this.BeginTime.Size = new System.Drawing.Size(218, 71);
             this.BeginTime.TabIndex = 0;
-            this.BeginTime.ValueChanged += new System.EventHandler(this.SettingTimeChanged);
             // 
             // label1
             // 
@@ -125,7 +122,6 @@
             // 
             // StatusLimit
             // 
-            this.StatusLimit.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.StatusLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.StatusLimit.ForeColor = System.Drawing.Color.Black;
             this.StatusLimit.Location = new System.Drawing.Point(365, 307);
@@ -213,32 +209,6 @@
             this.GPUTemp.TabIndex = 13;
             this.GPUTemp.Text = "GPU温度: 0℃";
             // 
-            // TodayTime
-            // 
-            this.TodayTime.AutoSize = true;
-            this.TodayTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TodayTime.Location = new System.Drawing.Point(12, 72);
-            this.TodayTime.Name = "TodayTime";
-            this.TodayTime.Size = new System.Drawing.Size(85, 28);
-            this.TodayTime.TabIndex = 14;
-            this.TodayTime.TabStop = true;
-            this.TodayTime.Tag = "Today";
-            this.TodayTime.Text = "今日の";
-            this.TodayTime.UseVisualStyleBackColor = true;
-            // 
-            // TomorrowTime
-            // 
-            this.TomorrowTime.AutoSize = true;
-            this.TomorrowTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TomorrowTime.Location = new System.Drawing.Point(12, 104);
-            this.TomorrowTime.Name = "TomorrowTime";
-            this.TomorrowTime.Size = new System.Drawing.Size(85, 28);
-            this.TomorrowTime.TabIndex = 15;
-            this.TomorrowTime.TabStop = true;
-            this.TomorrowTime.Tag = "Tomorrow";
-            this.TomorrowTime.Text = "明日の";
-            this.TomorrowTime.UseVisualStyleBackColor = true;
-            // 
             // LimitStatusText
             // 
             this.LimitStatusText.AutoSize = true;
@@ -306,8 +276,6 @@
             this.ClientSize = new System.Drawing.Size(625, 501);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.LimitStatusText);
-            this.Controls.Add(this.TomorrowTime);
-            this.Controls.Add(this.TodayTime);
             this.Controls.Add(this.GPUTemp);
             this.Controls.Add(this.LoadDefaultLimit);
             this.Controls.Add(this.GpuIndex);
@@ -321,9 +289,11 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.BeginTime);
             this.Font = new System.Drawing.Font("Gadugi", 8.25F);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VRChat向け GPU電力制限ツール Ver 1.11";
+            this.Text = "VRChat向け GPU電力制限ツール Ver 1.20";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).EndInit();
@@ -351,8 +321,6 @@
         private System.Windows.Forms.CheckBox AutoDetect;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label GPUTemp;
-        private System.Windows.Forms.RadioButton TodayTime;
-        private System.Windows.Forms.RadioButton TomorrowTime;
         private System.Windows.Forms.Label LimitStatusText;
         private System.Windows.Forms.NumericUpDown GPUusageThreshold;
         private System.Windows.Forms.Label label6;
