@@ -170,7 +170,7 @@
             // 
             // GPUreadTimer
             // 
-            this.GPUreadTimer.Enabled = true;
+            this.GPUreadTimer.Enabled = false;
             this.GPUreadTimer.Interval = 1000;
             this.GPUreadTimer.Tick += new System.EventHandler(this.GPUreadTimer_Tick);
             // 
