@@ -237,13 +237,9 @@ namespace VRCGPUTool
         private void Form1_Load(object sender, EventArgs e)
         {
             //nvidia-smiがインストールされていない環境をはじく
-            try
+            if (!System.IO.File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
             {
-                nvidia_smi("");
-            }
-            catch(FileNotFoundException)
-            {
-                MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください","エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
 
