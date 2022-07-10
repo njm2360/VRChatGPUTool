@@ -8,7 +8,7 @@ VRC向け GPU電力制限ツール
 
 [Download (GitHub)](https://github.com/njm2360/VRChatGPUTool/releases/latest)
 
-[Download (BOOTH)](https://njm2360.booth.pm/items/3992036)
+[Download (BOOTH)](https://njm2360.booth.pm/items/39933173)
 
 
 ## 使用法
