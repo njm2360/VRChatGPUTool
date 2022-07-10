@@ -5,7 +5,9 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 
 namespace VRCGPUTool
 {
@@ -51,8 +53,8 @@ namespace VRCGPUTool
                     if (v.Length != queryColumns.Length) continue;
 
                     gpuStatuses.Add(new GpuStatus(
-                        v[0],
-                        v[1],
+                        v[0].Trim(),
+                        v[1].Trim(),
                         (int)double.Parse(v[2]),
                         (int)double.Parse(v[3]),
                         (int)double.Parse(v[4]),
@@ -90,6 +92,14 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //アプリケーションのアップデート確認
+            var client = new HttpClient();
+            var result = client.GetAsync(@"https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest");
+
+            //var json = result.Content.ReadAsStringAsync();
+            //Console.WriteLine($"{(int)result.StatusCode} {result.StatusCode}");
+            //Console.WriteLine(json);
+
             //nvidia-smiがインストールされていない環境をはじく
             if (!System.IO.File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
             {
