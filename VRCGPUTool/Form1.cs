@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 
@@ -11,9 +14,8 @@ namespace VRCGPUTool
             InitializeComponent();
         }
 
-        static GpuStatus[] GPU = new GpuStatus[] { new GpuStatus()};
+        List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
-        private int gpucount = 0;
         private bool limitstatus = false;
         private int[] recentutil = new int[300];
         private int writeaddr = 0;
@@ -181,25 +183,35 @@ namespace VRCGPUTool
                 }
             }
         
-            public void RefreshGPUStatus(int index)
-            {
-                string output = nvidia_smi("--query-gpu=name,power.limit,power.default_limit,power.max_limit,power.min_limit,memory.total,memory.used,utilization.gpu,fan.speed,temperature.gpu,temperature.memory,uuid --format=csv,noheader,nounits");
-                string[] nvres = output.Split(',');
+        }
 
-                GPU[index].GPUName = nvres[0].ToString();
-                GPU[index].PowerLimit = Convert.ToInt16(Math.Floor(double.Parse(nvres[1])));
-                GPU[index].PLimitDefault = Convert.ToInt16(Math.Floor(double.Parse(nvres[2])));
-                GPU[index].PLimitMax = Convert.ToInt16(Math.Floor(double.Parse(nvres[3])));
-                GPU[index].PLimitMin = Convert.ToInt16(Math.Floor(double.Parse(nvres[4])));
-                GPU[index].VramCap = Convert.ToInt16(Math.Floor(double.Parse(nvres[5])));
-                GPU[index].VramUsage = Convert.ToInt16(Math.Floor(double.Parse(nvres[6])));
-                GPU[index].CoreLoad = Convert.ToInt16(Math.Floor(double.Parse(nvres[7])));
-                GPU[index].FanSpeed = Convert.ToInt16(Math.Floor(double.Parse(nvres[8])));
-                GPU[index].CoreTemp = Convert.ToInt16(Math.Floor(double.Parse(nvres[9])));
-                GPU[index].UUID = nvres[11].ToString().Substring(1,40);
-                //GPU[0].VramTemp = Convert.ToInt16(Math.Floor(double.Parse(nvres[9])));
+        void refreshGPUStatus()
+        {
+            string output = nvidia_smi("--query-gpu=name,power.limit,power.default_limit,power.max_limit,power.min_limit,memory.total,memory.used,utilization.gpu,fan.speed,temperature.gpu,temperature.memory,uuid --format=csv,noheader,nounits");
+            using (var r = new StringReader(output)) {
+                gpuStatuses.Clear();
+                for (string l = r.ReadLine(); l != null; l = r.ReadLine()) {
+                    GpuStatus g = new GpuStatus();
+                    string[] nvres = l.Split(',');
+                    g.GPUName = nvres[0].ToString();
+                    g.PowerLimit = Convert.ToInt16(Math.Floor(double.Parse(nvres[1])));
+                    g.PLimitDefault = Convert.ToInt16(Math.Floor(double.Parse(nvres[2])));
+                    g.PLimitMax = Convert.ToInt16(Math.Floor(double.Parse(nvres[3])));
+                    g.PLimitMin = Convert.ToInt16(Math.Floor(double.Parse(nvres[4])));
+                    g.VramCap = Convert.ToInt16(Math.Floor(double.Parse(nvres[5])));
+                    g.VramUsage = Convert.ToInt16(Math.Floor(double.Parse(nvres[6])));
+                    g.CoreLoad = Convert.ToInt16(Math.Floor(double.Parse(nvres[7])));
+                    g.FanSpeed = Convert.ToInt16(Math.Floor(double.Parse(nvres[8])));
+                    g.CoreTemp = Convert.ToInt16(Math.Floor(double.Parse(nvres[9])));
+                    g.UUID = nvres[11].ToString().Substring(1,40);
+                    gpuStatuses.Add(g);
+                }
             }
 
+            if (!gpuStatuses.Any()) {
+                MessageBox.Show("nvidia-smi.exe is exist, but GPU count is 0.\nExit.");
+                Close();
+            }
         }
 
         private static string nvidia_smi(string param)
@@ -230,16 +242,12 @@ namespace VRCGPUTool
                 recentutil[i] = -1;
             }
             //システムに搭載されているNvidiaGPUの数を取得
-            string uuid = nvidia_smi("--query-gpu=uuid --format=csv,noheader,nounits").ToString().Substring(0, 40);
-            int gpus = Convert.ToUInt16(nvidia_smi("--query-gpu=count --format=csv,noheader,nounits" + " --id=" + uuid));
-            Array.Resize(ref GPU, gpus);
-            gpucount = gpus;
+            refreshGPUStatus();
 
             //各GPUのステータスを取得
-            for(int s = 0; s < gpus; s++)
+            foreach (GpuStatus g in gpuStatuses)
             {
-                GPU[s].RefreshGPUStatus(s);
-                GpuIndex.Items.Add(GPU[s].GPUName);
+                GpuIndex.Items.Add(g.GPUName);
             }
 
             GpuIndex.SelectedIndex = 0;
@@ -247,9 +255,9 @@ namespace VRCGPUTool
             //電力制限値の範囲を設定
             //PowerLimitValue.Maximum = Convert.ToDecimal(GPU[0].PLimitMax);
             //PowerLimitValue.Minimum = Convert.ToDecimal(GPU[0].PLimitMin);
-            PowerLimitValue.Value = Convert.ToDecimal(GPU[0].PowerLimit);
+            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PowerLimit);
 
-            StatusLimit.Text = GPU[0].PowerLimit.ToString() + "W";
+            StatusLimit.Text = gpuStatuses.First().PowerLimit.ToString() + "W";
 
             //時間制限用
             datetime_now = DateTime.Now;
@@ -266,16 +274,19 @@ namespace VRCGPUTool
             {
                 TodayTime.Checked = true;
             }
+            GPUreadTimer.Enabled = true;
         }
 
         private void LoadDefaultLimit_Click(object sender, EventArgs e)
         {
-            PowerLimitValue.Value = Convert.ToDecimal(GPU[GpuIndex.SelectedIndex].PLimitDefault);
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            PowerLimitValue.Value = Convert.ToDecimal(g.PLimitDefault);
         }
 
         private void ForceLimit_Click(object sender, EventArgs e)
         {
-            nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + GPU[GpuIndex.SelectedIndex].UUID);
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
             StatusLimit.Text = PowerLimitValue.Value.ToString() + "W";
         }
 
@@ -294,32 +305,31 @@ namespace VRCGPUTool
             //設定時間を１時間後にセット（再度制限を防ぐ）
             setting_time = BeginTime.Value = DateTime.Now.AddHours(1);
 
-            nvidia_smi("-pl " + GPU[GpuIndex.SelectedIndex].PLimitDefault.ToString() + " --id=" + GPU[GpuIndex.SelectedIndex].UUID) ;
-            StatusLimit.Text = GPU[GpuIndex.SelectedIndex].PLimitDefault.ToString() + "W";
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID) ;
+            StatusLimit.Text = g.PLimitDefault.ToString() + "W";
         }
 
         private void SelectGPUChanged(object sender, EventArgs e)
         {
-            //PowerLimitValue.Maximum = Convert.ToDecimal(GPU[GpuIndex.SelectedIndex].PLimitMax);
-            //PowerLimitValue.Minimum = Convert.ToDecimal(GPU[GpuIndex.SelectedIndex].PLimitMin);
-            PowerLimitValue.Value = Convert.ToDecimal(GPU[GpuIndex.SelectedIndex].PowerLimit);
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            PowerLimitValue.Value = Convert.ToDecimal(g.PowerLimit);
+            StatusLimit.Text = g.PowerLimit + "W";
         }
 
         private void GPUreadTimer_Tick(object sender, EventArgs e)
         {
             //GPUのステータスを更新
-            for(int s = 0;s < gpucount; s++)
-            {
-                GPU[s].RefreshGPUStatus(s);
-            }
+            refreshGPUStatus();
             //自動検出（ベータ）
 
             //パラメータ定義
             const int AVE_DELTA = 20;
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
 
             if (AutoDetect.Checked == true)
             {
-                recentutil[writeaddr] = GPU[GpuIndex.SelectedIndex].CoreLoad;
+                recentutil[writeaddr] = g.CoreLoad;
                 writeaddr++;
                 if(writeaddr >= 300)
                 {
@@ -354,14 +364,15 @@ namespace VRCGPUTool
                     //使用率が指定の範囲の場合寝落ちと判断
                     if(max_util - min_util < Convert.ToInt16(GPUusageThreshold.Value))
                     {
-                        nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + GPU[GpuIndex.SelectedIndex].UUID);
+                        nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
                         StatusLimit.Text = PowerLimitValue.Value.ToString() + "W";
                     }
                 }
                 
             }
+
             //GPU温度を表示
-            GPUTemp.Text = "GPU温度:" + GPU[GpuIndex.SelectedIndex].CoreTemp.ToString() + "℃";
+            GPUTemp.Text = "GPU温度:" + g.CoreTemp.ToString() + "℃";
             //GPU電力制限
             datetime_now = DateTime.Now;
             if (datetime_now >= setting_time && limitstatus == false)
@@ -376,7 +387,7 @@ namespace VRCGPUTool
                 LoadDefaultLimit.Enabled = false;
                 ForceLimit.Enabled = false;
 
-                nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + GPU[GpuIndex.SelectedIndex].UUID);
+                nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
                 StatusLimit.Text = PowerLimitValue.Value.ToString() + "W";
             }
         }
@@ -403,16 +414,17 @@ namespace VRCGPUTool
 
         private void PowerLimitSettingChanged(object sender, EventArgs e)
         {
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
             //既定の範囲に収まらない場合ユーザーにメッセージ
-            if(PowerLimitValue.Value > GPU[GpuIndex.SelectedIndex].PLimitMax)
+            if(PowerLimitValue.Value > g.PLimitMax)
             {
-                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + GPU[GpuIndex.SelectedIndex].GPUName + "の最大電力制限は" + GPU[GpuIndex.SelectedIndex].PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
-                PowerLimitValue.Value = GPU[GpuIndex.SelectedIndex].PLimitMax;
+                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.GPUName + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                PowerLimitValue.Value = g.PLimitMax;
             }
-            if(PowerLimitValue.Value < GPU[GpuIndex.SelectedIndex].PLimitMin)
+            if(PowerLimitValue.Value < g.PLimitMin)
             {
-                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + GPU[GpuIndex.SelectedIndex].GPUName + "の最小電力制限は" + GPU[GpuIndex.SelectedIndex].PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                PowerLimitValue.Value = GPU[GpuIndex.SelectedIndex].PLimitMin;
+                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.GPUName + "の最小電力制限は" + g.PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                PowerLimitValue.Value = g.PLimitMin;
             }
         }
     }
