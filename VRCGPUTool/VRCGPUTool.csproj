@@ -5,6 +5,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Version>1.1.0</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>VRCGPUTool.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />

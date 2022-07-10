@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Reflection;
+using System.Drawing;
 
 namespace VRCGPUTool
 {
@@ -74,7 +75,7 @@ namespace VRCGPUTool
             //更新があるかチェック
             if(tag_name != version)
             {
-                var res = MessageBox.Show("アップデートがあります\n最新バージョンは " + tag_name + " です\n\nアップデートページを開きますか?","アップデート",MessageBoxButtons.OKCancel);
+                var res = MessageBox.Show("アップデートがあります\n最新バージョンは " + tag_name + " です\n\nアップデートページ(Booth)を開きますか?","アップデート",MessageBoxButtons.OKCancel);
                 if(res == DialogResult.OK)
                 {
                     Process.Start(new ProcessStartInfo { FileName = "https://njm2360.booth.pm/items/3993173", UseShellExecute = true });
@@ -102,22 +103,31 @@ namespace VRCGPUTool
                 string.Format("--query-gpu={0} --format=csv,noheader,nounits", query)
             );
 
-            using (var r = new StringReader(output)) {
-                for (string l = r.ReadLine(); l != null; l = r.ReadLine()) {
-                    string[] v = l.Split(',');
-                    if (v.Length != queryColumns.Length) continue;
+            try
+            {
+                using (var r = new StringReader(output)) {
+                    for (string l = r.ReadLine(); l != null; l = r.ReadLine()) {
+                        string[] v = l.Split(',');
+                        if (v.Length != queryColumns.Length) continue;
 
-                    gpuStatuses.Add(new GpuStatus(
-                        v[0].Trim(),
-                        v[1].Trim(),
-                        (int)double.Parse(v[2]),
-                        (int)double.Parse(v[3]),
-                        (int)double.Parse(v[4]),
-                        (int)double.Parse(v[5]),
-                        (int)double.Parse(v[6]),
-                        (int)double.Parse(v[7])
-                    ));
+                        gpuStatuses.Add(new GpuStatus(
+                            v[0].Trim(),
+                            v[1].Trim(),
+                            (int)double.Parse(v[2]),
+                            (int)double.Parse(v[3]),
+                            (int)double.Parse(v[4]),
+                            (int)double.Parse(v[5]),
+                            (int)double.Parse(v[6]),
+                            (int)double.Parse(v[7])
+                        ));
+                    }
                 }
+            }
+            catch (FormatException)
+            {
+                //現状LapTop GPUは対応しない可能性あり
+                MessageBox.Show("このGPUは電力制限に対応していません。\nアプリケーションを終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
             }
 
             if (!gpuStatuses.Any()) {
@@ -147,9 +157,14 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //アイコン設定
+            Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+            this.Icon = appIcon;
+
             //アプデチェック
             checkUpdateWorker.RunWorkerAsync();
 
+            //バージョン反映
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             this.Text += fileVersionInfo.ProductVersion;
