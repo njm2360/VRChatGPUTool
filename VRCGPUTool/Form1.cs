@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace VRCGPUTool
 {
@@ -17,6 +18,7 @@ namespace VRCGPUTool
         public Form1()
         {
             InitializeComponent();
+            InitializeBackgroundWorker();
         }
 
         List<GpuStatus> gpuStatuses = new List<GpuStatus>();
@@ -27,6 +29,46 @@ namespace VRCGPUTool
         private bool data_ready = false;
 
         DateTime datetime_now = DateTime.Now;
+
+        private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e) {
+            Task<string> worker = Task.Run<string>(async () => {
+                BackgroundWorker w = sender as BackgroundWorker;
+
+                var client = new HttpClient();
+
+                var message = new HttpRequestMessage {
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri("https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest"),
+                };
+
+                message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
+
+                var result = await client.SendAsync(message).ConfigureAwait(false);
+
+                result.EnsureSuccessStatusCode();
+
+                return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
+            });
+
+            worker.Wait();
+
+            e.Result = JsonSerializer.Deserialize<GitHubReleaseAPIStructure>(
+                worker.Result,
+                new JsonSerializerOptions(JsonSerializerDefaults.Web)
+            );
+        }
+
+        private void checkUpdateWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            if (e.Error != null)
+            {
+                MessageBox.Show(e.Error.Message);
+            }
+            else
+            {
+
+                MessageBox.Show(((GitHubReleaseAPIStructure)e.Result).tag_name);
+            }
+        }
 
         void refreshGPUStatus()
         {
@@ -93,25 +135,7 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Task<string> latest = Task.Run<string>(async () => {
-                var client = new HttpClient();
-
-                var message = new HttpRequestMessage {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri("https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest"),
-                };
-
-                message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
-                var result = await client.SendAsync(message).ConfigureAwait(false);
-
-                result.EnsureSuccessStatusCode();
-
-                return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-            });
-
-            latest.Wait();
-
-            MessageBox.Show(latest.Result);
+            checkUpdateWorker.RunWorkerAsync();
 
             //var json = result.Content.ReadAsStringAsync();
             //Console.WriteLine($"{(int)result.StatusCode} {result.StatusCode}");
