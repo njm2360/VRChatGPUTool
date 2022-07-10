@@ -47,6 +47,7 @@ namespace VRCGPUTool
             using (var r = new StringReader(output)) {
                 for (string l = r.ReadLine(); l != null; l = r.ReadLine()) {
                     string[] v = l.Split(',');
+                    if (v.Length != queryColumns.Length) continue;
 
                     gpuStatuses.Add(new GpuStatus(
                         v[0],
