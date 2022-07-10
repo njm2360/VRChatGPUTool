@@ -24,187 +24,40 @@ namespace VRCGPUTool
         DateTime datetime_now = DateTime.Now;
         DateTime setting_time = DateTime.Now;
 
-        class GpuStatus
-        {
-            private string gpu_name;
-            private int power_limit;
-            private int power_limit_default;
-            private int power_limit_max;
-            private int power_limt_min;
-            private int core_temp;
-            private int vram_temp;
-            private int fan_speed;
-            private int vram_cap;
-            private int vram_usage;
-            private int core_load;
-            private string uuid;
-
-            public string GPUName
-            {
-                set
-                {
-                    this.gpu_name = value;
-                }
-                get
-                {
-                    return this.gpu_name;
-                }
-            }
-
-            public int PowerLimit
-            {
-                set
-                {
-                    this.power_limit = value;
-                }
-                get 
-                {
-                    return this.power_limit;
-                }
-            }
-
-            public int PLimitMax
-            {
-                set
-                {
-                    this.power_limit_max = value;
-                }
-                get
-                {
-                    return this.power_limit_max;
-                }
-            }
-
-            public int PLimitMin
-            {
-                set
-                {
-                    this.power_limt_min = value;
-                }
-                get
-                {
-                    return this.power_limt_min;
-                }
-            }
-
-            public int PLimitDefault
-            {
-                set
-                {
-                    this.power_limit_default = value;
-                }
-                get
-                {
-                    return this.power_limit_default;
-                }
-            }
-
-            public int CoreTemp
-            {
-                set
-                {
-                    this.core_temp = value;
-                }
-                get
-                {
-                    return this.core_temp;
-                }
-            }
-
-            public int VramTemp
-            {
-                set
-                {
-                    this.vram_temp = value;
-                }
-                get
-                {
-                    return this.vram_temp;
-                }
-            }
-        
-            public int FanSpeed
-            {
-                set
-                {
-                    this.fan_speed = value;
-                }
-                get
-                {
-                    return this.fan_speed;
-                }
-            }
-
-            public int VramCap
-            {
-                set
-                {
-                    this.vram_cap = value;
-                }
-                get
-                {
-                    return this.vram_cap;
-                }
-            }
-            
-            public int VramUsage
-            {
-                set
-                {
-                    this.vram_usage = value;
-                }
-                get
-                {
-                    return this.vram_usage;
-                }
-            }
-
-            public int CoreLoad
-            {
-                set 
-                { 
-                    this.core_load = value; 
-                }
-                get
-                {
-                    return this.core_load;
-                }
-            }
-
-            public string UUID
-            {
-                set
-                {
-                    this.uuid = value;
-                }
-                get
-                {
-                    return this.uuid;
-                }
-            }
-        
-        }
-
         void refreshGPUStatus()
         {
-            string output = nvidia_smi("--query-gpu=name,power.limit,power.default_limit,power.max_limit,power.min_limit,memory.total,memory.used,utilization.gpu,fan.speed,temperature.gpu,temperature.memory,uuid --format=csv,noheader,nounits");
+            gpuStatuses.Clear();
+
+            string[] queryColumns = {
+                "name",
+                "uuid",
+                "power.limit",
+                "power.min_limit",
+                "power.max_limit",
+                "power.default_limit",
+                "utilization.gpu",
+                "temperature.gpu",
+            };
+
+            string query = string.Join(",", queryColumns);
+            string output = nvidia_smi(
+                string.Format("--query-gpu={0} --format=csv,noheader,nounits", query)
+            );
+
             using (var r = new StringReader(output)) {
-                gpuStatuses.Clear();
                 for (string l = r.ReadLine(); l != null; l = r.ReadLine()) {
-                    GpuStatus g = new GpuStatus();
-                    string[] nvres = l.Split(',');
-                    g.GPUName = nvres[0].ToString();
-                    g.PowerLimit = Convert.ToInt16(Math.Floor(double.Parse(nvres[1])));
-                    g.PLimitDefault = Convert.ToInt16(Math.Floor(double.Parse(nvres[2])));
-                    g.PLimitMax = Convert.ToInt16(Math.Floor(double.Parse(nvres[3])));
-                    g.PLimitMin = Convert.ToInt16(Math.Floor(double.Parse(nvres[4])));
-                    g.VramCap = Convert.ToInt16(Math.Floor(double.Parse(nvres[5])));
-                    g.VramUsage = Convert.ToInt16(Math.Floor(double.Parse(nvres[6])));
-                    g.CoreLoad = Convert.ToInt16(Math.Floor(double.Parse(nvres[7])));
-                    g.FanSpeed = Convert.ToInt16(Math.Floor(double.Parse(nvres[8])));
-                    g.CoreTemp = Convert.ToInt16(Math.Floor(double.Parse(nvres[9])));
-                    g.UUID = nvres[11].ToString().Substring(1,40);
-                    gpuStatuses.Add(g);
+                    string[] v = l.Split(',');
+
+                    gpuStatuses.Add(new GpuStatus(
+                        v[0],
+                        v[1],
+                        (int)double.Parse(v[2]),
+                        (int)double.Parse(v[3]),
+                        (int)double.Parse(v[4]),
+                        (int)double.Parse(v[5]),
+                        (int)double.Parse(v[6]),
+                        (int)double.Parse(v[7])
+                    ));
                 }
             }
 
@@ -254,15 +107,15 @@ namespace VRCGPUTool
             //各GPUのステータスを取得
             foreach (GpuStatus g in gpuStatuses)
             {
-                GpuIndex.Items.Add(g.GPUName);
+                GpuIndex.Items.Add(g.Name);
             }
 
             GpuIndex.SelectedIndex = 0;
 
             //電力制限値の範囲を設定
-            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PowerLimit);
+            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
 
-            StatusLimit.Text = gpuStatuses.First().PowerLimit.ToString() + "W";
+            StatusLimit.Text = gpuStatuses.First().PLimit.ToString() + "W";
 
             //時間制限用
             datetime_now = DateTime.Now;
@@ -318,8 +171,8 @@ namespace VRCGPUTool
         private void SelectGPUChanged(object sender, EventArgs e)
         {
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-            PowerLimitValue.Value = Convert.ToDecimal(g.PowerLimit);
-            StatusLimit.Text = g.PowerLimit + "W";
+            PowerLimitValue.Value = Convert.ToDecimal(g.PLimit);
+            StatusLimit.Text = g.PLimit + "W";
         }
 
         private void GPUreadTimer_Tick(object sender, EventArgs e)
@@ -436,12 +289,12 @@ namespace VRCGPUTool
             //既定の範囲に収まらない場合ユーザーにメッセージ
             if(PowerLimitValue.Value > g.PLimitMax)
             {
-                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.GPUName + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
                 PowerLimitValue.Value = g.PLimitMax;
             }
             if(PowerLimitValue.Value < g.PLimitMin)
             {
-                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.GPUName + "の最小電力制限は" + g.PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最小電力制限は" + g.PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 PowerLimitValue.Value = g.PLimitMin;
             }
         }
