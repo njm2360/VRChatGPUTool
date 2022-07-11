@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Reflection;
 using System.Drawing;
+using System.Text;
 
 namespace VRCGPUTool
 {
@@ -31,6 +32,12 @@ namespace VRCGPUTool
         private bool data_ready = false;
 
         DateTime datetime_now = DateTime.Now;
+
+        public class Config
+        {
+            public DateTime BeginTime { get; set; } = DateTime.Now;
+            public DateTime EndTime { get; set; } = DateTime.Now;
+        }
 
         private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e) {
             Task<string> worker = Task.Run<string>(async () => {
@@ -170,7 +177,7 @@ namespace VRCGPUTool
             this.Text += fileVersionInfo.ProductVersion;
 
             //nvidia-smiがインストールされていない環境をはじく
-            if (!System.IO.File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
+            if (!File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
             {
                 MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
@@ -194,7 +201,7 @@ namespace VRCGPUTool
 
             GpuIndex.SelectedIndex = 0;
 
-            //電力制限値の範囲を設定
+            // 電力制限値の範囲を設定
             PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
 
             StatusLimit.Text = gpuStatuses.First().PLimit.ToString() + "W";
@@ -202,16 +209,53 @@ namespace VRCGPUTool
             //時間制限用
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
+
+            //設定ファイルがあれば読み込む、なければ生成
+            
+            if (File.Exists("config.json"))
+            {
+                using (FileStream fs = File.OpenRead("config.json"))
+                {
+                    using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.UTF8))
+                    {
+                        while (!sr.EndOfStream)
+                        {
+                            Config config = JsonSerializer.Deserialize<Config>(sr.ReadLine());
+                            BeginTime.Value = config.BeginTime;
+                            EndTime.Value = config.EndTime;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                try
+                {
+                    Config config = new Config();
+                    config.BeginTime = BeginTime.Value;
+                    config.EndTime = EndTime.Value;
+                    
+                    string confjson = JsonSerializer.Serialize(config);
+
+                    using (StreamWriter sw = new StreamWriter("config.json"))
+                    {
+                        sw.WriteLine(confjson);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(string.Format("設定ファイル作成時にエラーが発生しました\n\n{0}",ex.Message.ToString()), "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Close();
+                }
+                
+            }
             
             //タイマー有効
             GPUreadTimer.Enabled = true;
         }
 
-        private void LoadDefaultLimit_Click(object sender, EventArgs e)
-        {
-            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-            PowerLimitValue.Value = Convert.ToDecimal(g.PLimitDefault);
-        }
+        
 
         private void ForceLimit_Click(object sender, EventArgs e)
         {
@@ -230,7 +274,7 @@ namespace VRCGPUTool
             LoadDefaultLimit.Enabled = true;
             ForceLimit.Enabled = true;
 
-            //設定時間を１時間後にセット（再度制限を防ぐ）
+            //設定時間を15分後にセット（再度制限を防ぐ）
             BeginTime.Value = DateTime.Now.AddMinutes(15);
 
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
@@ -354,6 +398,47 @@ namespace VRCGPUTool
             {
                 MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最小電力制限は" + g.PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 PowerLimitValue.Value = g.PLimitMin;
+            }
+        }
+
+        private void LoadMinimumLimit_Click(object sender, EventArgs e)
+        {
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            PowerLimitValue.Value = Convert.ToDecimal(g.PLimitMin);
+        }
+
+        private void LoadDefaultLimit_Click(object sender, EventArgs e)
+        {
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            PowerLimitValue.Value = Convert.ToDecimal(g.PLimitDefault);
+        }
+
+        private void LoadMaximumLimit_Click(object sender, EventArgs e)
+        {
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            PowerLimitValue.Value = Convert.ToDecimal(g.PLimitMax);
+        }
+
+        private void AppClosing(object sender, FormClosingEventArgs e)
+        {
+            try
+            {
+                Config config = new Config();
+                config.BeginTime = BeginTime.Value;
+                config.EndTime = EndTime.Value;
+
+                string confjson = JsonSerializer.Serialize(config);
+
+                using (StreamWriter sw = new StreamWriter("config.json"))
+                {
+                    sw.WriteLine(confjson);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("設定ファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Close();
             }
         }
     }
