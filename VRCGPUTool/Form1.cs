@@ -175,8 +175,6 @@ namespace VRCGPUTool
                 MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
-            //NVIDIA GPUがインストールされていない環境をはじく
-            nvidia_smi("");
 
             //直近のGPU使用率配列初期化
             for (int i = 0; i < recentutil.Length; i++)
@@ -185,6 +183,7 @@ namespace VRCGPUTool
             }
 
             //全GPUステータスを更新
+            //NVIDIA GPUがインストールされていない環境をはじく
             refreshGPUStatus();
 
             //GPUリストを更新
