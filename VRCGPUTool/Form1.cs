@@ -82,7 +82,7 @@ namespace VRCGPUTool
             //更新があるかチェック
             if(tag_name != version)
             {
-                var res = MessageBox.Show("アップデートがあります\n最新バージョンは " + tag_name + " です\n\nアップデートページ(Booth)を開きますか?","アップデート",MessageBoxButtons.OKCancel);
+                var res = MessageBox.Show("アップデートがあります\n\n最新バージョンは " + tag_name + " です\n\nアップデートページ(Booth)を開きますか?","アップデート",MessageBoxButtons.OKCancel);
                 if(res == DialogResult.OK)
                 {
                     Process.Start(new ProcessStartInfo { FileName = "https://njm2360.booth.pm/items/3993173", UseShellExecute = true });
@@ -211,7 +211,6 @@ namespace VRCGPUTool
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
             //設定ファイルがあれば読み込む、なければ生成
-            
             if (File.Exists("config.json"))
             {
                 using (FileStream fs = File.OpenRead("config.json"))
@@ -241,7 +240,11 @@ namespace VRCGPUTool
                     {
                         sw.WriteLine(confjson);
                     }
-
+                    var res = MessageBox.Show("この度は「VRChat向け GPU電力制限ツール」\nをダウンロードしていただきありがとうございます。\n\nリリースノートを開きますか?","ようこそ",MessageBoxButtons.YesNo,MessageBoxIcon.Information);
+                    if(res == DialogResult.Yes)
+                    {
+                        Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
+                    }
                 }
                 catch (Exception ex)
                 {
