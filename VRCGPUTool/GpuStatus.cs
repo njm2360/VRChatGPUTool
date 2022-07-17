@@ -10,6 +10,9 @@ namespace VRCGPUTool
         public int PLimitDefault { get; private set; }
         public int CoreLoad { get; private set; }
         public int CoreTemp { get; private set; }
+        public int PowerDraw { get; private set; }
+        public int CoreClock { get; private set; }
+        public int MemoryClock { get; private set; }
 
         public GpuStatus(
             string Name,
@@ -19,7 +22,10 @@ namespace VRCGPUTool
             int PLimitMax,
             int PLimitDefault,
             int CoreLoad,
-            int CoreTemp
+            int CoreTemp,
+            int PowerDraw,
+            int CoreClock,
+            int MemoryClock
         )
         {
             this.Name = Name;
@@ -30,6 +36,9 @@ namespace VRCGPUTool
             this.PLimitDefault = PLimitDefault;
             this.CoreLoad = CoreLoad;
             this.CoreTemp = CoreTemp;
+            this.PowerDraw = PowerDraw;
+            this.CoreClock = CoreClock;
+            this.MemoryClock = MemoryClock;
         }
     }
 }
