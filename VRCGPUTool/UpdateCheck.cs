@@ -14,9 +14,9 @@ namespace VRCGPUTool
     {
         private void InitializeBackgroundWorker()
         {
-            this.checkUpdateWorker = new BackgroundWorker();
-            this.checkUpdateWorker.DoWork += new DoWorkEventHandler(checkUpdateWorker_DoWork);
-            this.checkUpdateWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(checkUpdateWorker_RunWorkerCompleted);
+            checkUpdateWorker = new BackgroundWorker();
+            checkUpdateWorker.DoWork += new DoWorkEventHandler(checkUpdateWorker_DoWork);
+            checkUpdateWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(checkUpdateWorker_RunWorkerCompleted);
         }
 
         BackgroundWorker checkUpdateWorker;
