@@ -5,20 +5,14 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Text.Json;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
-using System.ComponentModel;
 using System.Reflection;
 using System.Drawing;
-using System.Text;
 
 namespace VRCGPUTool
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
-        public Form1()
+        public Main()
         {
             InitializeComponent();
             InitializeBackgroundWorker();
@@ -33,62 +27,12 @@ namespace VRCGPUTool
 
         DateTime datetime_now = DateTime.Now;
 
+        private string gitHubUseUrl = "https://github.com/njm2360/VRChatGPUTool#readme";
+
         public class Config
         {
             public DateTime BeginTime { get; set; } = DateTime.Now;
             public DateTime EndTime { get; set; } = DateTime.Now;
-        }
-
-        private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e) {
-            Task<string> worker = Task.Run<string>(async () => {
-                BackgroundWorker w = sender as BackgroundWorker;
-
-                var client = new HttpClient();
-
-                var message = new HttpRequestMessage {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri("https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest"),
-                };
-
-                message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
-
-                var result = await client.SendAsync(message).ConfigureAwait(false);
-
-                result.EnsureSuccessStatusCode();
-
-                return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
-            });
-
-            worker.Wait();
-
-            e.Result = JsonSerializer.Deserialize<GitHubReleaseAPIStructure>(
-                worker.Result,
-                new JsonSerializerOptions(JsonSerializerDefaults.Web)
-            );
-        }
-
-        private void checkUpdateWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
-            if (e.Error != null)
-            {
-                MessageBox.Show(string.Format("アップデートチェック中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
-                return;
-            }
-            string tag_name = ((GitHubReleaseAPIStructure)e.Result).tag_name;
-            string body = ((GitHubReleaseAPIStructure)e.Result).body;
-
-            Assembly assembly = Assembly.GetExecutingAssembly();
-            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            string version = "v" + fileVersionInfo.ProductVersion;
-
-            //更新があるかチェック
-            if(tag_name != version)
-            {
-                var res = MessageBox.Show("アップデートがあります\n\n最新バージョンは " + tag_name + " です\n\n改定内容:\n" + body + "\n\nアップデートページ(Booth)を開きますか?","アップデート",MessageBoxButtons.OKCancel);
-                if(res == DialogResult.OK)
-                {
-                    Process.Start(new ProcessStartInfo { FileName = "https://njm2360.booth.pm/items/3993173", UseShellExecute = true });
-                }
-            }
         }
 
         void refreshGPUStatus()
@@ -139,7 +83,6 @@ namespace VRCGPUTool
             }
             catch (FormatException)
             {
-                //現状LapTop GPUは対応しない可能性あり
                 MessageBox.Show("このGPUは電力制限に対応していません。\nアプリケーションを終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
@@ -171,36 +114,28 @@ namespace VRCGPUTool
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //アイコン設定
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             this.Icon = appIcon;
 
-            //アプデチェック
             checkUpdateWorker.RunWorkerAsync();
 
-            //バージョン反映
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             this.Text += fileVersionInfo.ProductVersion;
 
-            //nvidia-smiがインストールされていない環境をはじく
             if (!File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
             {
                 MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
             }
 
-            //直近のGPU使用率配列初期化
             for (int i = 0; i < recentutil.Length; i++)
             {
                 recentutil[i] = -1;
             }
 
-            //全GPUステータスを更新
-            //NVIDIA GPUがインストールされていない環境をはじく
             refreshGPUStatus();
 
-            //GPUリストを更新
             foreach (GpuStatus g in gpuStatuses)
             {
                 GpuIndex.Items.Add(g.Name);
@@ -208,16 +143,12 @@ namespace VRCGPUTool
 
             GpuIndex.SelectedIndex = 0;
 
-            // 電力制限値の範囲を設定
             PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
-
             GPUCorePLValue.Text = "GPUコア電力制限: " + gpuStatuses.First().PLimit.ToString() + "W";
 
-            //時間制限用
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
-            //設定ファイルがあれば読み込む、なければ生成
             if (File.Exists("config.json"))
             {
                 using (FileStream fs = File.OpenRead("config.json"))
@@ -261,11 +192,57 @@ namespace VRCGPUTool
                 
             }
             
-            //タイマー有効
             GPUreadTimer.Enabled = true;
         }
 
-        
+        private void Limit_Action(bool limit)
+        {
+            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
+            if (limit == true)
+            {
+                limitstatus = true;
+                LimitStatusText.Visible = true;
+                PowerLimitValue.Enabled = false;
+                BeginTime.Enabled = false;
+                LoadDefaultLimit.Enabled = false;
+                LoadMaximumLimit.Enabled = false;
+                LoadMinimumLimit.Enabled = false;
+                ForceLimit.Enabled = false;
+                CoreLimitEnable.Enabled = false;
+                CoreClockSetting.Enabled = false;
+
+                if (CoreLimitEnable.Checked == true)
+                {
+                    nvidia_smi("-lgc 210," + CoreClockSetting.Value + "--id=" + g.UUID);
+                }
+
+                nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
+                GPUCorePLValue.Text = "GPUコア電力制限: " + PowerLimitValue.Value.ToString() + "W";
+            }
+            else
+            {
+                limitstatus = false;
+                LimitStatusText.Visible = false;
+                PowerLimitValue.Enabled = true;
+                BeginTime.Enabled = true;
+                LoadDefaultLimit.Enabled = true;
+                LoadMaximumLimit.Enabled = true;
+                LoadMinimumLimit.Enabled = true;
+                ForceLimit.Enabled = true;
+                CoreLimitEnable.Enabled = true;
+                CoreClockSetting.Enabled = true;
+
+                if (CoreLimitEnable.Checked == true)
+                {
+                    nvidia_smi("-rgc --id=" + g.UUID);
+                }
+
+                BeginTime.Value = DateTime.Now.AddMinutes(15);
+                
+                nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID);
+                GPUCorePLValue.Text = "GPUコア電力制限: " + g.PLimitDefault.ToString() + "W";
+            }
+        }
 
         private void ForceLimit_Click(object sender, EventArgs e)
         {
@@ -276,25 +253,7 @@ namespace VRCGPUTool
 
         private void ForceUnlimit_Click(object sender, EventArgs e)
         {
-            //操作可能にするため表示
-            limitstatus = false;
-            LimitStatusText.Visible = false;
-            PowerLimitValue.Enabled = true;
-            BeginTime.Enabled = true;
-            LoadDefaultLimit.Enabled = true;
-            LoadMaximumLimit.Enabled = true;
-            LoadMinimumLimit.Enabled = true;
-            ForceLimit.Enabled = true;
-            CoreLimitEnable.Enabled = true;
-            CoreClockSetting.Enabled = true;
-
-            //設定時間を15分後にセット（再度制限を防ぐ）
-            BeginTime.Value = DateTime.Now.AddMinutes(15);
-
-            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-            nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID) ;
-            GPUCorePLValue.Text = "GPUコア電力制限: " + g.PLimitDefault.ToString() + "W";
-            nvidia_smi("-rgc --id=" + g.UUID);
+            Limit_Action(false);
         }
 
         private void SelectGPUChanged(object sender, EventArgs e)
@@ -351,28 +310,7 @@ namespace VRCGPUTool
                     //使用率が指定の範囲の場合寝落ちと判断
                     if(max_util - min_util < Convert.ToInt16(GPUusageThreshold.Value) && !limitstatus)
                     {
-                        limitstatus = true;
-                        LimitStatusText.Visible = true;
-                        //制限時に変更できないように無効化
-                        PowerLimitValue.Enabled = false;
-                        BeginTime.Enabled = false;
-                        LoadDefaultLimit.Enabled = false;
-                        LoadMaximumLimit.Enabled = false;
-                        LoadMinimumLimit.Enabled = false;
-                        ForceLimit.Enabled = false;
-                        CoreLimitEnable.Enabled = false;
-                        CoreClockSetting.Enabled = false;
-
-                        //Beta用
-                        if (CoreLimitEnable.Checked == true)
-                        {
-                            //210MHz - 指定値までに制限
-                            nvidia_smi("-lgc 210," + CoreClockSetting.Value + "--id=" + g.UUID);
-                        }
-
-                        //制限をかける
-                        nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
-                        GPUCorePLValue.Text = "GPUコア電力制限: " + PowerLimitValue.Value.ToString() + "W";
+                        Limit_Action(true);
                     }
                 }
                 
@@ -388,59 +326,19 @@ namespace VRCGPUTool
             datetime_now = DateTime.Now;
             if(datetime_now.Hour == BeginTime.Value.Hour && datetime_now.Minute == BeginTime.Value.Minute && !limitstatus)
             {
-                limitstatus = true;
-                LimitStatusText.Visible = true;
-                //制限時に変更できないように無効化
-                PowerLimitValue.Enabled = false;
-                BeginTime.Enabled = false;
-                LoadDefaultLimit.Enabled = false;
-                LoadMaximumLimit.Enabled = false;
-                LoadMinimumLimit.Enabled = false;
-                ForceLimit.Enabled = false;
-                CoreLimitEnable.Enabled = false;
-                CoreClockSetting.Enabled = false;
-
-                //Beta用
-                if (CoreLimitEnable.Checked == true)
-                {
-                    //210MHz - 指定値までに制限
-                    nvidia_smi("-lgc 210," + CoreClockSetting.Value +" --id=" + g.UUID);
-                }
-
-                nvidia_smi("-pl " + PowerLimitValue.Value.ToString() + " --id=" + g.UUID);
-                GPUCorePLValue.Text = "GPUコア電力制限: " + PowerLimitValue.Value.ToString() + "W";
+                Limit_Action(true);
             }
             if(datetime_now.Hour == EndTime.Value.Hour && datetime_now.Minute == EndTime.Value.Minute && limitstatus)
             {
-                //制限解除後は自動検出無効
                 AutoDetect.Checked = false;
-                //操作可能にするため表示
-                limitstatus = false;
-                LimitStatusText.Visible = false;
-                PowerLimitValue.Enabled = true;
-                BeginTime.Enabled = true;
-                LoadDefaultLimit.Enabled = true;
-                LoadMaximumLimit.Enabled = true;
-                LoadMinimumLimit.Enabled = true;
-                ForceLimit.Enabled = true;
-                CoreLimitEnable.Enabled = true;
-                CoreClockSetting.Enabled = true;
 
-                //Beta用
-                if (CoreLimitEnable.Checked == true)
-                {
-                    nvidia_smi("-rgc --id=" + g.UUID);
-                }
-
-                nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID);
-                GPUCorePLValue.Text = "GPUコア電力制限: " + g.PLimitDefault.ToString() + "W";
+                Limit_Action(false);
             }
         }
 
         private void PowerLimitSettingChanged(object sender, EventArgs e)
         {
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-            //既定の範囲に収まらない場合ユーザーにメッセージ
             if(PowerLimitValue.Value > g.PLimitMax)
             {
                 MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -505,6 +403,18 @@ namespace VRCGPUTool
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
             nvidia_smi("-rgc --id=" + g.UUID);
             MessageBox.Show("クロック制限をデフォルト値に設定しました", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ShowHowToUse(object sender, EventArgs e)
+        {
+            Process.Start(new ProcessStartInfo { FileName = gitHubUseUrl, UseShellExecute = true });
+        }
+
+        private void Reporter(object sender, EventArgs e)
+        {
+            Form report = new BugReport(Convert.ToInt32(((Button)sender).Tag));
+            
+            report.ShowDialog();
         }
     }
 }

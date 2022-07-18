@@ -2,10 +2,13 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <Compile Update="Form1.Background.cs">
+    <Compile Update="BugReport.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Update="Form1.cs">
+    <Compile Update="UpdateCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Main.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>
