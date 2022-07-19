@@ -21,20 +21,20 @@ namespace VRCGPUTool
 
         BackgroundWorker checkUpdateWorker;
 
-        const string gitHubApiUrl = "https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest";
         const string boothUrl = "https://njm2360.booth.pm/items/3993173";
 
         private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
+                APIs api = new APIs();
 
                 var client = new HttpClient();
 
                 var message = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri(gitHubApiUrl),
+                    RequestUri = new Uri(api.GitHubAPI),
                 };
 
                 message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));

@@ -11,8 +11,6 @@ namespace VRCGPUTool
     public partial class BugReport : Form
     {
 
-        private const string repoApiUrl = "";
-
         public BugReport(int typeIndex)
         {
             InitializeComponent();
@@ -40,13 +38,14 @@ namespace VRCGPUTool
         {
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
+                APIs api = new APIs();
 
                 var client = new HttpClient();
 
                 var message = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri(repoApiUrl),
+                    RequestUri = new Uri(api.ReportAPI),
                 };
 
                 message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));

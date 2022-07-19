@@ -3,4 +3,5 @@ packages
 VRCGPUTool/bin
 VRCGPUTool/obj
 VRCGPUTool/Properties
+VRCGPUTool/APIs.cs
 *.png
