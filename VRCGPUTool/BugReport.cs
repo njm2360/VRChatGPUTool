@@ -1,9 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Text;
 using System.Windows.Forms;
 
 namespace VRCGPUTool
@@ -11,10 +13,13 @@ namespace VRCGPUTool
     public partial class BugReport : Form
     {
 
+        private string selectFilePath = null;
+
         public BugReport(int typeIndex)
         {
             InitializeComponent();
-            if(typeIndex == 0)
+            InitializeReportWorker();
+            if (typeIndex == 0)
             {
                 bug.Checked = true;
             }
@@ -42,15 +47,33 @@ namespace VRCGPUTool
 
                 var client = new HttpClient();
 
-                var message = new HttpRequestMessage
+                var multipart = new MultipartFormDataContent("report-data-split");
+
+                if(bug.Checked == true)
                 {
-                    Method = HttpMethod.Get,
-                    RequestUri = new Uri(api.ReportAPI),
-                };
+                    multipart.Add(new StringContent("BugReport"), "Type");
+                }
+                if(func.Checked == true)
+                {
+                    multipart.Add(new StringContent("Function"), "Type");
+                }
 
-                message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
+                multipart.Add(new StringContent("<STX>" + body.Text + "<ETX>"),"Text");//Encoding.UTF8
 
-                var result = await client.SendAsync(message).ConfigureAwait(false);
+                if (selectFilePath != null)
+                {
+                    var finfo = new FileInfo(selectFilePath);
+                    FileStream fs = new FileStream(finfo.FullName, FileMode.Open);
+
+                    BinaryReader br = new BinaryReader(fs);
+
+                    ByteArrayContent imageContent = new ByteArrayContent(br.ReadBytes((int)fs.Length));
+
+                    multipart.Add(imageContent, "Image", finfo.Name);
+
+                }
+
+                var result = await client.PostAsync(api.ReportAPI,multipart).ConfigureAwait(false);
 
                 result.EnsureSuccessStatusCode();
 
@@ -61,9 +84,7 @@ namespace VRCGPUTool
 
             e.Result = worker.Result;
 
-            MessageBox.Show(e.Result.ToString());
-
-            e.Result = JsonSerializer.Deserialize<GitHubApi>(
+            e.Result = JsonSerializer.Deserialize<RepoApiRes>(
                 worker.Result,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web)
             );
@@ -76,13 +97,28 @@ namespace VRCGPUTool
                 MessageBox.Show(string.Format("送信中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
-            string body = ((GitHubApi)e.Result).body;
-            MessageBox.Show(string.Format("{0}",body));
+            //string body = ((RepoApiRes)e.Result).body;
+            //MessageBox.Show(string.Format("{0}",body));
+
+            MessageBox.Show("送信が完了しました", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Close();
         }
 
         private void Submit(object sender, EventArgs e)
         {
-            InitializeReportWorker();
+            if(body.Text == "")
+            {
+                MessageBox.Show("内容が入力されていません","エラー",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                return;
+            }
+            var res = MessageBox.Show("送信してもよろしいですか?","確認",MessageBoxButtons.OKCancel,MessageBoxIcon.Question);
+            if (res == DialogResult.OK)
+            {
+                if (reportSendWorker.IsBusy == false)
+                {
+                    reportSendWorker.RunWorkerAsync();
+                }
+            }
         }
 
         private void fileadd_Click(object sender, EventArgs e)
@@ -90,7 +126,9 @@ namespace VRCGPUTool
             OpenFileDialog ofd = openFileDialog1;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-
+                selectFilePath = ofd.FileName;
+                string [] fPath = selectFilePath.Split('\\');
+                fileCount.Text = fPath[fPath.Length - 1];
             }
         }
     }

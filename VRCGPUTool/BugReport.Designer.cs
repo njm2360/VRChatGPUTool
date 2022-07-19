@@ -40,6 +40,7 @@
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.fileadd = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
+            this.fileCount = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // body
@@ -140,11 +141,21 @@
             this.label4.TabIndex = 9;
             this.label4.Text = "※ファイルは4MBまでです";
             // 
+            // fileCount
+            // 
+            this.fileCount.AutoSize = true;
+            this.fileCount.Location = new System.Drawing.Point(327, 255);
+            this.fileCount.Name = "fileCount";
+            this.fileCount.Size = new System.Drawing.Size(98, 13);
+            this.fileCount.TabIndex = 10;
+            this.fileCount.Text = "選択されていません";
+            // 
             // BugReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(466, 366);
+            this.Controls.Add(this.fileCount);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.fileadd);
             this.Controls.Add(this.label3);
@@ -179,5 +190,6 @@
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button fileadd;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label fileCount;
     }
 }
