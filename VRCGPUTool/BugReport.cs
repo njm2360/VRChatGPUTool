@@ -27,7 +27,7 @@ namespace VRCGPUTool
             {
                 func.Checked = true;
             }
-            openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
+            //openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
         }
 
         private void InitializeReportWorker()
@@ -43,7 +43,6 @@ namespace VRCGPUTool
         {
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
-                APIs api = new APIs();
 
                 var client = new HttpClient();
 
@@ -77,7 +76,7 @@ namespace VRCGPUTool
 
                 }
 
-                var result = await client.PostAsync(api.ReportAPI,multipart).ConfigureAwait(false);
+                var result = await client.PostAsync(APIEndpoints.FeedbackEndpoint, multipart).ConfigureAwait(false);
 
                 result.EnsureSuccessStatusCode();
 

@@ -5,6 +5,9 @@
     <Compile Update="BugReport.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="nvidiasmi.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="UpdateCheck.cs">
       <SubType>Form</SubType>
     </Compile>

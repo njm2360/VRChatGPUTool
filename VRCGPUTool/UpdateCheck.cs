@@ -25,16 +25,17 @@ namespace VRCGPUTool
 
         private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e)
         {
+            string input = (string)e.Argument;
+
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
-                APIs api = new APIs();
 
                 var client = new HttpClient();
 
                 var message = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
-                    RequestUri = new Uri(api.GitHubAPI),
+                    RequestUri = new Uri(APIEndpoints.GitHubReleaseAPIEndpoint),
                 };
 
                 message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));

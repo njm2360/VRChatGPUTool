@@ -72,6 +72,7 @@
             this.howtouse = new System.Windows.Forms.Button();
             this.bugreport = new System.Windows.Forms.Button();
             this.functionsuggestion = new System.Windows.Forms.Button();
+            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -545,11 +546,21 @@
             this.functionsuggestion.UseVisualStyleBackColor = true;
             this.functionsuggestion.Click += new System.EventHandler(this.Reporter);
             // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(527, 432);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(93, 28);
+            this.label10.TabIndex = 30;
+            this.label10.Text = "※下げすぎ注意\r\n　上級者向けです";
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(661, 554);
+            this.Controls.Add(this.label10);
             this.Controls.Add(this.functionsuggestion);
             this.Controls.Add(this.bugreport);
             this.Controls.Add(this.howtouse);
@@ -634,6 +645,7 @@
         private System.Windows.Forms.Button howtouse;
         private System.Windows.Forms.Button bugreport;
         private System.Windows.Forms.Button functionsuggestion;
+        private System.Windows.Forms.Label label10;
     }
 }
 
