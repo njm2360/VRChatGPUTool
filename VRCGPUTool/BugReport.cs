@@ -47,7 +47,7 @@ namespace VRCGPUTool
 
                 var client = new HttpClient();
 
-                var multipart = new MultipartFormDataContent("report-data-split");
+                var multipart = new MultipartFormDataContent();
 
                 if(bug.Checked == true)
                 {
@@ -57,8 +57,12 @@ namespace VRCGPUTool
                 {
                     multipart.Add(new StringContent("Function"), "Type");
                 }
+                if(emailinput.Text != "")
+                {
+                    multipart.Add(new StringContent(emailinput.Text), "Email");
+                }
 
-                multipart.Add(new StringContent("<STX>" + body.Text + "<ETX>"),"Text");//Encoding.UTF8
+                multipart.Add(new StringContent(body.Text),"Text");
 
                 if (selectFilePath != null)
                 {
@@ -127,6 +131,12 @@ namespace VRCGPUTool
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 selectFilePath = ofd.FileName;
+                var finfo = new FileInfo(selectFilePath);
+                if (finfo.Length > 1024 * 1024 * 4)
+                {
+                    MessageBox.Show("ファイルサイズは4MB以下にしてください", "エラー", MessageBoxButtons.OK);
+                    selectFilePath = null;
+                }
                 string [] fPath = selectFilePath.Split('\\');
                 fileCount.Text = fPath[fPath.Length - 1];
             }
