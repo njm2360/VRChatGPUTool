@@ -34,8 +34,6 @@ namespace VRCGPUTool
 
         private string gitHubUseUrl = "https://github.com/njm2360/VRChatGPUTool#readme";
 
-        
-
         private void Form1_Load(object sender, EventArgs e)
         {
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);

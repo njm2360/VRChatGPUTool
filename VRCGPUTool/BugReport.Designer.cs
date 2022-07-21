@@ -41,21 +41,23 @@
             this.fileadd = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.fileCount = new System.Windows.Forms.Label();
+            this.RepoTypeGroup = new System.Windows.Forms.GroupBox();
+            this.RepoTypeGroup.SuspendLayout();
             this.SuspendLayout();
             // 
             // body
             // 
-            this.body.Location = new System.Drawing.Point(33, 76);
+            this.body.Location = new System.Drawing.Point(21, 77);
             this.body.Multiline = true;
             this.body.Name = "body";
             this.body.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.body.Size = new System.Drawing.Size(392, 165);
+            this.body.Size = new System.Drawing.Size(429, 165);
             this.body.TabIndex = 0;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(30, 60);
+            this.label1.Location = new System.Drawing.Point(18, 61);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(115, 13);
             this.label1.TabIndex = 1;
@@ -64,7 +66,7 @@
             // bug
             // 
             this.bug.AutoSize = true;
-            this.bug.Location = new System.Drawing.Point(33, 24);
+            this.bug.Location = new System.Drawing.Point(25, 19);
             this.bug.Name = "bug";
             this.bug.Size = new System.Drawing.Size(68, 17);
             this.bug.TabIndex = 2;
@@ -75,7 +77,7 @@
             // func
             // 
             this.func.AutoSize = true;
-            this.func.Location = new System.Drawing.Point(128, 24);
+            this.func.Location = new System.Drawing.Point(111, 19);
             this.func.Name = "func";
             this.func.Size = new System.Drawing.Size(73, 17);
             this.func.TabIndex = 3;
@@ -85,7 +87,7 @@
             // 
             // submit
             // 
-            this.submit.Location = new System.Drawing.Point(365, 330);
+            this.submit.Location = new System.Drawing.Point(366, 348);
             this.submit.Name = "submit";
             this.submit.Size = new System.Drawing.Size(75, 24);
             this.submit.TabIndex = 4;
@@ -96,7 +98,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(30, 258);
+            this.label2.Location = new System.Drawing.Point(18, 255);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(84, 13);
             this.label2.TabIndex = 5;
@@ -104,7 +106,7 @@
             // 
             // emailinput
             // 
-            this.emailinput.Location = new System.Drawing.Point(33, 274);
+            this.emailinput.Location = new System.Drawing.Point(21, 271);
             this.emailinput.Name = "emailinput";
             this.emailinput.Size = new System.Drawing.Size(239, 20);
             this.emailinput.TabIndex = 6;
@@ -112,7 +114,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(41, 297);
+            this.label3.Location = new System.Drawing.Point(29, 294);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(204, 13);
             this.label3.TabIndex = 7;
@@ -124,7 +126,7 @@
             // 
             // fileadd
             // 
-            this.fileadd.Location = new System.Drawing.Point(311, 271);
+            this.fileadd.Location = new System.Drawing.Point(21, 319);
             this.fileadd.Name = "fileadd";
             this.fileadd.Size = new System.Drawing.Size(139, 23);
             this.fileadd.TabIndex = 8;
@@ -135,7 +137,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(320, 297);
+            this.label4.Location = new System.Drawing.Point(29, 345);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(120, 13);
             this.label4.TabIndex = 9;
@@ -144,17 +146,30 @@
             // fileCount
             // 
             this.fileCount.AutoSize = true;
-            this.fileCount.Location = new System.Drawing.Point(327, 255);
+            this.fileCount.Location = new System.Drawing.Point(166, 324);
             this.fileCount.Name = "fileCount";
             this.fileCount.Size = new System.Drawing.Size(98, 13);
             this.fileCount.TabIndex = 10;
             this.fileCount.Text = "選択されていません";
+            this.fileCount.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // RepoTypeGroup
+            // 
+            this.RepoTypeGroup.Controls.Add(this.bug);
+            this.RepoTypeGroup.Controls.Add(this.func);
+            this.RepoTypeGroup.Location = new System.Drawing.Point(21, 12);
+            this.RepoTypeGroup.Name = "RepoTypeGroup";
+            this.RepoTypeGroup.Size = new System.Drawing.Size(251, 45);
+            this.RepoTypeGroup.TabIndex = 11;
+            this.RepoTypeGroup.TabStop = false;
+            this.RepoTypeGroup.Text = "報告種別";
             // 
             // BugReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(466, 366);
+            this.ClientSize = new System.Drawing.Size(466, 384);
+            this.Controls.Add(this.RepoTypeGroup);
             this.Controls.Add(this.fileCount);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.fileadd);
@@ -162,8 +177,6 @@
             this.Controls.Add(this.emailinput);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.submit);
-            this.Controls.Add(this.func);
-            this.Controls.Add(this.bug);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.body);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -172,6 +185,8 @@
             this.MinimizeBox = false;
             this.Name = "BugReport";
             this.Text = "問題報告フォーム";
+            this.RepoTypeGroup.ResumeLayout(false);
+            this.RepoTypeGroup.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -191,5 +206,6 @@
         private System.Windows.Forms.Button fileadd;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label fileCount;
+        private System.Windows.Forms.GroupBox RepoTypeGroup;
     }
 }

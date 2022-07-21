@@ -27,7 +27,7 @@ namespace VRCGPUTool
             {
                 func.Checked = true;
             }
-            //openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
+            openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
         }
 
         private void InitializeReportWorker()
@@ -37,7 +37,7 @@ namespace VRCGPUTool
             reportSendWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(reportSendWorker_RunWorkerCompleted);
         }
 
-        BackgroundWorker reportSendWorker;
+        internal BackgroundWorker reportSendWorker;
 
         private void reportSendWorker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -100,11 +100,6 @@ namespace VRCGPUTool
                 MessageBox.Show(string.Format("送信中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
-            //string body = ((ReportApiRes)e.Result).body;
-            //MessageBox.Show(string.Format("{0}",body));
-
-            MessageBox.Show("送信が完了しました", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            Close();
         }
 
         private void Submit(object sender, EventArgs e)
@@ -120,8 +115,17 @@ namespace VRCGPUTool
                 if (reportSendWorker.IsBusy == false)
                 {
                     reportSendWorker.RunWorkerAsync();
+                    RepoTypeGroup.Enabled = false;
+                    body.Enabled = false;
+                    MessageBox.Show("送信しました", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Close();
+                }
+                else
+                {
+                    MessageBox.Show("送信エラーが発生しました。時間をおいてからやり直してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            
         }
 
         private void fileadd_Click(object sender, EventArgs e)
