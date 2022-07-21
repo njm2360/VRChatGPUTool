@@ -47,6 +47,7 @@
             this.label6 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label10 = new System.Windows.Forms.Label();
             this.label9 = new System.Windows.Forms.Label();
             this.CoreClockSetting = new System.Windows.Forms.NumericUpDown();
             this.CoreLimitEnable = new System.Windows.Forms.CheckBox();
@@ -62,15 +63,14 @@
             this.GPUMemoryClockValue = new System.Windows.Forms.Label();
             this.GPUCoreClockValue = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.SpecificPLValue = new System.Windows.Forms.NumericUpDown();
+            this.SetGPUPLSpecific = new System.Windows.Forms.RadioButton();
+            this.ResetGPUDefaultPL = new System.Windows.Forms.RadioButton();
+            this.label11 = new System.Windows.Forms.Label();
             this.howtouse = new System.Windows.Forms.Button();
             this.bugreport = new System.Windows.Forms.Button();
             this.functionsuggestion = new System.Windows.Forms.Button();
-            this.label10 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.ResetGPUDefaultPL = new System.Windows.Forms.RadioButton();
-            this.SetGPUPLSpecific = new System.Windows.Forms.RadioButton();
-            this.SpecificPLValue = new System.Windows.Forms.NumericUpDown();
-            this.label12 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -282,6 +282,15 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "ベータ機能";
             // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(138, 79);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(93, 28);
+            this.label10.TabIndex = 30;
+            this.label10.Text = "※下げすぎ注意\r\n　上級者向けです";
+            // 
             // label9
             // 
             this.label9.AutoSize = true;
@@ -466,6 +475,64 @@
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "コア電力制限設定";
             // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label12.Location = new System.Drawing.Point(232, 150);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(18, 15);
+            this.label12.TabIndex = 35;
+            this.label12.Text = "W";
+            // 
+            // SpecificPLValue
+            // 
+            this.SpecificPLValue.Enabled = false;
+            this.SpecificPLValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SpecificPLValue.Location = new System.Drawing.Point(173, 148);
+            this.SpecificPLValue.Maximum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.SpecificPLValue.Name = "SpecificPLValue";
+            this.SpecificPLValue.Size = new System.Drawing.Size(53, 21);
+            this.SpecificPLValue.TabIndex = 34;
+            this.SpecificPLValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.SpecificPLValue.ValueChanged += new System.EventHandler(this.SpecificPLValue_ValueChanged);
+            // 
+            // SetGPUPLSpecific
+            // 
+            this.SetGPUPLSpecific.AutoSize = true;
+            this.SetGPUPLSpecific.Location = new System.Drawing.Point(32, 149);
+            this.SetGPUPLSpecific.Name = "SetGPUPLSpecific";
+            this.SetGPUPLSpecific.Size = new System.Drawing.Size(132, 18);
+            this.SetGPUPLSpecific.TabIndex = 33;
+            this.SetGPUPLSpecific.Text = "指定した値にセットする";
+            this.SetGPUPLSpecific.UseVisualStyleBackColor = true;
+            this.SetGPUPLSpecific.CheckedChanged += new System.EventHandler(this.SetGPUPLSpecific_CheckedChanged);
+            // 
+            // ResetGPUDefaultPL
+            // 
+            this.ResetGPUDefaultPL.AutoSize = true;
+            this.ResetGPUDefaultPL.Checked = true;
+            this.ResetGPUDefaultPL.Location = new System.Drawing.Point(32, 125);
+            this.ResetGPUDefaultPL.Name = "ResetGPUDefaultPL";
+            this.ResetGPUDefaultPL.Size = new System.Drawing.Size(132, 18);
+            this.ResetGPUDefaultPL.TabIndex = 32;
+            this.ResetGPUDefaultPL.TabStop = true;
+            this.ResetGPUDefaultPL.Text = "GPUのデフォルトに戻す";
+            this.ResetGPUDefaultPL.UseVisualStyleBackColor = true;
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(16, 107);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(77, 14);
+            this.label11.TabIndex = 31;
+            this.label11.Text = "解除時の挙動";
+            // 
             // howtouse
             // 
             this.howtouse.Location = new System.Drawing.Point(540, 39);
@@ -497,73 +564,6 @@
             this.functionsuggestion.Text = "機能要望等";
             this.functionsuggestion.UseVisualStyleBackColor = true;
             this.functionsuggestion.Click += new System.EventHandler(this.Reporter);
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(138, 79);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(93, 28);
-            this.label10.TabIndex = 30;
-            this.label10.Text = "※下げすぎ注意\r\n　上級者向けです";
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(16, 107);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(77, 14);
-            this.label11.TabIndex = 31;
-            this.label11.Text = "解除時の挙動";
-            // 
-            // ResetGPUDefaultPL
-            // 
-            this.ResetGPUDefaultPL.AutoSize = true;
-            this.ResetGPUDefaultPL.Checked = true;
-            this.ResetGPUDefaultPL.Location = new System.Drawing.Point(32, 125);
-            this.ResetGPUDefaultPL.Name = "ResetGPUDefaultPL";
-            this.ResetGPUDefaultPL.Size = new System.Drawing.Size(132, 18);
-            this.ResetGPUDefaultPL.TabIndex = 32;
-            this.ResetGPUDefaultPL.TabStop = true;
-            this.ResetGPUDefaultPL.Text = "GPUのデフォルトに戻す";
-            this.ResetGPUDefaultPL.UseVisualStyleBackColor = true;
-            // 
-            // SetGPUPLSpecific
-            // 
-            this.SetGPUPLSpecific.AutoSize = true;
-            this.SetGPUPLSpecific.Location = new System.Drawing.Point(32, 149);
-            this.SetGPUPLSpecific.Name = "SetGPUPLSpecific";
-            this.SetGPUPLSpecific.Size = new System.Drawing.Size(132, 18);
-            this.SetGPUPLSpecific.TabIndex = 33;
-            this.SetGPUPLSpecific.Text = "指定した値にセットする";
-            this.SetGPUPLSpecific.UseVisualStyleBackColor = true;
-            this.SetGPUPLSpecific.CheckedChanged += new System.EventHandler(this.SetGPUPLSpecific_CheckedChanged);
-            // 
-            // SpecificPLValue
-            // 
-            this.SpecificPLValue.Enabled = false;
-            this.SpecificPLValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.SpecificPLValue.Location = new System.Drawing.Point(173, 148);
-            this.SpecificPLValue.Maximum = new decimal(new int[] {
-            1000,
-            0,
-            0,
-            0});
-            this.SpecificPLValue.Name = "SpecificPLValue";
-            this.SpecificPLValue.Size = new System.Drawing.Size(53, 21);
-            this.SpecificPLValue.TabIndex = 34;
-            this.SpecificPLValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.SpecificPLValue.ValueChanged += new System.EventHandler(this.SpecificPLValue_ValueChanged);
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(232, 150);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(18, 15);
-            this.label12.TabIndex = 35;
-            this.label12.Text = "W";
             // 
             // Main
             // 
@@ -622,7 +622,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.DateTimePicker EndTime;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button LoadMinimumLimit;
         private System.Windows.Forms.Button LoadMaximumLimit;
@@ -643,12 +642,13 @@
         internal System.Windows.Forms.Label GPUMemoryClockValue;
         internal System.Windows.Forms.Label GPUCoreClockValue;
         private System.Windows.Forms.Label label12;
-        private System.Windows.Forms.NumericUpDown SpecificPLValue;
-        private System.Windows.Forms.RadioButton SetGPUPLSpecific;
-        private System.Windows.Forms.RadioButton ResetGPUDefaultPL;
         private System.Windows.Forms.Label label11;
         internal System.Windows.Forms.NumericUpDown PowerLimitValue;
         internal System.Windows.Forms.DateTimePicker BeginTime;
+        internal System.Windows.Forms.DateTimePicker EndTime;
+        internal System.Windows.Forms.NumericUpDown SpecificPLValue;
+        internal System.Windows.Forms.RadioButton SetGPUPLSpecific;
+        internal System.Windows.Forms.RadioButton ResetGPUDefaultPL;
     }
 }
 

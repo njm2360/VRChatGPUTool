@@ -87,7 +87,7 @@ namespace VRCGPUTool
 
             e.Result = worker.Result;
 
-            e.Result = JsonSerializer.Deserialize<RepoApiRes>(
+            e.Result = JsonSerializer.Deserialize<ReportApiRes>(
                 worker.Result,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web)
             );
@@ -100,7 +100,7 @@ namespace VRCGPUTool
                 MessageBox.Show(string.Format("送信中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
-            //string body = ((RepoApiRes)e.Result).body;
+            //string body = ((ReportApiRes)e.Result).body;
             //MessageBox.Show(string.Format("{0}",body));
 
             MessageBox.Show("送信が完了しました", "情報", MessageBoxButtons.OK, MessageBoxIcon.Information);

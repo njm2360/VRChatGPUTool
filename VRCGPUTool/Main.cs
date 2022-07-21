@@ -7,8 +7,6 @@ using System.Diagnostics;
 using System.Text.Json;
 using System.Reflection;
 using System.Drawing;
-using System.Threading.Tasks;
-using System.ComponentModel;
 
 namespace VRCGPUTool
 {
@@ -36,16 +34,10 @@ namespace VRCGPUTool
 
         private string gitHubUseUrl = "https://github.com/njm2360/VRChatGPUTool#readme";
 
-        public class Config
-        {
-            public DateTime BeginTime { get; set; } = DateTime.Now;
-            public DateTime EndTime { get; set; } = DateTime.Now;
-        }
+        
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            ///SuspendLayout / ResumeLayout
-
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             Icon = appIcon;
 
@@ -119,48 +111,8 @@ namespace VRCGPUTool
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
-            if (File.Exists("config.json"))
-            {
-                using (FileStream fs = File.OpenRead("config.json"))
-                {
-                    using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.UTF8))
-                    {
-                        while (!sr.EndOfStream)
-                        {
-                            Config config = JsonSerializer.Deserialize<Config>(sr.ReadLine());
-                            BeginTime.Value = config.BeginTime;
-                            EndTime.Value = config.EndTime;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                try
-                {
-                    Config config = new Config();
-                    config.BeginTime = BeginTime.Value;
-                    config.EndTime = EndTime.Value;
-                    
-                    string confjson = JsonSerializer.Serialize(config);
-
-                    using (StreamWriter sw = new StreamWriter("config.json"))
-                    {
-                        sw.WriteLine(confjson);
-                    }
-                    var resmsg = MessageBox.Show("この度は「VRChat向け GPU電力制限ツール」\nをダウンロードしていただきありがとうございます。\n\nリリースノートを開きますか?","ようこそ",MessageBoxButtons.YesNo,MessageBoxIcon.Information);
-                    if(resmsg == DialogResult.Yes)
-                    {
-                        Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(string.Format("設定ファイル作成時にエラーが発生しました\n\n{0}",ex.Message.ToString()), "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Close();
-                }
-                
-            }
+            ConfigJson config = new ConfigJson(this);
+            config.LoadConfig();
             
             GPUreadTimer.Enabled = true;
         }
@@ -389,25 +341,9 @@ namespace VRCGPUTool
                 e.Cancel = true;
                 return;
             }
-            try
-            {
-                Config config = new Config();
-                config.BeginTime = BeginTime.Value;
-                config.EndTime = EndTime.Value;
 
-                string confjson = JsonSerializer.Serialize(config);
-
-                using (StreamWriter sw = new StreamWriter("config.json"))
-                {
-                    sw.WriteLine(confjson);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("設定ファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(-1);
-            }
+            ConfigJson config = new ConfigJson(this);
+            config.SaveConfig();
         }
 
         private void ResetClockSetting_Click(object sender, EventArgs e)

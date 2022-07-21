@@ -49,7 +49,7 @@ namespace VRCGPUTool
 
             worker.Wait();
 
-            e.Result = JsonSerializer.Deserialize<ApiRes>(
+            e.Result = JsonSerializer.Deserialize<GitHubApiRes>(
                 worker.Result,
                 new JsonSerializerOptions(JsonSerializerDefaults.Web)
             );
@@ -62,8 +62,8 @@ namespace VRCGPUTool
                 MessageBox.Show(string.Format("アップデートチェック中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
-            string tag_name = ((ApiRes)e.Result).tag_name;
-            string body = ((ApiRes)e.Result).body;
+            string tag_name = ((GitHubApiRes)e.Result).tag_name;
+            string body = ((GitHubApiRes)e.Result).body;
 
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
