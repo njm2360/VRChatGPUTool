@@ -2,18 +2,18 @@
 using System.Text.Json;
 using System.IO;
 using System.Windows.Forms;
-using static VRCGPUTool.GPUPowerLog;
+//using static VRCGPUTool.GPUPowerLog;
 
 namespace VRCGPUTool.Util
 {
     internal class PowerLog
     {
-        public PowerLog(RawData data)
+        public PowerLog(GPUPowerLog glog)
         {
-            rawdata = data;
+            gpupowerlog = glog;
         }
 
-        RawData rawdata;
+        GPUPowerLog gpupowerlog;
 
         internal void LoadPowerLog()
         {
@@ -25,8 +25,7 @@ namespace VRCGPUTool.Util
                     {
                         while (!sr.EndOfStream)
                         {
-                            rawdata = JsonSerializer.Deserialize<RawData>(sr.ReadLine());
-                            rdata = rawdata;
+                            gpupowerlog.rawdata = JsonSerializer.Deserialize<GPUPowerLog.RawData>(sr.ReadLine());
                         }
                     }
                 }
@@ -35,7 +34,7 @@ namespace VRCGPUTool.Util
             {
                 try
                 {
-                    RawData plog = new RawData();
+                    GPUPowerLog plog = new GPUPowerLog();
                     
                     string logjson = JsonSerializer.Serialize(plog);
 
@@ -57,9 +56,9 @@ namespace VRCGPUTool.Util
         {
             try
             {
-                RawData plog = new RawData();
+                GPUPowerLog plog = new GPUPowerLog();
 
-                string logjson = JsonSerializer.Serialize(rawdata);
+                string logjson = JsonSerializer.Serialize(gpupowerlog.rawdata);
 
                 using (StreamWriter sw = new StreamWriter("power_history.json"))
                 {

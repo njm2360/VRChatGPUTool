@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Drawing;
 using VRCGPUTool.Util;
-using static VRCGPUTool.GPUPowerLog;
 
 namespace VRCGPUTool.Form
 {
@@ -80,7 +79,7 @@ namespace VRCGPUTool.Form
             Config config = new Config(this);
             config.LoadConfig();
 
-            PowerLog plog = new PowerLog(rdata);
+            PowerLog plog = new PowerLog(gpuPlog);
             plog.LoadPowerLog();
 
             GPUreadTimer.Enabled = true;
@@ -322,7 +321,7 @@ namespace VRCGPUTool.Form
             Config config = new Config(this);
             config.SaveConfig();
 
-            PowerLog plog = new PowerLog(rdata);
+            PowerLog plog = new PowerLog(gpuPlog);
             plog.SaveConfig();
         }
 

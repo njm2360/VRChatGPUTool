@@ -4,10 +4,10 @@
     {
         public GPUPowerLog()
         {
-            rdata = new RawData();
+            rawdata = new RawData();
         }
 
-        internal static RawData rdata;
+        internal RawData rawdata;
 
         internal class RawData
         {
@@ -17,7 +17,7 @@
 
         internal void AddPowerDeltaData(int hour,int value)
         {
-            rdata.HourPowerLog[hour] += value;
+            rawdata.HourPowerLog[hour] += value;
             //MessageBox.Show(rdata.HourPowerLog[hour].ToString());
         }
     }
