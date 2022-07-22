@@ -137,6 +137,7 @@ namespace VRCGPUTool.Form
                 {
                     MessageBox.Show("ファイルサイズは4MB以下にしてください", "エラー", MessageBoxButtons.OK);
                     selectFilePath = null;
+                    return;
                 }
                 string [] fPath = selectFilePath.Split('\\');
                 fileCount.Text = fPath[fPath.Length - 1];

@@ -8,5 +8,8 @@
     <Compile Update="Form\MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Form\PowerHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

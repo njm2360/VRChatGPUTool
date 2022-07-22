@@ -71,6 +71,7 @@
             this.howtouse = new System.Windows.Forms.Button();
             this.bugreport = new System.Windows.Forms.Button();
             this.functionsuggestion = new System.Windows.Forms.Button();
+            this.PowerLogShow = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -565,11 +566,23 @@
             this.functionsuggestion.UseVisualStyleBackColor = true;
             this.functionsuggestion.Click += new System.EventHandler(this.Reporter);
             // 
-            // Main
+            // PowerLogShow
+            // 
+            this.PowerLogShow.Location = new System.Drawing.Point(542, 134);
+            this.PowerLogShow.Name = "PowerLogShow";
+            this.PowerLogShow.Size = new System.Drawing.Size(99, 25);
+            this.PowerLogShow.TabIndex = 34;
+            this.PowerLogShow.Tag = "1";
+            this.PowerLogShow.Text = "電力使用履歴";
+            this.PowerLogShow.UseVisualStyleBackColor = true;
+            this.PowerLogShow.Click += new System.EventHandler(this.PowerLogShow_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(661, 540);
+            this.Controls.Add(this.PowerLogShow);
             this.Controls.Add(this.functionsuggestion);
             this.Controls.Add(this.bugreport);
             this.Controls.Add(this.howtouse);
@@ -584,7 +597,7 @@
             this.Font = new System.Drawing.Font("Gadugi", 8.25F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
-            this.Name = "Main";
+            this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "VRChat向け　GPU電力制限ツール Ver ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AppClosing);
@@ -649,6 +662,7 @@
         internal System.Windows.Forms.NumericUpDown SpecificPLValue;
         internal System.Windows.Forms.RadioButton SetGPUPLSpecific;
         internal System.Windows.Forms.RadioButton ResetGPUDefaultPL;
+        private System.Windows.Forms.Button PowerLogShow;
     }
 }
 

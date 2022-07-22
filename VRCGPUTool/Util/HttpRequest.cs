@@ -15,5 +15,6 @@ namespace VRCGPUTool.Util
         {
             client = new HttpClient();
         }
+
     }
 }

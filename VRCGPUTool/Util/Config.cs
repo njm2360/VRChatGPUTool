@@ -7,16 +7,16 @@ using VRCGPUTool.Form;
 
 namespace VRCGPUTool.Util
 {
-    internal class ConfigJson
+    internal class Config
     {
         public MainForm MainObj;
 
-        public ConfigJson(MainForm Main_Obj)
+        public Config(MainForm Main_Obj)
         {
             MainObj = Main_Obj;
         }
 
-        public class Config
+        private class Conf
         {
             public int BeginHour { get; set; } = DateTime.Now.Hour;
             public int BeginMinute { get; set; } = DateTime.Now.Minute;
@@ -35,22 +35,44 @@ namespace VRCGPUTool.Util
                 {
                     using (StreamReader sr = new StreamReader(fs, System.Text.Encoding.UTF8))
                     {
-                        while (!sr.EndOfStream)
+                        try
                         {
-                            Config config = JsonSerializer.Deserialize<Config>(sr.ReadLine());
-                            MainObj.BeginTime.Value = new DateTime(1970, 1, 1, config.BeginHour, config.BeginMinute, 0);
-                            MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
-                            MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
-                            MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
-                            if(config.RestoreGPUPLDefault == true)
+                            while (!sr.EndOfStream)
                             {
-                                MainObj.ResetGPUDefaultPL.Checked = true;
-                                MainObj.SpecificPLValue.Enabled = false;
+                                Conf config = JsonSerializer.Deserialize<Conf>(sr.ReadLine());
+                                MainObj.BeginTime.Value = new DateTime(1970, 1, 1, config.BeginHour, config.BeginMinute, 0);
+                                MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
+                                MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
+                                MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
+                                if (config.RestoreGPUPLDefault == true)
+                                {
+                                    MainObj.ResetGPUDefaultPL.Checked = true;
+                                    MainObj.SpecificPLValue.Enabled = false;
+                                }
+                                else
+                                {
+                                    MainObj.SetGPUPLSpecific.Checked = true;
+                                    MainObj.SpecificPLValue.Enabled = true;
+                                }
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            var res = MessageBox.Show("設定ファイルに誤りがあります。\n設定ファイルを再生成しますか?","エラー", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                            if(res == DialogResult.Yes)
+                            {
+                                try                                {
+                                    File.Delete("config.json");
+                                }
+                                catch(Exception)                                {
+                                    MessageBox.Show("設定ファイルを削除できませんでした\n設定ファイルを手動で消してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    Environment.Exit(-1);
+                                }
+                                Application.Restart();
                             }
                             else
                             {
-                                MainObj.SetGPUPLSpecific.Checked = true;
-                                MainObj.SpecificPLValue.Enabled = true;
+                                Application.Exit();
                             }
                         }
                     }
@@ -60,7 +82,7 @@ namespace VRCGPUTool.Util
             {
                 try
                 {
-                    Config config = new Config();
+                    Conf config = new Conf();
                     config.BeginHour = MainObj.BeginTime.Value.Hour;
                     config.BeginMinute = MainObj.BeginTime.Value.Minute;
                     config.EndHour = MainObj.EndTime.Value.Hour;
@@ -94,7 +116,7 @@ namespace VRCGPUTool.Util
         {
             try
             {
-                Config config = new Config();
+                Conf config = new Conf();
 
                 config.BeginHour = MainObj.BeginTime.Value.Hour;
                 config.BeginMinute = MainObj.BeginTime.Value.Minute;

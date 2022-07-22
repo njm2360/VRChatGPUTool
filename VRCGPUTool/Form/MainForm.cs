@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Drawing;
 using VRCGPUTool.Util;
+using static VRCGPUTool.GPUPowerLog;
 
 namespace VRCGPUTool.Form
 {
@@ -19,13 +20,13 @@ namespace VRCGPUTool.Form
             update.InitializeBackgroundWorker();
             nvsmi = new NvidiaSmi(this);
             nvsmi.InitializeNvsmiWorker();
-            httpreq = new HttpRequest();
+            gpuPlog = new GPUPowerLog();
         }
 
         NvidiaSmi nvsmi;
         UpdateCheck update;
-        HttpRequest httpreq;
 
+        internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
         internal bool limitstatus = false;
@@ -33,6 +34,7 @@ namespace VRCGPUTool.Form
         private int[] recentutil = new int[300];
         private int writeaddr = 0;
         private bool data_ready = false;
+        private bool ignoreTimeCheck = false;
 
         DateTime datetime_now = DateTime.Now;
 
@@ -75,9 +77,12 @@ namespace VRCGPUTool.Form
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
-            ConfigJson config = new ConfigJson(this);
+            Config config = new Config(this);
             config.LoadConfig();
-            
+
+            PowerLog plog = new PowerLog(rdata);
+            plog.LoadPowerLog();
+
             GPUreadTimer.Enabled = true;
         }
 
@@ -146,6 +151,7 @@ namespace VRCGPUTool.Form
                 var res = MessageBox.Show("制限終了時間と現在時刻が同じため制限を開始できません\n終了時間を強制変更することで制限を開始しますか", "情報", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
                 if (res == DialogResult.OK)
                 {
+                    ignoreTimeCheck = true;
                     EndTime.Value = DateTime.Now.AddMinutes(15);
                     Limit_Action(true, false);
                 }
@@ -160,6 +166,7 @@ namespace VRCGPUTool.Form
                 var res = MessageBox.Show("制限開始時間と現在時刻が同じため制限を解除できません\n開始時間を強制変更することで制限を解除しますか", "情報", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
                 if (res == DialogResult.OK)
                 {
+                    ignoreTimeCheck = true;
                     BeginTime.Value = DateTime.Now.AddMinutes(15);
                     Limit_Action(false, false);
                 }
@@ -187,12 +194,11 @@ namespace VRCGPUTool.Form
                 limittime = 0;
             }
 
-            GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-
             const int AVE_DELTA = 20;
 
             if (AutoDetect.Checked == true && limitstatus == true)
             {
+                GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
                 recentutil[writeaddr] = g.CoreLoad;
                 writeaddr++;
                 if(writeaddr >= 300)
@@ -313,8 +319,11 @@ namespace VRCGPUTool.Form
                 return;
             }
 
-            ConfigJson config = new ConfigJson(this);
+            Config config = new Config(this);
             config.SaveConfig();
+
+            PowerLog plog = new PowerLog(rdata);
+            plog.SaveConfig();
         }
 
         private void ResetClockSetting_Click(object sender, EventArgs e)
@@ -338,15 +347,28 @@ namespace VRCGPUTool.Form
 
         private void SettingTimeChange(object sender, EventArgs e)
         {
-            if ((BeginTime.Value.Hour == EndTime.Value.Hour) && (BeginTime.Value.Minute == EndTime.Value.Minute))
+            if ((BeginTime.Value.Hour == EndTime.Value.Hour) && (BeginTime.Value.Minute == EndTime.Value.Minute ))
             {
-                if (limitstatus)
+                if (!ignoreTimeCheck)
                 {
-                    Limit_Action(false, false);
+                    if (limitstatus)
+                    {
+                        Limit_Action(false, false);
+                    }
+                    BeginTime.Value = BeginTime.Value.AddMinutes(15);
+                    MessageBox.Show("開始時間と終了時刻は同じ時間に設定できません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                BeginTime.Value = BeginTime.Value.AddMinutes(15);
-                MessageBox.Show("開始時間と終了時刻は同じ時間に設定できません","エラー",MessageBoxButtons.OK, MessageBoxIcon.Error); 
+                else
+                {
+                    ignoreTimeCheck = false;
+                }
             }
+        }
+
+        private void PowerLogShow_Click(object sender, EventArgs e)
+        {
+            PowerHistory history = new PowerHistory(gpuPlog);
+            history.Show();
         }
     }
 }

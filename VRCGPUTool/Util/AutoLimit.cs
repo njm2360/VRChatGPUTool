@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VRCGPUTool
+namespace VRCGPUTool.Util
 {
-    internal class PowerHistory
+    internal class AutoLimit
     {
     }
 }

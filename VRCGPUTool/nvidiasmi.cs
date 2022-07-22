@@ -56,6 +56,8 @@ namespace VRCGPUTool
 
             string output = p.StandardOutput.ReadToEnd();
 
+            p.Dispose();
+
             return output;
         }
 
@@ -115,9 +117,12 @@ namespace VRCGPUTool
             MainObj.GPUCoreClockValue.Text = "GPUコアクロック: " + g.CoreClock.ToString() + "MHz";
             MainObj.GPUMemoryClockValue.Text = "GPUメモリクロック: " + g.MemoryClock.ToString() + "MHz";
 
+            DateTime datetime_now = DateTime.Now;
+
+            MainObj.gpuPlog.AddPowerDeltaData(datetime_now.Hour,g.PowerDraw);
+
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))
             {
-                DateTime datetime_now = DateTime.Now;
                 if (datetime_now.Hour == MainObj.BeginTime.Value.Hour && datetime_now.Minute == MainObj.BeginTime.Value.Minute)
                 {
                     MainObj.BeginTime.Value = DateTime.Now.AddMinutes(15);
