@@ -2,10 +2,8 @@
 using System.IO;
 using System.ComponentModel;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Text;
 using System.Windows.Forms;
 
 namespace VRCGPUTool
