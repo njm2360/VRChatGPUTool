@@ -150,6 +150,7 @@ namespace VRCGPUTool.Form
                     Limit_Action(true, false);
                 }
             }
+            Limit_Action(true, false);
         }
 
         private void ForceUnlimit_Click(object sender, EventArgs e)
@@ -163,6 +164,7 @@ namespace VRCGPUTool.Form
                     Limit_Action(false, false);
                 }
             }
+            Limit_Action(false, false);
         }
 
         private void SelectGPUChanged(object sender, EventArgs e)
