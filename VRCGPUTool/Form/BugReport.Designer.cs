@@ -1,4 +1,4 @@
-﻿namespace VRCGPUTool
+﻿namespace VRCGPUTool.Form
 {
     partial class BugReport
     {

@@ -8,18 +8,18 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace VRCGPUTool
+namespace VRCGPUTool.Util
 {
-    partial class Main
+    partial class UpdateCheck
     {
-        private void InitializeBackgroundWorker()
+        internal void InitializeBackgroundWorker()
         {
             checkUpdateWorker = new BackgroundWorker();
             checkUpdateWorker.DoWork += new DoWorkEventHandler(checkUpdateWorker_DoWork);
             checkUpdateWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(checkUpdateWorker_RunWorkerCompleted);
         }
 
-        BackgroundWorker checkUpdateWorker;
+        internal BackgroundWorker checkUpdateWorker;
 
         const string boothUrl = "https://njm2360.booth.pm/items/3993173";
 

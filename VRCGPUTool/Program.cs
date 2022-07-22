@@ -1,27 +1,24 @@
 ﻿using System;
 using System.Threading;
 using System.Windows.Forms;
+using VRCGPUTool.Form;
 
 namespace VRCGPUTool
 {
     internal static class Program
     {
-        /// <summary>
-        /// アプリケーションのメイン エントリ ポイントです。
-        /// </summary>
         [STAThread]
         static void Main()
         {
-            string mutexName = "Test1";
-            bool createdNew = false;
-            Mutex mutex = new Mutex(true, mutexName, out createdNew);
+            string mutexName = "VRChatGPUTool";
+            Mutex mutex = new Mutex(true, mutexName, out bool createdNew);
             if (createdNew)
             {
                 try
                 {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new Main());
+                    Application.Run(new MainForm());
                 }
                 catch
                 {

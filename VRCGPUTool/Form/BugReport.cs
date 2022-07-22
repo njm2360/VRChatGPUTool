@@ -6,9 +6,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace VRCGPUTool
+namespace VRCGPUTool.Form
 {
-    public partial class BugReport : Form
+    public partial class BugReport : System.Windows.Forms.Form
     {
 
         private string selectFilePath = null;

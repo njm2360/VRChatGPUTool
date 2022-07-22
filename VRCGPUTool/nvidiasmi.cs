@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VRCGPUTool.Form;
 
 namespace VRCGPUTool
 {
     partial class NvidiaSmi 
     {
-        public Main MainObj;
+        public MainForm MainObj;
 
         internal string[] queryColumns = {
             "name",
@@ -26,7 +27,7 @@ namespace VRCGPUTool
             "clocks.mem",
         };
 
-        public NvidiaSmi(Main Main_Obj)
+        public NvidiaSmi(Form.MainForm Main_Obj)
         {
             MainObj = Main_Obj;
         }
@@ -97,8 +98,8 @@ namespace VRCGPUTool
             }
             catch (FormatException)
             {
-                MessageBox.Show("予期せぬエラーが発生しました。\nアプリケーションを終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MainObj.Close();
+                MessageBox.Show("予期せぬエラーが発生しました。\nアプリケーションを強制終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
             }
 
             if (!MainObj.gpuStatuses.Any())
@@ -123,6 +124,48 @@ namespace VRCGPUTool
                 }
                 MainObj.Limit_Action(false, true);
                 MessageBox.Show("外部ツールによって電力制限値が変更されたため制限を終了しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        
+        internal void InitGPU()
+        {
+            string query = string.Join(",", queryColumns);
+            string res = nvidia_smi(string.Format("--query-gpu={0} --format=csv,noheader,nounits", query));
+            try
+            {
+                using (var r = new StringReader(res))
+                {
+                    for (string l = r.ReadLine(); l != null; l = r.ReadLine())
+                    {
+                        string[] v = l.Split(',');
+                        if (v.Length != queryColumns.Length) continue;
+
+                        MainObj.gpuStatuses.Add(new GpuStatus(
+                            v[0].Trim(),
+                            v[1].Trim(),
+                            (int)double.Parse(v[2]),
+                            (int)double.Parse(v[3]),
+                            (int)double.Parse(v[4]),
+                            (int)double.Parse(v[5]),
+                            (int)double.Parse(v[6]),
+                            (int)double.Parse(v[7]),
+                            (int)double.Parse(v[8]),
+                            (int)double.Parse(v[9]),
+                            (int)double.Parse(v[10])
+                        ));
+                    }
+                }
+            }
+            catch (FormatException)
+            {
+                MessageBox.Show("このGPUは電力制限に対応していません。\nアプリケーションを終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MainObj.Close();
+            }
+
+            if (!MainObj.gpuStatuses.Any())
+            {
+                MessageBox.Show("NVIDIA GPUがシステムで検出されませんでした。\n対応GPUが搭載されているか確認してください");
+                Application.Exit();
             }
         }
     }

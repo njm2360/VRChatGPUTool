@@ -3,14 +3,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Windows.Forms;
+using VRCGPUTool.Form;
 
-namespace VRCGPUTool
+namespace VRCGPUTool.Util
 {
     internal class ConfigJson
     {
-        public Main MainObj;
+        public MainForm MainObj;
 
-        public ConfigJson(Main Main_Obj)
+        public ConfigJson(MainForm Main_Obj)
         {
             MainObj = Main_Obj;
         }

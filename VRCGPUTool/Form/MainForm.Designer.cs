@@ -1,6 +1,6 @@
-﻿namespace VRCGPUTool
+﻿namespace VRCGPUTool.Form
 {
-    partial class Main
+    partial class MainForm
     {
         /// <summary>
         /// 必要なデザイナー変数です。

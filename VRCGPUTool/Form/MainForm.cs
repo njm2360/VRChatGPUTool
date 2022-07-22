@@ -4,23 +4,27 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
-using System.Text.Json;
 using System.Reflection;
 using System.Drawing;
+using VRCGPUTool.Util;
 
-namespace VRCGPUTool
+namespace VRCGPUTool.Form
 {
-    public partial class Main : Form
+    public partial class MainForm : System.Windows.Forms.Form
     {
-        public Main()
+        public MainForm()
         {
             InitializeComponent();
-            InitializeBackgroundWorker();
+            update = new UpdateCheck();
+            update.InitializeBackgroundWorker();
             nvsmi = new NvidiaSmi(this);
             nvsmi.InitializeNvsmiWorker();
+            httpreq = new HttpRequest();
         }
 
         NvidiaSmi nvsmi;
+        UpdateCheck update;
+        HttpRequest httpreq;
 
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
@@ -38,9 +42,6 @@ namespace VRCGPUTool
         {
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             Icon = appIcon;
-
-            checkUpdateWorker.RunWorkerAsync();
-
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
             this.Text += fileVersionInfo.ProductVersion;
@@ -51,49 +52,14 @@ namespace VRCGPUTool
                 Application.Exit();
             }
 
+            update.checkUpdateWorker.RunWorkerAsync();
+
             for (int i = 0; i < recentutil.Length; i++)
             {
                 recentutil[i] = -1;
             }
 
-            string query = string.Join(",", nvsmi.queryColumns);
-            string res = nvsmi.nvidia_smi(string.Format("--query-gpu={0} --format=csv,noheader,nounits", query));
-            try
-            {
-                using (var r = new StringReader(res))
-                {
-                    for (string l = r.ReadLine(); l != null; l = r.ReadLine())
-                    {
-                        string[] v = l.Split(',');
-                        if (v.Length != nvsmi.queryColumns.Length) continue;
-
-                        gpuStatuses.Add(new GpuStatus(
-                            v[0].Trim(),
-                            v[1].Trim(),
-                            (int)double.Parse(v[2]),
-                            (int)double.Parse(v[3]),
-                            (int)double.Parse(v[4]),
-                            (int)double.Parse(v[5]),
-                            (int)double.Parse(v[6]),
-                            (int)double.Parse(v[7]),
-                            (int)double.Parse(v[8]),
-                            (int)double.Parse(v[9]),
-                            (int)double.Parse(v[10])
-                        ));
-                    }
-                }
-            }
-            catch (FormatException)
-            {
-                MessageBox.Show("このGPUは電力制限に対応していません。\nアプリケーションを終了します。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Close();
-            }
-
-            if (!gpuStatuses.Any())
-            {
-                MessageBox.Show("NVIDIA GPUがシステムで検出されませんでした。\n対応GPUが搭載されているか確認してください");
-                Application.Exit();
-            }
+            nvsmi.InitGPU();            
 
             foreach (GpuStatus g in gpuStatuses)
             {
@@ -157,8 +123,6 @@ namespace VRCGPUTool
                     nvsmi.nvidia_smi("-rgc --id=" + g.UUID);
                 }
 
-                //BeginTime.Value = DateTime.Now.AddMinutes(15);
-
                 if(expection == false)
                 {
                     if(ResetGPUDefaultPL.Checked == true)
@@ -171,28 +135,34 @@ namespace VRCGPUTool
                         nvsmi.nvidia_smi("-pl " + SpecificPLValue.Value.ToString() + " --id=" + g.UUID);
                         GPUCorePLValue.Text = "GPUコア電力制限: " + SpecificPLValue.Value.ToString() + "W";
                     }
-                }
-                else
-                {
-                    //GPUCorePLValue.Text = "GPUコア電力制限: " + g.PLimit + "W";
-                }
-                
+                }                
             }
         }
 
         private void ForceLimit_Click(object sender, EventArgs e)
         {
-            Limit_Action(true, false);
+            if (datetime_now.Hour == EndTime.Value.Hour && datetime_now.Minute == EndTime.Value.Minute)
+            {
+                var res = MessageBox.Show("制限終了時間と現在時刻が同じため制限を開始できません\n終了時間を強制変更することで制限を開始しますか", "情報", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                if (res == DialogResult.OK)
+                {
+                    EndTime.Value = DateTime.Now.AddMinutes(15);
+                    Limit_Action(true, false);
+                }
+            }
         }
 
         private void ForceUnlimit_Click(object sender, EventArgs e)
         {
             if (datetime_now.Hour == BeginTime.Value.Hour && datetime_now.Minute == BeginTime.Value.Minute)
             {
-                BeginTime.Value = DateTime.Now.AddMinutes(10);
-                MessageBox.Show("開始時間と被っているため開始時間を変更しました","情報",MessageBoxButtons.OK,MessageBoxIcon.Information);
+                var res = MessageBox.Show("制限開始時間と現在時刻が同じため制限を解除できません\n開始時間を強制変更することで制限を解除しますか", "情報", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                if (res == DialogResult.OK)
+                {
+                    BeginTime.Value = DateTime.Now.AddMinutes(15);
+                    Limit_Action(false, false);
+                }
             }
-            Limit_Action(false,false);
         }
 
         private void SelectGPUChanged(object sender, EventArgs e)
@@ -219,7 +189,7 @@ namespace VRCGPUTool
 
             const int AVE_DELTA = 20;
 
-            if (AutoDetect.Checked == true)
+            if (AutoDetect.Checked == true && limitstatus == true)
             {
                 recentutil[writeaddr] = g.CoreLoad;
                 writeaddr++;
@@ -286,6 +256,7 @@ namespace VRCGPUTool
                 PowerLimitValue.Value = g.PLimitMin;
             }
         }
+
         private void SpecificPLValue_ValueChanged(object sender, EventArgs e)
         {
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
@@ -358,7 +329,7 @@ namespace VRCGPUTool
 
         private void Reporter(object sender, EventArgs e)
         {
-            Form report = new BugReport(Convert.ToInt32(((Button)sender).Tag));
+            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag));
             
             report.ShowDialog();
         }
