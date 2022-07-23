@@ -7,11 +7,11 @@ using VRCGPUTool.Form;
 
 namespace VRCGPUTool.Util
 {
-    internal class Config
+    internal class ConfigFile
     {
         public MainForm MainObj;
 
-        public Config(MainForm Main_Obj)
+        public ConfigFile(MainForm Main_Obj)
         {
             MainObj = Main_Obj;
         }
@@ -25,6 +25,40 @@ namespace VRCGPUTool.Util
             public int PowerLimitSetting { get; set; } = 100;
             public int UnlimitPLSetting { get; set; } = 100;
             public bool RestoreGPUPLDefault { get; set; } = false;
+        }
+
+        private void CreateConfigFile()
+        {
+            try
+            {
+                Conf config = new Conf();
+                config.BeginHour = MainObj.BeginTime.Value.Hour;
+                config.BeginMinute = MainObj.BeginTime.Value.Minute;
+                config.EndHour = MainObj.EndTime.Value.Hour;
+                config.EndMinute = MainObj.EndTime.Value.Minute;
+                config.PowerLimitSetting = (int)MainObj.PowerLimitValue.Value;
+                config.UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value;
+                config.RestoreGPUPLDefault = true;
+
+                string confjson = JsonSerializer.Serialize(config);
+
+                using (StreamWriter sw = new StreamWriter("config.json"))
+                {
+                    sw.WriteLine(confjson);
+                }
+
+                Directory.CreateDirectory("./powerlog");
+                var resmsg = MessageBox.Show("この度は「VRChat向け GPU電力制限ツール」\nをダウンロードしていただきありがとうございます。\n\nリリースノートを開きますか?", "ようこそ", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                if (resmsg == DialogResult.Yes)
+                {
+                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("設定ファイル作成時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
+            }
         }
 
         internal void LoadConfig()
@@ -80,37 +114,7 @@ namespace VRCGPUTool.Util
             }
             else
             {
-                try
-                {
-                    Conf config = new Conf();
-                    config.BeginHour = MainObj.BeginTime.Value.Hour;
-                    config.BeginMinute = MainObj.BeginTime.Value.Minute;
-                    config.EndHour = MainObj.EndTime.Value.Hour;
-                    config.EndMinute = MainObj.EndTime.Value.Minute;
-                    config.PowerLimitSetting = (int)MainObj.PowerLimitValue.Value;
-                    config.UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value;
-                    config.RestoreGPUPLDefault = true;
-
-                    string confjson = JsonSerializer.Serialize(config);
-
-                    using (StreamWriter sw = new StreamWriter("config.json"))
-                    {
-                        sw.WriteLine(confjson);
-                    }
-
-                    Directory.CreateDirectory("./powerlog");
-                    var resmsg = MessageBox.Show("この度は「VRChat向け GPU電力制限ツール」\nをダウンロードしていただきありがとうございます。\n\nリリースノートを開きますか?", "ようこそ", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                    if (resmsg == DialogResult.Yes)
-                    {
-                        Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(string.Format("設定ファイル作成時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(-1);
-                }
-
+                CreateConfigFile();
             }
         }
 
@@ -134,7 +138,6 @@ namespace VRCGPUTool.Util
                 {
                     sw.WriteLine(confjson);
                 }
-
             }
             catch (Exception ex)
             {

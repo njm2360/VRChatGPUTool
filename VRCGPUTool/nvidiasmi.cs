@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using VRCGPUTool.Form;
+using VRCGPUTool.Util;
 
 namespace VRCGPUTool
 {
@@ -119,6 +120,14 @@ namespace VRCGPUTool
 
             DateTime datetime_now = DateTime.Now;
 
+            if(MainObj.gpuPlog.rawdata.logdate.Day != datetime_now.Day)
+            {
+                PowerLogFile plog = new PowerLogFile(MainObj.gpuPlog);
+                plog.SaveConfig(MainObj.gpuPlog.rawdata.logdate);
+                MainObj.gpuPlog = null;
+                MainObj.gpuPlog = new GPUPowerLog();
+            }
+            
             MainObj.gpuPlog.AddPowerDeltaData(datetime_now.Hour,g.PowerDraw);
 
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))

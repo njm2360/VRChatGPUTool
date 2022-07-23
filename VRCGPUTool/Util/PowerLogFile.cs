@@ -5,9 +5,9 @@ using System.Windows.Forms;
 
 namespace VRCGPUTool.Util
 {
-    internal class PowerLog
+    internal class PowerLogFile
     {
-        public PowerLog(GPUPowerLog glog)
+        public PowerLogFile(GPUPowerLog glog)
         {
             gpupowerlog = glog;
         }
@@ -17,6 +17,8 @@ namespace VRCGPUTool.Util
         internal void CreatePowerLogFile()
         {
             DateTime dt = DateTime.Now;
+
+            //gpupowerlog.rawdata = null;
 
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
 
@@ -38,10 +40,8 @@ namespace VRCGPUTool.Util
             }
         }
 
-        internal void LoadPowerLog()
+        internal bool LoadPowerLog(DateTime dt, bool isHistoryRead)
         {
-            DateTime dt = DateTime.Now;
-
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
 
             if (File.Exists(fName))
@@ -59,8 +59,16 @@ namespace VRCGPUTool.Util
             }
             else
             {
-                CreatePowerLogFile();
+                if (!isHistoryRead)
+                {
+                    CreatePowerLogFile();
+                }
+                else
+                {
+                    return false;
+                }
             }
+            return true;
         }
         
         internal void SaveConfig()
@@ -68,6 +76,29 @@ namespace VRCGPUTool.Util
             //日付変わるときに保存
             DateTime dt = DateTime.Now;
 
+            string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
+
+            try
+            {
+                GPUPowerLog plog = new GPUPowerLog();
+
+                string logjson = JsonSerializer.Serialize(gpupowerlog.rawdata);
+
+                using (StreamWriter sw = new StreamWriter(fName))
+                {
+                    sw.WriteLine(logjson);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(string.Format("設定ファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(-1);
+            }
+        }
+
+        internal void SaveConfig(DateTime dt)
+        {
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
 
             try

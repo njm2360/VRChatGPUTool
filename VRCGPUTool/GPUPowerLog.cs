@@ -1,4 +1,6 @@
-﻿namespace VRCGPUTool
+﻿using System;
+
+namespace VRCGPUTool
 {
     public class GPUPowerLog
     {
@@ -11,7 +13,16 @@
 
         internal class RawData
         {
-            public int[] hourPowerLog { get; set; } = new int[31];
+            public int[] hourPowerLog { get; set; } = new int[24];
+            public DateTime logdate { get; set; } = DateTime.Now;
+        }
+
+        internal void ClearPowerLog()
+        {
+            foreach(int i in rawdata.hourPowerLog)
+            {
+                rawdata.hourPowerLog[i] = 0;
+            }
         }
 
         internal void AddPowerDeltaData(int hour,int value)

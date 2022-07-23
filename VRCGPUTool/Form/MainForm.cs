@@ -76,11 +76,11 @@ namespace VRCGPUTool.Form
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
-            Config config = new Config(this);
+            ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
 
-            PowerLog plog = new PowerLog(gpuPlog);
-            plog.LoadPowerLog();
+            PowerLogFile plog = new PowerLogFile(gpuPlog);
+            plog.LoadPowerLog(DateTime.Now,false);
 
             GPUreadTimer.Enabled = true;
         }
@@ -318,10 +318,10 @@ namespace VRCGPUTool.Form
                 return;
             }
 
-            Config config = new Config(this);
+            ConfigFile config = new ConfigFile(this);
             config.SaveConfig();
 
-            PowerLog plog = new PowerLog(gpuPlog);
+            PowerLogFile plog = new PowerLogFile(gpuPlog);
             plog.SaveConfig();
         }
 
@@ -366,7 +366,7 @@ namespace VRCGPUTool.Form
 
         private void PowerLogShow_Click(object sender, EventArgs e)
         {
-            PowerHistory history = new PowerHistory(gpuPlog);
+            PowerHistory history = new PowerHistory(this);
             history.Show();
         }
     }
