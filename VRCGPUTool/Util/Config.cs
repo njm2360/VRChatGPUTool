@@ -97,6 +97,8 @@ namespace VRCGPUTool.Util
                     {
                         sw.WriteLine(confjson);
                     }
+
+                    Directory.CreateDirectory("./powerlog");
                     var resmsg = MessageBox.Show("この度は「VRChat向け GPU電力制限ツール」\nをダウンロードしていただきありがとうございます。\n\nリリースノートを開きますか?", "ようこそ", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                     if (resmsg == DialogResult.Yes)
                     {
