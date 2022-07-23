@@ -25,20 +25,24 @@ namespace VRCGPUTool.Util
             public int PowerLimitSetting { get; set; } = 100;
             public int UnlimitPLSetting { get; set; } = 100;
             public bool RestoreGPUPLDefault { get; set; } = false;
+            public string SelectGPUUUID { get; set; } = string.Empty;
         }
 
         private void CreateConfigFile()
         {
             try
             {
-                Conf config = new Conf();
-                config.BeginHour = MainObj.BeginTime.Value.Hour;
-                config.BeginMinute = MainObj.BeginTime.Value.Minute;
-                config.EndHour = MainObj.EndTime.Value.Hour;
-                config.EndMinute = MainObj.EndTime.Value.Minute;
-                config.PowerLimitSetting = (int)MainObj.PowerLimitValue.Value;
-                config.UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value;
-                config.RestoreGPUPLDefault = true;
+                Conf config = new Conf
+                {
+                    BeginHour = MainObj.BeginTime.Value.Hour,
+                    BeginMinute = MainObj.BeginTime.Value.Minute,
+                    EndHour = MainObj.EndTime.Value.Hour,
+                    EndMinute = MainObj.EndTime.Value.Minute,
+                    PowerLimitSetting = (int)MainObj.PowerLimitValue.Value,
+                    UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value,
+                    RestoreGPUPLDefault = true,
+                    SelectGPUUUID = "UUID"
+                };
 
                 string confjson = JsonSerializer.Serialize(config);
 
@@ -78,6 +82,8 @@ namespace VRCGPUTool.Util
                                 MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
                                 MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
                                 MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
+                                MainObj.SelectGPUUUID = config.SelectGPUUUID;
+
                                 if (config.RestoreGPUPLDefault == true)
                                 {
                                     MainObj.ResetGPUDefaultPL.Checked = true;
@@ -122,15 +128,17 @@ namespace VRCGPUTool.Util
         {
             try
             {
-                Conf config = new Conf();
-
-                config.BeginHour = MainObj.BeginTime.Value.Hour;
-                config.BeginMinute = MainObj.BeginTime.Value.Minute;
-                config.EndHour = MainObj.EndTime.Value.Hour;
-                config.EndMinute = MainObj.EndTime.Value.Minute;
-                config.PowerLimitSetting = (int)MainObj.PowerLimitValue.Value;
-                config.UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value;
-                config.RestoreGPUPLDefault = MainObj.ResetGPUDefaultPL.Checked;
+                Conf config = new Conf
+                {
+                    BeginHour = MainObj.BeginTime.Value.Hour,
+                    BeginMinute = MainObj.BeginTime.Value.Minute,
+                    EndHour = MainObj.EndTime.Value.Hour,
+                    EndMinute = MainObj.EndTime.Value.Minute,
+                    PowerLimitSetting = (int)MainObj.PowerLimitValue.Value,
+                    UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value,
+                    RestoreGPUPLDefault = MainObj.ResetGPUDefaultPL.Checked,
+                    SelectGPUUUID = "6263462"
+                };
 
                 string confjson = JsonSerializer.Serialize(config);
 

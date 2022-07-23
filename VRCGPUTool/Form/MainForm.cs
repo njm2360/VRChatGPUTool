@@ -28,6 +28,7 @@ namespace VRCGPUTool.Form
         internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
+        internal string SelectGPUUUID;
         internal bool limitstatus = false;
         internal long limittime = 0;
         private int[] recentutil = new int[300];
@@ -60,14 +61,7 @@ namespace VRCGPUTool.Form
                 recentutil[i] = -1;
             }
 
-            nvsmi.InitGPU();            
-
-            foreach (GpuStatus g in gpuStatuses)
-            {
-                GpuIndex.Items.Add(g.Name);
-            }
-
-            GpuIndex.SelectedIndex = 0;
+            nvsmi.InitGPU();
 
             SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
             PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
@@ -78,6 +72,37 @@ namespace VRCGPUTool.Form
 
             ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
+
+            int j = 0;
+            int resNo = -1;
+            foreach (GpuStatus g in gpuStatuses)
+            {
+                GpuIndex.Items.Add(g.Name);
+                if (g.UUID == SelectGPUUUID)
+                {
+                    resNo = j;
+                }
+                else
+                {
+                    j++;
+                }
+            }
+            if (!(SelectGPUUUID == ""))
+            {
+                if (resNo == -1)
+                {
+                    MessageBox.Show("前回終了時に選択したGPUが見つかりませんでした。", "エラー");
+                    GpuIndex.SelectedIndex = 0;
+                }
+                else
+                {
+                    GpuIndex.SelectedIndex = resNo;
+                }
+            }
+            else
+            {
+                GpuIndex.SelectedIndex = 0;
+            }
 
             PowerLogFile plog = new PowerLogFile(gpuPlog);
             plog.LoadPowerLog(DateTime.Now,false);
