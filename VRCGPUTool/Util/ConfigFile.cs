@@ -88,6 +88,7 @@ namespace VRCGPUTool.Util
                                 }
                                 catch (IndexOutOfRangeException)
                                 {
+                                    MessageBox.Show("EX");
                                     MainObj.GpuIndex.SelectedIndex = 0;
                                 }
 
@@ -128,6 +129,7 @@ namespace VRCGPUTool.Util
             else
             {
                 CreateConfigFile();
+                LoadConfig();
             }
         }
 

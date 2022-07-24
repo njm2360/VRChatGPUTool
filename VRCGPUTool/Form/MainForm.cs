@@ -28,7 +28,6 @@ namespace VRCGPUTool.Form
         internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
-        internal string SelectGPUUUID;
         internal bool limitstatus = false;
         internal long limittime = 0;
         private int[] recentutil = new int[300];
@@ -67,16 +66,16 @@ namespace VRCGPUTool.Form
             {
                 GpuIndex.Items.Add(g.Name);
             }
-
-            SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
-            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
-            GPUCorePLValue.Text = "GPUコア電力制限: " + gpuStatuses.First().PLimit.ToString() + "W";
-
+            
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
             ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
+
+            SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
+            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
+            GPUCorePLValue.Text = "GPUコア電力制限: " + gpuStatuses.First().PLimit.ToString() + "W";
 
             PowerLogFile plog = new PowerLogFile(gpuPlog);
             plog.LoadPowerLog(DateTime.Now,false);
