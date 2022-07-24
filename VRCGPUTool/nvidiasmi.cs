@@ -120,15 +120,7 @@ namespace VRCGPUTool
 
             DateTime datetime_now = DateTime.Now;
 
-            if(MainObj.gpuPlog.rawdata.logdate.Day != datetime_now.Day)
-            {
-                PowerLogFile plog = new PowerLogFile(MainObj.gpuPlog);
-                plog.SaveConfig(MainObj.gpuPlog.rawdata.logdate);
-                MainObj.gpuPlog = null;
-                MainObj.gpuPlog = new GPUPowerLog();
-            }
-            
-            MainObj.gpuPlog.AddPowerDeltaData(datetime_now.Hour,g.PowerDraw);
+            PowerLogging(datetime_now,g);
 
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))
             {
@@ -139,6 +131,19 @@ namespace VRCGPUTool
                 MainObj.Limit_Action(false, true);
                 MessageBox.Show("外部ツールによって電力制限値が変更されたため制限を終了しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void PowerLogging(DateTime dt,GpuStatus g)
+        {
+            if (MainObj.gpuPlog.rawdata.logdate.Day != dt.Day)
+            {
+                PowerLogFile plog = new PowerLogFile(MainObj.gpuPlog);
+                plog.SaveConfig(MainObj.gpuPlog.rawdata.logdate);
+                MainObj.gpuPlog = null;
+                MainObj.gpuPlog = new GPUPowerLog();
+            }
+
+            MainObj.gpuPlog.AddPowerDeltaData(dt.Hour, g.PowerDraw);
         }
         
         internal void InitGPU()

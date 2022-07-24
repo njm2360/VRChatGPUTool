@@ -80,17 +80,16 @@ namespace VRCGPUTool.Util
                                 Conf config = JsonSerializer.Deserialize<Conf>(sr.ReadLine());
                                 MainObj.BeginTime.Value = new DateTime(1970, 1, 1, config.BeginHour, config.BeginMinute, 0);
                                 MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
-                                MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
-                                MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
                                 try
                                 {
                                     MainObj.GpuIndex.SelectedIndex = config.SelectGPUIndex;
                                 }
                                 catch (IndexOutOfRangeException)
                                 {
-                                    MessageBox.Show("EX");
                                     MainObj.GpuIndex.SelectedIndex = 0;
                                 }
+                                MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
+                                MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
 
                                 if (config.RestoreGPUPLDefault == true)
                                 {
