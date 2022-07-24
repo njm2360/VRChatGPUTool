@@ -42,17 +42,17 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.DataRefreshDate = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.DateRefresh = new System.Windows.Forms.Button();
+            this.DataRefresh = new System.Windows.Forms.Button();
             this.NextDayData = new System.Windows.Forms.Button();
             this.PreviousDayData = new System.Windows.Forms.Button();
             this.LogDateLabel = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.label2 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
+            this.NextMonthData = new System.Windows.Forms.Button();
+            this.PreviousMonthData = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.UsageGraphDay)).BeginInit();
             this.TabRange.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -95,7 +95,7 @@
             // 
             this.tabPage1.Controls.Add(this.DataRefreshDate);
             this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.DateRefresh);
+            this.tabPage1.Controls.Add(this.DataRefresh);
             this.tabPage1.Controls.Add(this.NextDayData);
             this.tabPage1.Controls.Add(this.PreviousDayData);
             this.tabPage1.Controls.Add(this.LogDateLabel);
@@ -126,15 +126,15 @@
             this.label1.TabIndex = 5;
             this.label1.Text = "データ取得日時:";
             // 
-            // DateRefresh
+            // DataRefresh
             // 
-            this.DateRefresh.Location = new System.Drawing.Point(692, 431);
-            this.DateRefresh.Name = "DateRefresh";
-            this.DateRefresh.Size = new System.Drawing.Size(106, 25);
-            this.DateRefresh.TabIndex = 4;
-            this.DateRefresh.Text = "最新データに更新";
-            this.DateRefresh.UseVisualStyleBackColor = true;
-            this.DateRefresh.Click += new System.EventHandler(this.DateRefresh_Click);
+            this.DataRefresh.Location = new System.Drawing.Point(692, 431);
+            this.DataRefresh.Name = "DataRefresh";
+            this.DataRefresh.Size = new System.Drawing.Size(106, 25);
+            this.DataRefresh.TabIndex = 4;
+            this.DataRefresh.Text = "最新データに更新";
+            this.DataRefresh.UseVisualStyleBackColor = true;
+            this.DataRefresh.Click += new System.EventHandler(this.DataRefresh_Click);
             // 
             // NextDayData
             // 
@@ -170,8 +170,8 @@
             // 
             this.tabPage2.Controls.Add(this.label3);
             this.tabPage2.Controls.Add(this.label4);
-            this.tabPage2.Controls.Add(this.button1);
-            this.tabPage2.Controls.Add(this.button2);
+            this.tabPage2.Controls.Add(this.NextMonthData);
+            this.tabPage2.Controls.Add(this.PreviousMonthData);
             this.tabPage2.Controls.Add(this.label2);
             this.tabPage2.Controls.Add(this.UsageGraphMonth);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
@@ -182,6 +182,54 @@
             this.tabPage2.Text = "電力使用量【1カ月】";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(582, 16);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(36, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "(Date)";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(490, 16);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(86, 13);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "データ取得日時:";
+            // 
+            // NextMonthData
+            // 
+            this.NextMonthData.Location = new System.Drawing.Point(388, 431);
+            this.NextMonthData.Name = "NextMonthData";
+            this.NextMonthData.Size = new System.Drawing.Size(155, 25);
+            this.NextMonthData.TabIndex = 5;
+            this.NextMonthData.Text = "翌月＞＞";
+            this.NextMonthData.UseVisualStyleBackColor = true;
+            this.NextMonthData.Click += new System.EventHandler(this.NextMonthData_Click);
+            // 
+            // PreviousMonthData
+            // 
+            this.PreviousMonthData.Location = new System.Drawing.Point(155, 431);
+            this.PreviousMonthData.Name = "PreviousMonthData";
+            this.PreviousMonthData.Size = new System.Drawing.Size(155, 25);
+            this.PreviousMonthData.TabIndex = 4;
+            this.PreviousMonthData.Text = "＜＜先月";
+            this.PreviousMonthData.UseVisualStyleBackColor = true;
+            this.PreviousMonthData.Click += new System.EventHandler(this.PreviousMonthData_Click);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(16, 12);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(261, 27);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "2020年1月の電力使用履歴";
+            // 
             // UsageGraphMonth
             // 
             chartArea2.AxisX.MajorGrid.Interval = 1D;
@@ -190,7 +238,7 @@
             this.UsageGraphMonth.ChartAreas.Add(chartArea2);
             legend2.Name = "Legend1";
             this.UsageGraphMonth.Legends.Add(legend2);
-            this.UsageGraphMonth.Location = new System.Drawing.Point(18, 46);
+            this.UsageGraphMonth.Location = new System.Drawing.Point(6, 40);
             this.UsageGraphMonth.Name = "UsageGraphMonth";
             series2.ChartArea = "ChartArea1";
             series2.Legend = "Legend1";
@@ -202,52 +250,6 @@
             title2.Name = "Title1";
             title2.Text = "電力使用量(１カ月)";
             this.UsageGraphMonth.Titles.Add(title2);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(13, 16);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(261, 27);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "2020年1月の電力使用履歴";
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(399, 429);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(155, 25);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "翌月＞＞";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(166, 429);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(155, 25);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "＜＜先月";
-            this.button2.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(595, 16);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(36, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "(Date)";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(503, 16);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(86, 13);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "データ取得日時:";
             // 
             // PowerHistory
             // 
@@ -282,13 +284,13 @@
         private System.Windows.Forms.Button NextDayData;
         private System.Windows.Forms.Button PreviousDayData;
         private System.Windows.Forms.Label LogDateLabel;
-        private System.Windows.Forms.Button DateRefresh;
+        private System.Windows.Forms.Button DataRefresh;
         private System.Windows.Forms.Label DataRefreshDate;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button NextMonthData;
+        private System.Windows.Forms.Button PreviousMonthData;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.DataVisualization.Charting.Chart UsageGraphMonth;
     }

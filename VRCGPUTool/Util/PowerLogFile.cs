@@ -40,6 +40,8 @@ namespace VRCGPUTool.Util
             }
         }
 
+        //#desc 戻り値：Trueファイルを生成した,False：ファイルを生成していない
+        //ファイルが存在しない場合の戻り値を渡さないと判別できない
         internal bool LoadPowerLog(DateTime dt, bool isHistoryRead)
         {
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
