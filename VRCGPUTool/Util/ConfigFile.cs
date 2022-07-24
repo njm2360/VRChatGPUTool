@@ -25,7 +25,7 @@ namespace VRCGPUTool.Util
             public int PowerLimitSetting { get; set; } = 100;
             public int UnlimitPLSetting { get; set; } = 100;
             public bool RestoreGPUPLDefault { get; set; } = false;
-            public string SelectGPUUUID { get; set; } = string.Empty;
+            public int SelectGPUIndex { get; set; } = 0;
         }
 
         private void CreateConfigFile()
@@ -41,7 +41,7 @@ namespace VRCGPUTool.Util
                     PowerLimitSetting = (int)MainObj.PowerLimitValue.Value,
                     UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value,
                     RestoreGPUPLDefault = true,
-                    SelectGPUUUID = "UUID"
+                    SelectGPUIndex = 0
                 };
 
                 string confjson = JsonSerializer.Serialize(config);
@@ -82,7 +82,14 @@ namespace VRCGPUTool.Util
                                 MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
                                 MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
                                 MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
-                                MainObj.SelectGPUUUID = config.SelectGPUUUID;
+                                try
+                                {
+                                    MainObj.GpuIndex.SelectedIndex = config.SelectGPUIndex;
+                                }
+                                catch (IndexOutOfRangeException)
+                                {
+                                    MainObj.GpuIndex.SelectedIndex = 0;
+                                }
 
                                 if (config.RestoreGPUPLDefault == true)
                                 {
@@ -137,7 +144,7 @@ namespace VRCGPUTool.Util
                     PowerLimitSetting = (int)MainObj.PowerLimitValue.Value,
                     UnlimitPLSetting = (int)MainObj.SpecificPLValue.Value,
                     RestoreGPUPLDefault = MainObj.ResetGPUDefaultPL.Checked,
-                    SelectGPUUUID = "6263462"
+                    SelectGPUIndex = MainObj.GpuIndex.SelectedIndex
                 };
 
                 string confjson = JsonSerializer.Serialize(config);
