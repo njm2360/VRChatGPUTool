@@ -13,18 +13,20 @@ namespace VRCGPUTool.Form
         {
             MainObj = fm;
             InitializeComponent();
-            PlogDara = MainObj.gpuPlog;
-            dispDate = DateTime.Today;
+            PlogData = MainObj.gpuPlog;
+            dispDataDay = DateTime.Today;
+            dispDataMonth = DateTime.Today;
         }
 
-        GPUPowerLog PlogDara;
+        GPUPowerLog PlogData;
 
-        private DateTime dispDate;
+        private DateTime dispDataDay;
+        private DateTime dispDataMonth;
 
         private void PowerHistory_Load(object sender, EventArgs e)
         {
-            DrawHistoryDay(PlogDara);
-            DrawHistoryMonth(PlogDara);
+            DrawHistoryDay(PlogData);
+            DrawHistoryMonth(dispDataMonth, true);
         }
 
         private void DrawHistoryDay(GPUPowerLog dispdata)
@@ -47,10 +49,15 @@ namespace VRCGPUTool.Form
                 ChartType = SeriesChartType.Column
             };
 
+            double usageTotalDay = 0.0;
+
             for (int i = 0; i < 24; i++)
             {
                 seriesColumn.Points.Add(new DataPoint(i, (double)dispdata.rawdata.hourPowerLog[i] / 3600.0));
+                usageTotalDay += dispdata.rawdata.hourPowerLog[i];
             }
+
+            usageTotalDay /= (3600.0 * 1000.0); //Kwh
 
             ChartArea area = new ChartArea("area");
             area.AxisX.Title = "時間(h)";
@@ -66,76 +73,50 @@ namespace VRCGPUTool.Form
 
         private void PreviousDayData_Click(object sender, EventArgs e)
         {
-            GPUPowerLog plog = new GPUPowerLog();
-            PowerLogFile plogfile = new PowerLogFile(plog);
+            dispDataDay = dispDataDay.AddDays(-1);
 
-            dispDate = dispDate.AddDays(-1);
-
-            var res = plogfile.LoadPowerLog(dispDate,true);
-            if(res == false)
+            if (DateTime.Now.Date == dispDataDay.Date)
             {
-                MessageBox.Show("これ以上ログがないため遡れません","エラー");
-                dispDate = dispDate.AddDays(1);
+                DrawHistoryDay(PlogData);
             }
             else
             {
+                GPUPowerLog plog = new GPUPowerLog();
+                PowerLogFile plogfile = new PowerLogFile(plog);
+                plogfile.LoadPowerLog(dispDataDay, true);
                 DrawHistoryDay(plog);
             }
         }
 
         private void NextDayData_Click(object sender, EventArgs e)
         {
-            GPUPowerLog plog;
-            PowerLogFile plogfile;
+            dispDataDay = dispDataDay.AddDays(1);
 
-            dispDate = dispDate.AddDays(1);
-            if (DateTime.Now.Date == dispDate)
+            if (DateTime.Now.Date == dispDataDay.Date)
             {
-                PlogDara = MainObj.gpuPlog;
-                plog = PlogDara;
-                DrawHistoryDay(plog);
+                DrawHistoryDay(PlogData);
             }
             else
             {
-                plog = new GPUPowerLog();
-                plogfile = new PowerLogFile(plog);
-                var res = plogfile.LoadPowerLog(dispDate, true);
-                if (res == false)
-                {
-                    MessageBox.Show("これ以上ログがないため遡れません", "エラー");
-                    dispDate = dispDate.AddDays(-1);
-                }
-                else
-                {
-                    DrawHistoryDay(plog);
-                }
+                GPUPowerLog plog = new GPUPowerLog();
+                PowerLogFile plogfile = new PowerLogFile(plog);
+                plogfile.LoadPowerLog(dispDataDay, true);
+                DrawHistoryDay(plog);
             }
         }
 
         private void DataRefresh_Click(object sender, EventArgs e)
         {
-            GPUPowerLog plog;
-            if (DateTime.Now.Date == dispDate)
+            if (DateTime.Now.Date == dispDataDay.Date)
             {
-                PlogDara = MainObj.gpuPlog;
-                plog = PlogDara;
-                DrawHistoryDay(plog);
+                DrawHistoryDay(PlogData);
             }
         }
 
-        private void DrawHistoryMonth(GPUPowerLog dat)
+        private void DrawHistoryMonth(DateTime dispdt, bool isThisMonth)
         {
-            //こっちは当月用(ParamでGPUPowerLogを渡す)
-            //過去のデータはdipsdataの日付から1日までのデータを拾う
-            //ファイルを逐次Readすればよさそう
-            //GPUPowerLogにReadメソッドあるか可能
-
             DateTime dt = DateTime.Now;
-            DataRefreshDate.Text = dt.ToString();
-
-            string datelabel = string.Format("{0:D4}年{1}月の電力使用履歴", dat.rawdata.logdate.Year, dat.rawdata.logdate.Month);
-
-            LogDateLabel.Text = datelabel;
+            DataRefreshDate2.Text = dt.ToString();
 
             UsageGraphMonth.Series.Clear();
             UsageGraphMonth.ChartAreas.Clear();
@@ -148,34 +129,6 @@ namespace VRCGPUTool.Form
                 ChartType = SeriesChartType.Column
             };
 
-            //当日のデータを集計してグラフに追加
-            int TodayUsage = 0;
-
-            for (int i = 0; i < 24; i++)
-            {
-                TodayUsage += dat.rawdata.hourPowerLog[i];
-            }
-            seriesColumn.Points.Add(new DataPoint(dat.rawdata.logdate.Day,(double)TodayUsage / 3600.0));
-
-            //過去のデータ読み出し（当月1日まで）
-            int Days = DateTime.DaysInMonth(dat.rawdata.logdate.Year, dat.rawdata.logdate.Month);
-
-            for (int i = 1; i < Days; i++)
-            {
-                DateTime loadDate = new DateTime(dat.rawdata.logdate.Year, dat.rawdata.logdate.Month,i);
-                GPUPowerLog recentlog = new GPUPowerLog();
-                PowerLogFile logfile = new PowerLogFile(recentlog);
-                logfile.LoadPowerLog(loadDate,true);
-
-                TodayUsage = 0;
-                for (int j = 0; j < 24; j++)
-                {
-                    TodayUsage += recentlog.rawdata.hourPowerLog[i];
-                }
-
-                seriesColumn.Points.Add(new DataPoint(i, (double)TodayUsage / 3600.0));
-            }
-
             ChartArea area = new ChartArea("area");
             area.AxisX.Title = "日(Day)";
             area.AxisY.Title = "電力量(Wh)";
@@ -185,17 +138,114 @@ namespace VRCGPUTool.Form
             UsageGraphMonth.ChartAreas.Add(area);
             UsageGraphMonth.Series.Add(seriesColumn);
             UsageGraphMonth.ChartAreas["area"].AxisX.Minimum = 1;
+
+            if (isThisMonth)
+            {
+                DataPointAddThisMonth(seriesColumn);
+            }
+            else
+            {
+                DataPointAddPreviousMonth(dispdt, seriesColumn);
+            }
+        }
+
+        private void DataPointAddThisMonth(Series seriesColumn)
+        {
+            string datelabel = string.Format("{0:D4}年{1}月の電力使用履歴", PlogData.rawdata.logdate.Year, PlogData.rawdata.logdate.Month);
+            LogMonthLabel.Text = datelabel;
+
+            int dayUsage = 0;
+            double usageTotalMonth = 0.0;
+
+            for (int i = 0; i < 24; i++)
+            {
+                dayUsage += PlogData.rawdata.hourPowerLog[i];
+            }
+            seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day, (double)dayUsage / 3600.0));
+            usageTotalMonth += dayUsage;
+
+            int Days = DateTime.DaysInMonth(PlogData.rawdata.logdate.Year, PlogData.rawdata.logdate.Month);
             UsageGraphMonth.ChartAreas["area"].AxisX.Maximum = Days;
+
+            for (int i = 1; i < PlogData.rawdata.logdate.Day; i++)
+            {
+                DateTime loadDate = new DateTime(PlogData.rawdata.logdate.Year, PlogData.rawdata.logdate.Month, i);
+                GPUPowerLog recentlog = new GPUPowerLog();
+                PowerLogFile logfile = new PowerLogFile(recentlog);
+                int res = logfile.LoadPowerLog(loadDate, true);
+
+                if (res == 0)
+                {
+                    dayUsage = 0;
+                    for (int j = 0; j < 24; j++)
+                    {
+                        dayUsage += recentlog.rawdata.hourPowerLog[j];
+                    }
+                    seriesColumn.Points.Add(new DataPoint(i, (double)dayUsage / 3600.0));
+                    usageTotalMonth += dayUsage;
+                }
+            }
+            usageTotalMonth /= (3600.0 * 1000.0); //Kwh
+        }
+
+        private void DataPointAddPreviousMonth(DateTime dt, Series seriesColumn)
+        {
+            string datelabel = string.Format("{0:D4}年{1}月の電力使用履歴", dt.Year, dt.Month);
+            LogMonthLabel.Text = datelabel;
+
+            int dayUsage = 0;
+            double usageTotalMonth = 0.0;
+            int Days = DateTime.DaysInMonth(dt.Year, dt.Month);
+            UsageGraphMonth.ChartAreas["area"].AxisX.Maximum = Days;
+
+            for (int i = 1; i <= Days; i++)
+            {
+                DateTime loadDate = new DateTime(dt.Year, dt.Month, i);
+                GPUPowerLog recentlog = new GPUPowerLog();
+                PowerLogFile logfile = new PowerLogFile(recentlog);
+                int res = logfile.LoadPowerLog(loadDate, true);
+
+                if (res == 0)
+                {
+                    dayUsage = 0;
+                    for (int j = 0; j < 24; j++)
+                    {
+                        dayUsage += recentlog.rawdata.hourPowerLog[j];
+                    }
+
+                    seriesColumn.Points.Add(new DataPoint(i, (double)dayUsage / 3600.0));
+                    usageTotalMonth += dayUsage;
+                }
+            }
+            usageTotalMonth /= (3600.0 * 1000.0); //Kwh
         }
 
         private void PreviousMonthData_Click(object sender, EventArgs e)
         {
+            dispDataMonth = dispDataMonth.AddMonths(-1);
 
+            if (DateTime.Now.Year == dispDataMonth.Year && DateTime.Now.Month == dispDataMonth.Month)
+            {
+                DrawHistoryMonth(dispDataMonth, true);
+            }
+            else
+            {
+                DrawHistoryMonth(dispDataMonth, false);
+            }
         }
 
         private void NextMonthData_Click(object sender, EventArgs e)
         {
+            dispDataMonth = dispDataMonth.AddMonths(1);
 
+            if (DateTime.Now.Year == dispDataMonth.Year && DateTime.Now.Month == dispDataMonth.Month)
+            {
+                DrawHistoryMonth(dispDataMonth, true);
+            }
+            else
+            {
+                DrawHistoryMonth(dispDataMonth, false);
+            }
         }
     }
 }

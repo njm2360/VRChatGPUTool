@@ -47,11 +47,11 @@
             this.PreviousDayData = new System.Windows.Forms.Button();
             this.LogDateLabel = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.label3 = new System.Windows.Forms.Label();
+            this.DataRefreshDate2 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.NextMonthData = new System.Windows.Forms.Button();
             this.PreviousMonthData = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
+            this.LogMonthLabel = new System.Windows.Forms.Label();
             this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.UsageGraphDay)).BeginInit();
             this.TabRange.SuspendLayout();
@@ -168,11 +168,11 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.label3);
+            this.tabPage2.Controls.Add(this.DataRefreshDate2);
             this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.NextMonthData);
             this.tabPage2.Controls.Add(this.PreviousMonthData);
-            this.tabPage2.Controls.Add(this.label2);
+            this.tabPage2.Controls.Add(this.LogMonthLabel);
             this.tabPage2.Controls.Add(this.UsageGraphMonth);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -182,14 +182,14 @@
             this.tabPage2.Text = "電力使用量【1カ月】";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // label3
+            // DataRefreshDate2
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(582, 16);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(36, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "(Date)";
+            this.DataRefreshDate2.AutoSize = true;
+            this.DataRefreshDate2.Location = new System.Drawing.Point(582, 16);
+            this.DataRefreshDate2.Name = "DataRefreshDate2";
+            this.DataRefreshDate2.Size = new System.Drawing.Size(36, 13);
+            this.DataRefreshDate2.TabIndex = 8;
+            this.DataRefreshDate2.Text = "(Date)";
             // 
             // label4
             // 
@@ -220,15 +220,15 @@
             this.PreviousMonthData.UseVisualStyleBackColor = true;
             this.PreviousMonthData.Click += new System.EventHandler(this.PreviousMonthData_Click);
             // 
-            // label2
+            // LogMonthLabel
             // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(16, 12);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(261, 27);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "2020年1月の電力使用履歴";
+            this.LogMonthLabel.AutoSize = true;
+            this.LogMonthLabel.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LogMonthLabel.Location = new System.Drawing.Point(16, 12);
+            this.LogMonthLabel.Name = "LogMonthLabel";
+            this.LogMonthLabel.Size = new System.Drawing.Size(261, 27);
+            this.LogMonthLabel.TabIndex = 2;
+            this.LogMonthLabel.Text = "2020年1月の電力使用履歴";
             // 
             // UsageGraphMonth
             // 
@@ -287,11 +287,11 @@
         private System.Windows.Forms.Button DataRefresh;
         private System.Windows.Forms.Label DataRefreshDate;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label DataRefreshDate2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button NextMonthData;
         private System.Windows.Forms.Button PreviousMonthData;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label LogMonthLabel;
         private System.Windows.Forms.DataVisualization.Charting.Chart UsageGraphMonth;
     }
 }
