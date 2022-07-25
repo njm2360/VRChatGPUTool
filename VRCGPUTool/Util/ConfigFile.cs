@@ -77,7 +77,7 @@ namespace VRCGPUTool.Util
                         {
                             while (!sr.EndOfStream)
                             {
-                                Conf config = JsonSerializer.Deserialize<Conf>(sr.ReadLine());
+                                Conf config = JsonSerializer.Deserialize<Conf>(sr.ReadToEnd());
                                 MainObj.BeginTime.Value = new DateTime(1970, 1, 1, config.BeginHour, config.BeginMinute, 0);
                                 MainObj.EndTime.Value = new DateTime(1970, 1, 1, config.EndHour, config.EndMinute, 0);
                                 try

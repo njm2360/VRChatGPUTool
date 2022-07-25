@@ -52,7 +52,7 @@ namespace VRCGPUTool.Util
                     {
                         while (!sr.EndOfStream)
                         {
-                            gpupowerlog.rawdata = JsonSerializer.Deserialize<GPUPowerLog.RawData>(sr.ReadLine());
+                            gpupowerlog.rawdata = JsonSerializer.Deserialize<GPUPowerLog.RawData>(sr.ReadToEnd());
                         }
                     }
                 }
