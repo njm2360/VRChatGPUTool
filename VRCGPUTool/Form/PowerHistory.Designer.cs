@@ -53,6 +53,8 @@
             this.PreviousMonthData = new System.Windows.Forms.Button();
             this.LogMonthLabel = new System.Windows.Forms.Label();
             this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.MonthlyTotalPower = new System.Windows.Forms.Label();
+            this.DaylyTotalPower = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.UsageGraphDay)).BeginInit();
             this.TabRange.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -90,9 +92,11 @@
             this.TabRange.SelectedIndex = 0;
             this.TabRange.Size = new System.Drawing.Size(826, 495);
             this.TabRange.TabIndex = 1;
+            this.TabRange.SelectedIndexChanged += new System.EventHandler(this.TabChanged);
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.DaylyTotalPower);
             this.tabPage1.Controls.Add(this.DataRefreshDate);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.DataRefresh);
@@ -159,15 +163,16 @@
             // LogDateLabel
             // 
             this.LogDateLabel.AutoSize = true;
-            this.LogDateLabel.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LogDateLabel.Font = new System.Drawing.Font("游ゴシック", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.LogDateLabel.Location = new System.Drawing.Point(16, 12);
             this.LogDateLabel.Name = "LogDateLabel";
-            this.LogDateLabel.Size = new System.Drawing.Size(294, 27);
+            this.LogDateLabel.Size = new System.Drawing.Size(268, 25);
             this.LogDateLabel.TabIndex = 1;
             this.LogDateLabel.Text = "2020年1月1日の電力使用履歴";
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.MonthlyTotalPower);
             this.tabPage2.Controls.Add(this.DataRefreshDate2);
             this.tabPage2.Controls.Add(this.label4);
             this.tabPage2.Controls.Add(this.NextMonthData);
@@ -223,10 +228,10 @@
             // LogMonthLabel
             // 
             this.LogMonthLabel.AutoSize = true;
-            this.LogMonthLabel.Font = new System.Drawing.Font("游ゴシック", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LogMonthLabel.Font = new System.Drawing.Font("游ゴシック", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(128)));
             this.LogMonthLabel.Location = new System.Drawing.Point(16, 12);
             this.LogMonthLabel.Name = "LogMonthLabel";
-            this.LogMonthLabel.Size = new System.Drawing.Size(261, 27);
+            this.LogMonthLabel.Size = new System.Drawing.Size(238, 25);
             this.LogMonthLabel.TabIndex = 2;
             this.LogMonthLabel.Text = "2020年1月の電力使用履歴";
             // 
@@ -250,6 +255,26 @@
             title2.Name = "Title1";
             title2.Text = "電力使用量(１カ月)";
             this.UsageGraphMonth.Titles.Add(title2);
+            // 
+            // MonthlyTotalPower
+            // 
+            this.MonthlyTotalPower.AutoSize = true;
+            this.MonthlyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MonthlyTotalPower.Location = new System.Drawing.Point(306, 7);
+            this.MonthlyTotalPower.Name = "MonthlyTotalPower";
+            this.MonthlyTotalPower.Size = new System.Drawing.Size(132, 30);
+            this.MonthlyTotalPower.TabIndex = 9;
+            this.MonthlyTotalPower.Text = "合計:0.0kWh";
+            // 
+            // DaylyTotalPower
+            // 
+            this.DaylyTotalPower.AutoSize = true;
+            this.DaylyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DaylyTotalPower.Location = new System.Drawing.Point(306, 7);
+            this.DaylyTotalPower.Name = "DaylyTotalPower";
+            this.DaylyTotalPower.Size = new System.Drawing.Size(132, 30);
+            this.DaylyTotalPower.TabIndex = 10;
+            this.DaylyTotalPower.Text = "合計:0.0kWh";
             // 
             // PowerHistory
             // 
@@ -293,5 +318,7 @@
         private System.Windows.Forms.Button PreviousMonthData;
         private System.Windows.Forms.Label LogMonthLabel;
         private System.Windows.Forms.DataVisualization.Charting.Chart UsageGraphMonth;
+        private System.Windows.Forms.Label DaylyTotalPower;
+        private System.Windows.Forms.Label MonthlyTotalPower;
     }
 }

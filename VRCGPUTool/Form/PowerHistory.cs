@@ -34,7 +34,7 @@ namespace VRCGPUTool.Form
             DateTime dt = DateTime.Now;
             DataRefreshDate.Text = dt.ToString();
 
-            string datelabel = string.Format("{0:D4}年{1}月{2}日の電力使用履歴",dispdata.rawdata.logdate.Year, dispdata.rawdata.logdate.Month, dispdata.rawdata.logdate.Day);
+            string datelabel = string.Format("{0:D4}年{1}月{2}日の電力使用履歴", dispDataDay.Year, dispDataDay.Month, dispDataDay.Day);
 
             LogDateLabel.Text = datelabel;
 
@@ -46,7 +46,8 @@ namespace VRCGPUTool.Form
 
             Series seriesColumn = new Series
             {
-                ChartType = SeriesChartType.Column
+                ChartType = SeriesChartType.Column,
+                IsVisibleInLegend = false
             };
 
             double usageTotalDay = 0.0;
@@ -58,6 +59,7 @@ namespace VRCGPUTool.Form
             }
 
             usageTotalDay /= (3600.0 * 1000.0); //Kwh
+            DaylyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalDay);
 
             ChartArea area = new ChartArea("area");
             area.AxisX.Title = "時間(h)";
@@ -126,7 +128,8 @@ namespace VRCGPUTool.Form
 
             Series seriesColumn = new Series
             {
-                ChartType = SeriesChartType.Column
+                ChartType = SeriesChartType.Column,
+                IsVisibleInLegend = false
             };
 
             ChartArea area = new ChartArea("area");
@@ -186,6 +189,7 @@ namespace VRCGPUTool.Form
                 }
             }
             usageTotalMonth /= (3600.0 * 1000.0); //Kwh
+            MonthlyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalMonth);
         }
 
         private void DataPointAddPreviousMonth(DateTime dt, Series seriesColumn)
@@ -218,6 +222,7 @@ namespace VRCGPUTool.Form
                 }
             }
             usageTotalMonth /= (3600.0 * 1000.0); //Kwh
+            MonthlyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalMonth);
         }
 
         private void PreviousMonthData_Click(object sender, EventArgs e)
@@ -245,6 +250,18 @@ namespace VRCGPUTool.Form
             else
             {
                 DrawHistoryMonth(dispDataMonth, false);
+            }
+        }
+
+        private void TabChanged(object sender, EventArgs e)
+        {
+            if(TabRange.SelectedIndex == 0)
+            {
+                DrawHistoryDay(PlogData);
+            }
+            else
+            {
+                DrawHistoryMonth(dispDataMonth, true);
             }
         }
     }
