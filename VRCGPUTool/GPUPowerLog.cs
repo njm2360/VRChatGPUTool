@@ -1,4 +1,5 @@
 ﻿using System;
+using VRCGPUTool.Util;
 
 namespace VRCGPUTool
 {
@@ -25,7 +26,20 @@ namespace VRCGPUTool
             }
         }
 
-        internal void AddPowerDeltaData(int hour,int value)
+        internal void PowerLogging(DateTime dt, GpuStatus g,GPUPowerLog gpuPlog)
+        {
+            if (gpuPlog.rawdata.logdate.Day != dt.Day)
+            {
+                PowerLogFile plog = new PowerLogFile(gpuPlog);
+                plog.SaveConfig(gpuPlog.rawdata.logdate);
+                gpuPlog = null;
+                gpuPlog = new GPUPowerLog();
+            }
+
+            gpuPlog.AddPowerDeltaData(dt.Hour, g.PowerDraw);
+        }
+
+        private void AddPowerDeltaData(int hour,int value)
         {
             rawdata.hourPowerLog[hour] += value;
         }

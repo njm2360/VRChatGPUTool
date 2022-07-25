@@ -20,23 +20,19 @@ namespace VRCGPUTool.Form
             nvsmi = new NvidiaSmi(this);
             nvsmi.InitializeNvsmiWorker();
             gpuPlog = new GPUPowerLog();
+            autoLimit = new AutoLimit(this);
         }
 
         NvidiaSmi nvsmi;
         UpdateCheck update;
-
+        AutoLimit autoLimit;
         internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
         internal bool limitstatus = false;
         internal long limittime = 0;
-        private int[] recentutil = new int[300];
-        private int writeaddr = 0;
-        private bool data_ready = false;
         private bool ignoreTimeCheck = false;
-
         DateTime datetime_now = DateTime.Now;
-
         private string gitHubUseUrl = "https://github.com/njm2360/VRChatGPUTool#readme";
 
         private void Form1_Load(object sender, EventArgs e)
@@ -45,27 +41,12 @@ namespace VRCGPUTool.Form
             Icon = appIcon;
             Assembly assembly = Assembly.GetExecutingAssembly();
             FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            this.Text += fileVersionInfo.ProductVersion;
+            Text += fileVersionInfo.ProductVersion;
 
-            if (!File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
-            {
-                MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Application.Exit();
-            }
-
-            update.checkUpdateWorker.RunWorkerAsync();
-
-            for (int i = 0; i < recentutil.Length; i++)
-            {
-                recentutil[i] = -1;
-            }
-
+            nvsmi.CheckNvidiaSmi();
             nvsmi.InitGPU();
 
-            foreach (GpuStatus g in gpuStatuses)
-            {
-                GpuIndex.Items.Add(g.Name);
-            }
+            update.checkUpdateWorker.RunWorkerAsync();
             
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
@@ -191,47 +172,14 @@ namespace VRCGPUTool.Form
                 limittime = 0;
             }
 
-            const int AVE_DELTA = 20;
-
             if (AutoDetect.Checked == true && limitstatus == true)
             {
-                GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-                recentutil[writeaddr] = g.CoreLoad;
-                writeaddr++;
-                if(writeaddr >= 300)
-                {
-                    writeaddr = 0;
-                    data_ready = true;
-                }
-                if(data_ready == true)
-                {
-                    int max_util = 0;
-                    int min_util = 100;
-                    int[] ave_util = new int[(recentutil.Length / AVE_DELTA)];
+                bool res = autoLimit.CheckAutoLimit(gpuStatuses.ElementAt(GpuIndex.SelectedIndex));
 
-                    for(int i = 0;i < ave_util.Length; i++)
-                    {
-                        for (int s = 0; s < AVE_DELTA; s++)
-                        {
-                            ave_util[i] += recentutil[AVE_DELTA * i + s];
-                        }
-                        ave_util[i] /= AVE_DELTA;
-                        if(ave_util[i] > max_util)
-                        {
-                            max_util = ave_util[i];
-                        }
-                        if (ave_util[i] < min_util)
-                        {
-                            min_util = ave_util[i];
-                        }
-                    }
-
-                    if(max_util - min_util < Convert.ToInt16(GPUusageThreshold.Value) && !limitstatus)
-                    {
-                        Limit_Action(true,false);
-                    }
-                }
-                
+                if(res == true)
+                {
+                    Limit_Action(true, false);
+                }                
             }
 
             datetime_now = DateTime.Now;

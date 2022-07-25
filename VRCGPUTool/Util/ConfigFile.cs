@@ -22,11 +22,13 @@ namespace VRCGPUTool.Util
             public int BeginMinute { get; set; } = DateTime.Now.Minute;
             public int EndHour { get; set; } = DateTime.Now.Hour;
             public int EndMinute { get; set; } = DateTime.Now.Minute;
-            public int PowerLimitSetting { get; set; } = 100;
-            public int UnlimitPLSetting { get; set; } = 100;
+            public int PowerLimitSetting { get; set; } = 0;
+            public int UnlimitPLSetting { get; set; } = 0;
             public bool RestoreGPUPLDefault { get; set; } = false;
             public int SelectGPUIndex { get; set; } = 0;
         }
+
+        private bool isFirstCreate = false;
 
         private void CreateConfigFile()
         {
@@ -88,8 +90,12 @@ namespace VRCGPUTool.Util
                                 {
                                     MainObj.GpuIndex.SelectedIndex = 0;
                                 }
-                                MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
-                                MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
+
+                                if (!isFirstCreate)
+                                {
+                                    MainObj.PowerLimitValue.Value = config.PowerLimitSetting;
+                                    MainObj.SpecificPLValue.Value = config.UnlimitPLSetting;
+                                }
 
                                 if (config.RestoreGPUPLDefault == true)
                                 {
@@ -127,6 +133,7 @@ namespace VRCGPUTool.Util
             }
             else
             {
+                isFirstCreate = true;
                 CreateConfigFile();
                 LoadConfig();
             }

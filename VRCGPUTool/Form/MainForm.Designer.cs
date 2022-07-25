@@ -59,7 +59,6 @@
             this.GPUTotalPower = new System.Windows.Forms.Label();
             this.GPUCorePLValue = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.label4 = new System.Windows.Forms.Label();
             this.GPUMemoryClockValue = new System.Windows.Forms.Label();
             this.GPUCoreClockValue = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
@@ -142,7 +141,7 @@
             // ForceLimit
             // 
             this.ForceLimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ForceLimit.Location = new System.Drawing.Point(13, 433);
+            this.ForceLimit.Location = new System.Drawing.Point(12, 382);
             this.ForceLimit.Name = "ForceLimit";
             this.ForceLimit.Size = new System.Drawing.Size(205, 44);
             this.ForceLimit.TabIndex = 7;
@@ -153,7 +152,7 @@
             // ForceUnlimit
             // 
             this.ForceUnlimit.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ForceUnlimit.Location = new System.Drawing.Point(13, 485);
+            this.ForceUnlimit.Location = new System.Drawing.Point(12, 434);
             this.ForceUnlimit.Name = "ForceUnlimit";
             this.ForceUnlimit.Size = new System.Drawing.Size(205, 44);
             this.ForceUnlimit.TabIndex = 8;
@@ -166,7 +165,7 @@
             this.GpuIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.GpuIndex.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.GpuIndex.FormattingEnabled = true;
-            this.GpuIndex.Location = new System.Drawing.Point(357, 485);
+            this.GpuIndex.Location = new System.Drawing.Point(357, 472);
             this.GpuIndex.Name = "GpuIndex";
             this.GpuIndex.Size = new System.Drawing.Size(284, 28);
             this.GpuIndex.TabIndex = 9;
@@ -224,7 +223,7 @@
             this.LimitStatusText.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.LimitStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LimitStatusText.ForeColor = System.Drawing.Color.Red;
-            this.LimitStatusText.Location = new System.Drawing.Point(224, 454);
+            this.LimitStatusText.Location = new System.Drawing.Point(222, 409);
             this.LimitStatusText.Name = "LimitStatusText";
             this.LimitStatusText.Size = new System.Drawing.Size(127, 41);
             this.LimitStatusText.TabIndex = 16;
@@ -276,7 +275,7 @@
             this.groupBox1.Controls.Add(this.GPUusageThreshold);
             this.groupBox1.Controls.Add(this.label5);
             this.groupBox1.Controls.Add(this.AutoDetect);
-            this.groupBox1.Location = new System.Drawing.Point(355, 358);
+            this.groupBox1.Location = new System.Drawing.Point(355, 347);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(284, 119);
             this.groupBox1.TabIndex = 20;
@@ -414,7 +413,6 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.GPUMemoryClockValue);
             this.groupBox3.Controls.Add(this.GPUCoreClockValue);
             this.groupBox3.Controls.Add(this.GPUCorePLValue);
@@ -422,19 +420,10 @@
             this.groupBox3.Controls.Add(this.GPUCoreTemp);
             this.groupBox3.Location = new System.Drawing.Point(13, 165);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(336, 247);
+            this.groupBox3.Size = new System.Drawing.Size(336, 201);
             this.groupBox3.TabIndex = 29;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "GPUステータス";
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(27, 198);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(251, 28);
-            this.label4.TabIndex = 30;
-            this.label4.Text = "※GPU全体電力はコアの電力制限値より大きくなる\r\n場合があります（コア以外の消費電力を含むため）";
             // 
             // GPUMemoryClockValue
             // 
@@ -471,7 +460,7 @@
             this.groupBox4.Controls.Add(this.label2);
             this.groupBox4.Location = new System.Drawing.Point(355, 165);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(284, 187);
+            this.groupBox4.Size = new System.Drawing.Size(284, 176);
             this.groupBox4.TabIndex = 30;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "コア電力制限設定";
@@ -581,7 +570,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(661, 540);
+            this.ClientSize = new System.Drawing.Size(661, 507);
             this.Controls.Add(this.PowerLogShow);
             this.Controls.Add(this.functionsuggestion);
             this.Controls.Add(this.bugreport);
@@ -630,7 +619,6 @@
         private System.Windows.Forms.CheckBox AutoDetect;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label LimitStatusText;
-        private System.Windows.Forms.NumericUpDown GPUusageThreshold;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -639,7 +627,6 @@
         private System.Windows.Forms.Button LoadMinimumLimit;
         private System.Windows.Forms.Button LoadMaximumLimit;
         private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown CoreClockSetting;
         private System.Windows.Forms.CheckBox CoreLimitEnable;
         private System.Windows.Forms.GroupBox groupBox4;
@@ -663,6 +650,7 @@
         internal System.Windows.Forms.RadioButton SetGPUPLSpecific;
         internal System.Windows.Forms.RadioButton ResetGPUDefaultPL;
         private System.Windows.Forms.Button PowerLogShow;
+        internal System.Windows.Forms.NumericUpDown GPUusageThreshold;
     }
 }
 

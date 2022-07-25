@@ -196,8 +196,6 @@ namespace VRCGPUTool.Form
         {
             string datelabel = string.Format("{0:D4}年{1}月の電力使用履歴", dt.Year, dt.Month);
             LogMonthLabel.Text = datelabel;
-
-            int dayUsage = 0;
             double usageTotalMonth = 0.0;
             int Days = DateTime.DaysInMonth(dt.Year, dt.Month);
             UsageGraphMonth.ChartAreas["area"].AxisX.Maximum = Days;
@@ -211,7 +209,7 @@ namespace VRCGPUTool.Form
 
                 if (res == 0)
                 {
-                    dayUsage = 0;
+                    int dayUsage = 0;
                     for (int j = 0; j < 24; j++)
                     {
                         dayUsage += recentlog.rawdata.hourPowerLog[j];

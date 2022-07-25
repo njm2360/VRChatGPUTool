@@ -28,7 +28,7 @@ namespace VRCGPUTool
             "clocks.mem",
         };
 
-        public NvidiaSmi(Form.MainForm Main_Obj)
+        public NvidiaSmi(MainForm Main_Obj)
         {
             MainObj = Main_Obj;
         }
@@ -120,7 +120,7 @@ namespace VRCGPUTool
 
             DateTime datetime_now = DateTime.Now;
 
-            PowerLogging(datetime_now,g);
+            MainObj.gpuPlog.PowerLogging(datetime_now,g,MainObj.gpuPlog);
 
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))
             {
@@ -133,17 +133,13 @@ namespace VRCGPUTool
             }
         }
 
-        private void PowerLogging(DateTime dt,GpuStatus g)
+        internal void CheckNvidiaSmi()
         {
-            if (MainObj.gpuPlog.rawdata.logdate.Day != dt.Day)
+            if (!File.Exists(@"C:\Windows\system32\nvidia-smi.exe"))
             {
-                PowerLogFile plog = new PowerLogFile(MainObj.gpuPlog);
-                plog.SaveConfig(MainObj.gpuPlog.rawdata.logdate);
-                MainObj.gpuPlog = null;
-                MainObj.gpuPlog = new GPUPowerLog();
+                MessageBox.Show("nvidia-smiが見つかりません。\nNVIDIAグラフィックドライバが正しくインストールされていることを確認してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
             }
-
-            MainObj.gpuPlog.AddPowerDeltaData(dt.Hour, g.PowerDraw);
         }
         
         internal void InitGPU()
@@ -173,6 +169,10 @@ namespace VRCGPUTool
                             (int)double.Parse(v[10])
                         ));
                     }
+                }
+                foreach (GpuStatus g in MainObj.gpuStatuses)
+                {
+                    MainObj.GpuIndex.Items.Add(g.Name);
                 }
             }
             catch (FormatException)
