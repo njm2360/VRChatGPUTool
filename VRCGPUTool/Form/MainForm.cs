@@ -26,6 +26,7 @@ namespace VRCGPUTool.Form
         NvidiaSmi nvsmi;
         UpdateCheck update;
         AutoLimit autoLimit;
+        PowerHistory history;
         internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
@@ -312,8 +313,11 @@ namespace VRCGPUTool.Form
 
         private void PowerLogShow_Click(object sender, EventArgs e)
         {
-            PowerHistory history = new PowerHistory(this);
-            history.Show();
+            if ((history == null) || history.IsDisposed)
+            {
+                history = new PowerHistory(this);
+                history.Show();
+            }
         }
     }
 }
