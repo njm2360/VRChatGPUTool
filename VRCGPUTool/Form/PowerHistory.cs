@@ -94,6 +94,12 @@ namespace VRCGPUTool.Form
         {
             dispDataDay = dispDataDay.AddDays(1);
 
+            if(DateTime.Now.Date > PlogData.rawdata.logdate.Date)
+            {
+                MessageBox.Show("日付が変わりました。表示内容を更新するにはこのウィンドウを開きなおしてください", "情報");
+                return;
+            }
+
             if (DateTime.Now.Date == dispDataDay.Date)
             {
                 DrawHistoryDay(PlogData);
