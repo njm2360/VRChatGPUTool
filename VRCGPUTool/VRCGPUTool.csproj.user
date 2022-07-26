@@ -11,5 +11,8 @@
     <Compile Update="Form\PowerHistory.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Form\UnitPriceSetting.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

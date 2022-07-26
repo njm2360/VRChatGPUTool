@@ -40,6 +40,7 @@
             this.UsageGraphDay = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.TabRange = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.DaylyTotalPower = new System.Windows.Forms.Label();
             this.DataRefreshDate = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.DataRefresh = new System.Windows.Forms.Button();
@@ -47,14 +48,14 @@
             this.PreviousDayData = new System.Windows.Forms.Button();
             this.LogDateLabel = new System.Windows.Forms.Label();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.MonthlyTotalPower = new System.Windows.Forms.Label();
             this.DataRefreshDate2 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.NextMonthData = new System.Windows.Forms.Button();
             this.PreviousMonthData = new System.Windows.Forms.Button();
             this.LogMonthLabel = new System.Windows.Forms.Label();
             this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
-            this.MonthlyTotalPower = new System.Windows.Forms.Label();
-            this.DaylyTotalPower = new System.Windows.Forms.Label();
+            this.PowerPlanSetting = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.UsageGraphDay)).BeginInit();
             this.TabRange.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -111,6 +112,16 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "電力使用量【24時間】";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // DaylyTotalPower
+            // 
+            this.DaylyTotalPower.AutoSize = true;
+            this.DaylyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DaylyTotalPower.Location = new System.Drawing.Point(306, 7);
+            this.DaylyTotalPower.Name = "DaylyTotalPower";
+            this.DaylyTotalPower.Size = new System.Drawing.Size(132, 30);
+            this.DaylyTotalPower.TabIndex = 10;
+            this.DaylyTotalPower.Text = "合計:0.0kWh";
             // 
             // DataRefreshDate
             // 
@@ -187,6 +198,16 @@
             this.tabPage2.Text = "電力使用量【1カ月】";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // MonthlyTotalPower
+            // 
+            this.MonthlyTotalPower.AutoSize = true;
+            this.MonthlyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.MonthlyTotalPower.Location = new System.Drawing.Point(306, 7);
+            this.MonthlyTotalPower.Name = "MonthlyTotalPower";
+            this.MonthlyTotalPower.Size = new System.Drawing.Size(132, 30);
+            this.MonthlyTotalPower.TabIndex = 9;
+            this.MonthlyTotalPower.Text = "合計:0.0kWh";
+            // 
             // DataRefreshDate2
             // 
             this.DataRefreshDate2.AutoSize = true;
@@ -256,31 +277,22 @@
             title2.Text = "電力使用量(１カ月)";
             this.UsageGraphMonth.Titles.Add(title2);
             // 
-            // MonthlyTotalPower
+            // PowerPlanSetting
             // 
-            this.MonthlyTotalPower.AutoSize = true;
-            this.MonthlyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.MonthlyTotalPower.Location = new System.Drawing.Point(306, 7);
-            this.MonthlyTotalPower.Name = "MonthlyTotalPower";
-            this.MonthlyTotalPower.Size = new System.Drawing.Size(132, 30);
-            this.MonthlyTotalPower.TabIndex = 9;
-            this.MonthlyTotalPower.Text = "合計:0.0kWh";
-            // 
-            // DaylyTotalPower
-            // 
-            this.DaylyTotalPower.AutoSize = true;
-            this.DaylyTotalPower.Font = new System.Drawing.Font("Yu Gothic UI", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.DaylyTotalPower.Location = new System.Drawing.Point(306, 7);
-            this.DaylyTotalPower.Name = "DaylyTotalPower";
-            this.DaylyTotalPower.Size = new System.Drawing.Size(132, 30);
-            this.DaylyTotalPower.TabIndex = 10;
-            this.DaylyTotalPower.Text = "合計:0.0kWh";
+            this.PowerPlanSetting.Location = new System.Drawing.Point(708, 513);
+            this.PowerPlanSetting.Name = "PowerPlanSetting";
+            this.PowerPlanSetting.Size = new System.Drawing.Size(106, 25);
+            this.PowerPlanSetting.TabIndex = 11;
+            this.PowerPlanSetting.Text = "電気代設定";
+            this.PowerPlanSetting.UseVisualStyleBackColor = true;
+            this.PowerPlanSetting.Click += new System.EventHandler(this.PowerPlanSetting_Click);
             // 
             // PowerHistory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(850, 519);
+            this.ClientSize = new System.Drawing.Size(850, 549);
+            this.Controls.Add(this.PowerPlanSetting);
             this.Controls.Add(this.TabRange);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -320,5 +332,6 @@
         private System.Windows.Forms.DataVisualization.Charting.Chart UsageGraphMonth;
         private System.Windows.Forms.Label DaylyTotalPower;
         private System.Windows.Forms.Label MonthlyTotalPower;
+        private System.Windows.Forms.Button PowerPlanSetting;
     }
 }

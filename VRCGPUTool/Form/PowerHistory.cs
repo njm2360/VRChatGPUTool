@@ -19,6 +19,7 @@ namespace VRCGPUTool.Form
         }
 
         GPUPowerLog PlogData;
+        UnitPriceSetting pricesetting;
 
         private DateTime dispDataDay;
         private DateTime dispDataMonth;
@@ -267,6 +268,12 @@ namespace VRCGPUTool.Form
             {
                 DrawHistoryMonth(dispDataMonth, true);
             }
+        }
+
+        private void PowerPlanSetting_Click(object sender, EventArgs e)
+        {
+            pricesetting = new UnitPriceSetting();
+            pricesetting.ShowDialog();
         }
     }
 }
