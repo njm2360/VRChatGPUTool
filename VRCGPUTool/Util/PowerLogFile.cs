@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.IO;
 using System.Windows.Forms;
+using VRCGPUTool.Form;
 
 namespace VRCGPUTool.Util
 {
@@ -18,8 +19,6 @@ namespace VRCGPUTool.Util
         {
             DateTime dt = DateTime.Now;
 
-            //gpupowerlog.rawdata = null;
-
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
 
             try
@@ -35,7 +34,7 @@ namespace VRCGPUTool.Util
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("設定ファイル作成時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("電力ログファイル作成時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
             }
         }
@@ -72,10 +71,14 @@ namespace VRCGPUTool.Util
             }
         }
 
-        internal void SaveConfig()
+        internal void SavePowerLog(bool isDayBefore)
         {
-            //日付変わるときに保存
-            DateTime dt = DateTime.Now;
+            DateTime dt = DateTime.Now.Date;
+
+            if (isDayBefore)
+            {
+                dt = dt.AddDays(-1);
+            }
 
             string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
 
@@ -89,34 +92,10 @@ namespace VRCGPUTool.Util
                 {
                     sw.WriteLine(logjson);
                 }
-
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("設定ファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(-1);
-            }
-        }
-
-        internal void SaveConfig(DateTime dt)
-        {
-            string fName = string.Format("powerlog/powerlog_{0:D4}{1:D2}{2:D2}.json", dt.Year, dt.Month, dt.Day);
-
-            try
-            {
-                GPUPowerLog plog = new GPUPowerLog();
-
-                string logjson = JsonSerializer.Serialize(gpupowerlog.rawdata);
-
-                using (StreamWriter sw = new StreamWriter(fName))
-                {
-                    sw.WriteLine(logjson);
-                }
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(string.Format("設定ファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(string.Format("電力ログファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
             }
         }

@@ -120,7 +120,7 @@ namespace VRCGPUTool
 
             DateTime datetime_now = DateTime.Now;
 
-            MainObj.gpuPlog.PowerLogging(datetime_now,g,MainObj.gpuPlog);
+            MainObj.gpuPlog.PowerLogging(datetime_now,g,MainObj.gpuPlog,MainObj);
 
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))
             {

@@ -175,9 +175,7 @@ namespace VRCGPUTool.Form
 
             if (AutoDetect.Checked == true && limitstatus == true)
             {
-                bool res = autoLimit.CheckAutoLimit(gpuStatuses.ElementAt(GpuIndex.SelectedIndex));
-
-                if(res == true)
+                if(autoLimit.CheckAutoLimit(gpuStatuses.ElementAt(GpuIndex.SelectedIndex)))
                 {
                     Limit_Action(true, false);
                 }                
@@ -269,7 +267,7 @@ namespace VRCGPUTool.Form
             config.SaveConfig();
 
             PowerLogFile plog = new PowerLogFile(gpuPlog);
-            plog.SaveConfig();
+            plog.SavePowerLog(false);
         }
 
         private void ResetClockSetting_Click(object sender, EventArgs e)
