@@ -16,10 +16,15 @@ namespace VRCGPUTool.Form
             PlogData = MainObj.gpuPlog;
             dispDataDay = DateTime.Today;
             dispDataMonth = DateTime.Today;
+            setting = new Setting();
+            setting.LoadProfile(setting);
         }
 
-        GPUPowerLog PlogData;
+        readonly Setting setting;
+        readonly GPUPowerLog PlogData;
         UnitPriceSetting pricesetting;
+
+        int[] hourOfPrice = new int[24];
 
         private DateTime dispDataDay;
         private DateTime dispDataMonth;
@@ -272,8 +277,27 @@ namespace VRCGPUTool.Form
 
         private void PowerPlanSetting_Click(object sender, EventArgs e)
         {
-            pricesetting = new UnitPriceSetting();
+            pricesetting = new UnitPriceSetting(setting);
             pricesetting.ShowDialog();
+
+            int unitP;
+            int lastread = 23;
+            for (int i = (setting.pfData.ProfileCount - 1); i >= 0; i--)
+            {
+                for (int j = 23; j >= 0; j--)
+                {
+                    if (j == setting.pfData.SplitTime[i])
+                    {
+                        unitP = setting.pfData.Unit[i];
+                        for (int k = lastread; k >= j; k--)
+                        {
+                            hourOfPrice[k] = unitP;
+                        }
+                        lastread = --j;
+                        break;
+                    }
+                }
+            }
         }
     }
 }
