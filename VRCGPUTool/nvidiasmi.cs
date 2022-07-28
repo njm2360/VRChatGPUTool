@@ -3,16 +3,15 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using VRCGPUTool.Form;
-using VRCGPUTool.Util;
 
 namespace VRCGPUTool
 {
-    partial class NvidiaSmi 
+    partial class NvidiaSmi
     {
         public MainForm MainObj;
+        internal BackgroundWorker NvsmiWorker;
 
         internal string[] queryColumns = {
             "name",
@@ -31,16 +30,16 @@ namespace VRCGPUTool
         public NvidiaSmi(MainForm Main_Obj)
         {
             MainObj = Main_Obj;
+            InitializeNvsmiWorker();
         }
 
-        internal void InitializeNvsmiWorker()
+        private void InitializeNvsmiWorker()
         {
             NvsmiWorker = new BackgroundWorker();
             NvsmiWorker.DoWork += new DoWorkEventHandler(NvsmiWorker_DoWork);
             NvsmiWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(NvsmiWorker_RunWorkerCompleted);
         }
 
-        internal BackgroundWorker NvsmiWorker;
         internal string nvidia_smi(string param)
         {
             Console.WriteLine(param);
@@ -120,7 +119,7 @@ namespace VRCGPUTool
 
             DateTime datetime_now = DateTime.Now;
 
-            MainObj.gpuPlog.PowerLogging(datetime_now,g,MainObj.gpuPlog,MainObj);
+            MainObj.gpuPlog.PowerLogging(datetime_now, g, MainObj.gpuPlog, MainObj);
 
             if ((MainObj.PowerLimitValue.Value != g.PLimit) && MainObj.limitstatus && (MainObj.limittime > 2))
             {
@@ -141,7 +140,7 @@ namespace VRCGPUTool
                 Application.Exit();
             }
         }
-        
+
         internal void InitGPU()
         {
             string query = string.Join(",", queryColumns);

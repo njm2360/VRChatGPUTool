@@ -7,20 +7,20 @@ namespace VRCGPUTool.Form
 {
     public partial class UnitPriceSetting : System.Windows.Forms.Form
     {
-        public UnitPriceSetting(Setting setting)
+        public UnitPriceSetting(PowerProfile powerProfile)
         {
             InitializeComponent();
-            this.setting = setting;
+            this.powerProfile = powerProfile;
         }
 
-        readonly Setting setting;
+        readonly PowerProfile powerProfile;
 
         const int margin = 30;
 
-        DateTimePicker[] dtPicker = new DateTimePicker[Setting.maxPf];
-        TextBox[] textBox = new TextBox[Setting.maxPf];
-        Label[] label1 = new Label[Setting.maxPf];
-        Label[] label2 = new Label[Setting.maxPf];
+        DateTimePicker[] dtPicker = new DateTimePicker[PowerProfile.maxPf];
+        TextBox[] textBox = new TextBox[PowerProfile.maxPf];
+        Label[] label1 = new Label[PowerProfile.maxPf];
+        Label[] label2 = new Label[PowerProfile.maxPf];
 
         private int sbCount = 0;
 
@@ -36,14 +36,14 @@ namespace VRCGPUTool.Form
             {
                 SettingRefresh(res);
             }
-            setting.SaveProfileFile();
+            powerProfile.SaveProfileFile();
             Redraw(res);
         }
 
         private int InputValueCheck()
         {
-            int plancount = Setting.maxPf;
-            for (int i = 0; i < Setting.maxPf; i++)
+            int plancount = PowerProfile.maxPf;
+            for (int i = 0; i < PowerProfile.maxPf; i++)
             {
                 if (textBox[i].Text == "")
                 {
@@ -73,18 +73,18 @@ namespace VRCGPUTool.Form
 
         private void SettingRefresh(int plancount)
         {
-            setting.pfData.ProfileCount = plancount;
-            for (int i = 0; i < Setting.maxPf; i++)
+            powerProfile.pfData.ProfileCount = plancount;
+            for (int i = 0; i < PowerProfile.maxPf; i++)
             {
                 if (i < plancount)
                 {
-                    setting.pfData.SplitTime[i] = dtPicker[i].Value.Hour;
-                    setting.pfData.Unit[i] = Convert.ToInt32(textBox[i].Text);
+                    powerProfile.pfData.SplitTime[i] = dtPicker[i].Value.Hour;
+                    powerProfile.pfData.Unit[i] = Convert.ToInt32(textBox[i].Text);
                 }
                 else
                 {
-                    setting.pfData.SplitTime[i] = 0;
-                    setting.pfData.Unit[i] = 0;
+                    powerProfile.pfData.SplitTime[i] = 0;
+                    powerProfile.pfData.Unit[i] = 0;
                 }
             }
         }
@@ -100,7 +100,7 @@ namespace VRCGPUTool.Form
             groupBox1.Text = "電気代設定(時間別)";
             groupBox1.SuspendLayout();
 
-            for (int i = 0; i < Setting.maxPf; i++)
+            for (int i = 0; i < PowerProfile.maxPf; i++)
             {
                 dtPicker[i] = new DateTimePicker();
                 dtPicker[i].CustomFormat = "H";
@@ -110,9 +110,9 @@ namespace VRCGPUTool.Form
                 dtPicker[i].Name = "Time";
                 dtPicker[i].ShowUpDown = true;
                 dtPicker[i].Size = new Size(40, 20);
-                if (setting.pfData.ProfileCount > i)
+                if (powerProfile.pfData.ProfileCount > i)
                 {
-                    dtPicker[i].Value = new DateTime(2020, 1, 1, setting.pfData.SplitTime[i], 0, 0);
+                    dtPicker[i].Value = new DateTime(2020, 1, 1, powerProfile.pfData.SplitTime[i], 0, 0);
                 }
                 dtPicker[i].ValueChanged += new EventHandler(UnitPriceSetting_ValueChanged);
                 groupBox1.Controls.Add(dtPicker[i]);
@@ -121,9 +121,9 @@ namespace VRCGPUTool.Form
                 textBox[i].Location = new Point(85, 25 + i * margin);
                 textBox[i].Name = "Pr";
                 textBox[i].Size = new Size(30, 20);
-                if (setting.pfData.ProfileCount > i)
+                if (powerProfile.pfData.ProfileCount > i)
                 {
-                    textBox[i].Text = setting.pfData.Unit[i].ToString();
+                    textBox[i].Text = powerProfile.pfData.Unit[i].ToString();
                 }
                 groupBox1.Controls.Add(textBox[i]);
 
@@ -157,7 +157,7 @@ namespace VRCGPUTool.Form
             {
                 return;
             }
-            setting.SaveProfileFile();
+            powerProfile.SaveProfileFile();
             Redraw(res);
         }
 
@@ -213,7 +213,7 @@ namespace VRCGPUTool.Form
 
         private void Redraw_Form(object sender, PaintEventArgs e)
         {
-            Redraw(setting.pfData.ProfileCount);
+            Redraw(powerProfile.pfData.ProfileCount);
         }
     }
 }

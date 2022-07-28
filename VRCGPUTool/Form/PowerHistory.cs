@@ -16,12 +16,12 @@ namespace VRCGPUTool.Form
             PlogData = MainObj.gpuPlog;
             dispDataDay = DateTime.Today;
             dispDataMonth = DateTime.Today;
-            setting = new Setting();
-            setting.LoadProfile(setting);
+            powerPofile = new PowerProfile();
+            powerPofile.LoadProfile(powerPofile);
         }
 
-        readonly Setting setting;
         readonly GPUPowerLog PlogData;
+        readonly PowerProfile powerPofile;
         UnitPriceSetting pricesetting;
 
         int[] hourOfPrice = new int[24];
@@ -57,14 +57,19 @@ namespace VRCGPUTool.Form
             };
 
             double usageTotalDay = 0.0;
+            double priceOfDay = 0.0;
 
             for (int i = 0; i < 24; i++)
             {
                 seriesColumn.Points.Add(new DataPoint(i, (double)dispdata.rawdata.hourPowerLog[i] / 3600.0));
                 usageTotalDay += dispdata.rawdata.hourPowerLog[i];
+                priceOfDay += hourOfPrice[i] * dispdata.rawdata.hourPowerLog[i];
             }
 
             usageTotalDay /= (3600.0 * 1000.0); //Kwh
+            priceOfDay /= (3600.0 * 1000.0);
+
+            //---.Text = string.Format({0:f2},proceOfDay);
             DaylyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalDay);
 
             ChartArea area = new ChartArea("area");
@@ -100,7 +105,7 @@ namespace VRCGPUTool.Form
         {
             dispDataDay = dispDataDay.AddDays(1);
 
-            if(DateTime.Now.Date > PlogData.rawdata.logdate.Date)
+            if (DateTime.Now.Date > PlogData.rawdata.logdate.Date)
             {
                 MessageBox.Show("日付が変わりました。表示内容を更新するにはこのウィンドウを開きなおしてください", "情報");
                 return;
@@ -171,10 +176,12 @@ namespace VRCGPUTool.Form
 
             int dayUsage = 0;
             double usageTotalMonth = 0.0;
+            double priceOfMonth = 0.0;
 
             for (int i = 0; i < 24; i++)
             {
                 dayUsage += PlogData.rawdata.hourPowerLog[i];
+                priceOfMonth += hourOfPrice[i] * PlogData.rawdata.hourPowerLog[i];
             }
             seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day, (double)dayUsage / 3600.0));
             usageTotalMonth += dayUsage;
@@ -195,6 +202,7 @@ namespace VRCGPUTool.Form
                     for (int j = 0; j < 24; j++)
                     {
                         dayUsage += recentlog.rawdata.hourPowerLog[j];
+                        priceOfMonth += hourOfPrice[i] * recentlog.rawdata.hourPowerLog[i];
                     }
                     seriesColumn.Points.Add(new DataPoint(i, (double)dayUsage / 3600.0));
                     usageTotalMonth += dayUsage;
@@ -202,6 +210,8 @@ namespace VRCGPUTool.Form
             }
             usageTotalMonth /= (3600.0 * 1000.0); //Kwh
             MonthlyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalMonth);
+            priceOfMonth /= (3600.0 * 1000.0);
+            //.Text
         }
 
         private void DataPointAddPreviousMonth(DateTime dt, Series seriesColumn)
@@ -265,7 +275,7 @@ namespace VRCGPUTool.Form
 
         private void TabChanged(object sender, EventArgs e)
         {
-            if(TabRange.SelectedIndex == 0)
+            if (TabRange.SelectedIndex == 0)
             {
                 DrawHistoryDay(PlogData);
             }
@@ -277,18 +287,18 @@ namespace VRCGPUTool.Form
 
         private void PowerPlanSetting_Click(object sender, EventArgs e)
         {
-            pricesetting = new UnitPriceSetting(setting);
+            pricesetting = new UnitPriceSetting(powerPofile);
             pricesetting.ShowDialog();
 
             int unitP;
             int lastread = 23;
-            for (int i = (setting.pfData.ProfileCount - 1); i >= 0; i--)
+            for (int i = (powerPofile.pfData.ProfileCount - 1); i >= 0; i--)
             {
                 for (int j = 23; j >= 0; j--)
                 {
-                    if (j == setting.pfData.SplitTime[i])
+                    if (j == powerPofile.pfData.SplitTime[i])
                     {
-                        unitP = setting.pfData.Unit[i];
+                        unitP = powerPofile.pfData.Unit[i];
                         for (int k = lastread; k >= j; k--)
                         {
                             hourOfPrice[k] = unitP;
@@ -296,6 +306,36 @@ namespace VRCGPUTool.Form
                         lastread = --j;
                         break;
                     }
+                }
+            }
+        }
+
+        private void SaveAction(object sender, EventArgs e)
+        {
+            PowerLogCsv logcsv = new PowerLogCsv(MainObj,this);
+            if (TabRange.SelectedIndex == 0)
+            {
+                if (DateTime.Now.Date == dispDataDay.Date)
+                {
+                    logcsv.ExportCsvDay(PlogData);
+                }
+                else
+                {
+                    GPUPowerLog plog = new GPUPowerLog();
+                    PowerLogFile plogfile = new PowerLogFile(plog);
+                    plogfile.LoadPowerLog(dispDataDay, true);
+                    logcsv.ExportCsvDay(plog);
+                }
+            }
+            else
+            {
+                if (DateTime.Now.Year == dispDataMonth.Year && DateTime.Now.Month == dispDataMonth.Month)
+                {
+                    logcsv.ExportCsvMonth(dispDataMonth, true);
+                }
+                else
+                {
+                    logcsv.ExportCsvMonth(dispDataMonth, false);
                 }
             }
         }

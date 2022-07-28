@@ -16,27 +16,27 @@ namespace VRCGPUTool.Form
         {
             InitializeComponent();
             update = new UpdateCheck();
-            update.InitializeBackgroundWorker();
             nvsmi = new NvidiaSmi(this);
-            nvsmi.InitializeNvsmiWorker();
             gpuPlog = new GPUPowerLog();
             autoLimit = new AutoLimit(this);
         }
 
-        NvidiaSmi nvsmi;
-        UpdateCheck update;
-        AutoLimit autoLimit;
-        PowerHistory history;
+        private NvidiaSmi nvsmi;
+        private UpdateCheck update;
+        private DataProvide dataProvide;
+        private AutoLimit autoLimit;
+        private PowerHistory history;
         internal GPUPowerLog gpuPlog;
         internal List<GpuStatus> gpuStatuses = new List<GpuStatus>();
 
         internal bool limitstatus = false;
-        internal long limittime = 0;
+        internal bool allowDataProvide = false;
+        internal string guid = "";
         private bool ignoreTimeCheck = false;
-        DateTime datetime_now = DateTime.Now;
-        private string gitHubUseUrl = "https://github.com/njm2360/VRChatGPUTool#readme";
+        internal int limittime = 0;
+        private DateTime datetime_now = DateTime.Now;
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             Icon appIcon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
             Icon = appIcon;
@@ -48,24 +48,30 @@ namespace VRCGPUTool.Form
             nvsmi.InitGPU();
 
             update.checkUpdateWorker.RunWorkerAsync();
-            
+
             BeginTime.Value = DateTime.Now.AddMinutes(15);
             EndTime.Value = DateTime.Now.AddMinutes(30);
 
             ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
 
+            PowerLogFile plog = new PowerLogFile(gpuPlog);
+            plog.LoadPowerLog(DateTime.Now, false);
+
             SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
             PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
             GPUCorePLValue.Text = "GPUコア電力制限: " + gpuStatuses.First().PLimit.ToString() + "W";
 
-            PowerLogFile plog = new PowerLogFile(gpuPlog);
-            plog.LoadPowerLog(DateTime.Now,false);
+            if (allowDataProvide)
+            {
+                dataProvide = new DataProvide();
+                dataProvide.InitializeRepo(this);
+            }
 
             GPUreadTimer.Enabled = true;
         }
 
-        internal void Limit_Action(bool limit,bool expection)
+        internal void Limit_Action(bool limit, bool expection)
         {
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
             if (limit == true)
@@ -107,9 +113,9 @@ namespace VRCGPUTool.Form
                     nvsmi.nvidia_smi("-rgc --id=" + g.UUID);
                 }
 
-                if(expection == false)
+                if (expection == false)
                 {
-                    if(ResetGPUDefaultPL.Checked == true)
+                    if (ResetGPUDefaultPL.Checked == true)
                     {
                         nvsmi.nvidia_smi("-pl " + g.PLimitDefault.ToString() + " --id=" + g.UUID);
                         GPUCorePLValue.Text = "GPUコア電力制限: " + g.PLimitDefault.ToString() + "W";
@@ -119,7 +125,7 @@ namespace VRCGPUTool.Form
                         nvsmi.nvidia_smi("-pl " + SpecificPLValue.Value.ToString() + " --id=" + g.UUID);
                         GPUCorePLValue.Text = "GPUコア電力制限: " + SpecificPLValue.Value.ToString() + "W";
                     }
-                }                
+                }
             }
         }
 
@@ -131,7 +137,7 @@ namespace VRCGPUTool.Form
                 if (res == DialogResult.OK)
                 {
                     ignoreTimeCheck = true;
-                    EndTime.Value = DateTime.Now.AddMinutes(15);
+                    EndTime.Value = DateTime.Now.AddMinutes(60);
                     Limit_Action(true, false);
                 }
             }
@@ -146,7 +152,7 @@ namespace VRCGPUTool.Form
                 if (res == DialogResult.OK)
                 {
                     ignoreTimeCheck = true;
-                    BeginTime.Value = DateTime.Now.AddMinutes(15);
+                    BeginTime.Value = DateTime.Now.AddMinutes(60);
                     Limit_Action(false, false);
                 }
             }
@@ -175,18 +181,18 @@ namespace VRCGPUTool.Form
 
             if (AutoDetect.Checked == true && limitstatus == true)
             {
-                if(autoLimit.CheckAutoLimit(gpuStatuses.ElementAt(GpuIndex.SelectedIndex)))
+                if (autoLimit.CheckAutoLimit(gpuStatuses.ElementAt(GpuIndex.SelectedIndex)))
                 {
                     Limit_Action(true, false);
-                }                
+                }
             }
 
             datetime_now = DateTime.Now;
-            if(datetime_now.Hour == BeginTime.Value.Hour && datetime_now.Minute == BeginTime.Value.Minute && !limitstatus)
+            if (datetime_now.Hour == BeginTime.Value.Hour && datetime_now.Minute == BeginTime.Value.Minute && !limitstatus)
             {
                 Limit_Action(true, false);
             }
-            if(datetime_now.Hour == EndTime.Value.Hour && datetime_now.Minute == EndTime.Value.Minute && limitstatus)
+            if (datetime_now.Hour == EndTime.Value.Hour && datetime_now.Minute == EndTime.Value.Minute && limitstatus)
             {
                 AutoDetect.Checked = false;
 
@@ -197,12 +203,12 @@ namespace VRCGPUTool.Form
         private void PowerLimitSettingChanged(object sender, EventArgs e)
         {
             GpuStatus g = gpuStatuses.ElementAt(GpuIndex.SelectedIndex);
-            if(PowerLimitValue.Value > g.PLimitMax)
+            if (PowerLimitValue.Value > g.PLimitMax)
             {
-                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最大電力制限は" + g.PLimitMax + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 PowerLimitValue.Value = g.PLimitMax;
             }
-            if(PowerLimitValue.Value < g.PLimitMin)
+            if (PowerLimitValue.Value < g.PLimitMin)
             {
                 MessageBox.Show("電力制限値が設定可能な範囲外です。\n" + g.Name + "の最小電力制限は" + g.PLimitMin + "Wです。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 PowerLimitValue.Value = g.PLimitMin;
@@ -224,9 +230,10 @@ namespace VRCGPUTool.Form
             }
         }
 
+
         private void SetGPUPLSpecific_CheckedChanged(object sender, EventArgs e)
         {
-            if(SetGPUPLSpecific.Checked == true)
+            if (SetGPUPLSpecific.Checked == true)
             {
                 SpecificPLValue.Enabled = true;
             }
@@ -256,9 +263,9 @@ namespace VRCGPUTool.Form
 
         private void AppClosing(object sender, FormClosingEventArgs e)
         {
-            if(limitstatus == true)
+            if (limitstatus == true)
             {
-                MessageBox.Show("アプリを終了する前に制限を解除してください","エラー",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("アプリを終了する前に制限を解除してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
                 return;
             }
@@ -279,19 +286,12 @@ namespace VRCGPUTool.Form
 
         private void ShowHowToUse(object sender, EventArgs e)
         {
-            Process.Start(new ProcessStartInfo { FileName = gitHubUseUrl, UseShellExecute = true });
-        }
-
-        private void Reporter(object sender, EventArgs e)
-        {
-            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag));
-            
-            report.ShowDialog();
+            Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
         }
 
         private void SettingTimeChange(object sender, EventArgs e)
         {
-            if ((BeginTime.Value.Hour == EndTime.Value.Hour) && (BeginTime.Value.Minute == EndTime.Value.Minute ))
+            if ((BeginTime.Value.Hour == EndTime.Value.Hour) && (BeginTime.Value.Minute == EndTime.Value.Minute))
             {
                 if (!ignoreTimeCheck)
                 {
@@ -307,6 +307,12 @@ namespace VRCGPUTool.Form
                     ignoreTimeCheck = false;
                 }
             }
+        }
+
+        private void Reporter(object sender, EventArgs e)
+        {
+            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag));
+            report.ShowDialog();
         }
 
         private void PowerLogShow_Click(object sender, EventArgs e)

@@ -115,6 +115,7 @@
             // 
             // PowerLimitValue
             // 
+            this.PowerLimitValue.Tag = 1;
             this.PowerLimitValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PowerLimitValue.Location = new System.Drawing.Point(34, 56);
             this.PowerLimitValue.Maximum = new decimal(new int[] {
@@ -478,6 +479,7 @@
             // SpecificPLValue
             // 
             this.SpecificPLValue.Enabled = false;
+            this.SpecificPLValue.Tag = 2;
             this.SpecificPLValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SpecificPLValue.Location = new System.Drawing.Point(173, 148);
             this.SpecificPLValue.Maximum = new decimal(new int[] {
@@ -588,9 +590,9 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "VRChat向け　GPU電力制限ツール Ver ";
+            this.Text = "VRChat向け GPU電力制限ツール Ver ";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.AppClosing);
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).EndInit();
             this.groupBox1.ResumeLayout(false);

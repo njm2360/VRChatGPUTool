@@ -28,14 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title1 = new System.Windows.Forms.DataVisualization.Charting.Title();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title3 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.Title title4 = new System.Windows.Forms.DataVisualization.Charting.Title();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PowerHistory));
             this.UsageGraphDay = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.TabRange = new System.Windows.Forms.TabControl();
@@ -56,6 +56,8 @@
             this.LogMonthLabel = new System.Windows.Forms.Label();
             this.UsageGraphMonth = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.PowerPlanSetting = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.UsageGraphDay)).BeginInit();
             this.TabRange.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -65,24 +67,24 @@
             // 
             // UsageGraphDay
             // 
-            chartArea1.AxisX.MajorGrid.Interval = 1D;
-            chartArea1.AxisX.MajorTickMark.Interval = 1D;
-            chartArea1.Name = "ChartArea1";
-            this.UsageGraphDay.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.UsageGraphDay.Legends.Add(legend1);
+            chartArea3.AxisX.MajorGrid.Interval = 1D;
+            chartArea3.AxisX.MajorTickMark.Interval = 1D;
+            chartArea3.Name = "ChartArea1";
+            this.UsageGraphDay.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.UsageGraphDay.Legends.Add(legend3);
             this.UsageGraphDay.Location = new System.Drawing.Point(6, 40);
             this.UsageGraphDay.Name = "UsageGraphDay";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.UsageGraphDay.Series.Add(series1);
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Series1";
+            this.UsageGraphDay.Series.Add(series3);
             this.UsageGraphDay.Size = new System.Drawing.Size(782, 377);
             this.UsageGraphDay.TabIndex = 0;
             this.UsageGraphDay.Text = "chart1";
-            title1.Name = "Title1";
-            title1.Text = "電力使用量(24時間)";
-            this.UsageGraphDay.Titles.Add(title1);
+            title3.Name = "Title1";
+            title3.Text = "電力使用量(24時間)";
+            this.UsageGraphDay.Titles.Add(title3);
             // 
             // TabRange
             // 
@@ -258,24 +260,24 @@
             // 
             // UsageGraphMonth
             // 
-            chartArea2.AxisX.MajorGrid.Interval = 1D;
-            chartArea2.AxisX.MajorTickMark.Interval = 1D;
-            chartArea2.Name = "ChartArea1";
-            this.UsageGraphMonth.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.UsageGraphMonth.Legends.Add(legend2);
+            chartArea4.AxisX.MajorGrid.Interval = 1D;
+            chartArea4.AxisX.MajorTickMark.Interval = 1D;
+            chartArea4.Name = "ChartArea1";
+            this.UsageGraphMonth.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.UsageGraphMonth.Legends.Add(legend4);
             this.UsageGraphMonth.Location = new System.Drawing.Point(6, 40);
             this.UsageGraphMonth.Name = "UsageGraphMonth";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.UsageGraphMonth.Series.Add(series2);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.UsageGraphMonth.Series.Add(series4);
             this.UsageGraphMonth.Size = new System.Drawing.Size(782, 377);
             this.UsageGraphMonth.TabIndex = 1;
             this.UsageGraphMonth.Text = "chart1";
-            title2.Name = "Title1";
-            title2.Text = "電力使用量(１カ月)";
-            this.UsageGraphMonth.Titles.Add(title2);
+            title4.Name = "Title1";
+            title4.Text = "電力使用量(１カ月)";
+            this.UsageGraphMonth.Titles.Add(title4);
             // 
             // PowerPlanSetting
             // 
@@ -287,11 +289,22 @@
             this.PowerPlanSetting.UseVisualStyleBackColor = true;
             this.PowerPlanSetting.Click += new System.EventHandler(this.PowerPlanSetting_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(572, 513);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(106, 25);
+            this.button1.TabIndex = 12;
+            this.button1.Text = "CSVエクスポート";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.SaveAction);
+            // 
             // PowerHistory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(850, 549);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.PowerPlanSetting);
             this.Controls.Add(this.TabRange);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -333,5 +346,7 @@
         private System.Windows.Forms.Label DaylyTotalPower;
         private System.Windows.Forms.Label MonthlyTotalPower;
         private System.Windows.Forms.Button PowerPlanSetting;
+        private System.Windows.Forms.Button button1;
+        internal System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }

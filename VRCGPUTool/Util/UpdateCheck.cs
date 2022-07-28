@@ -12,16 +12,21 @@ namespace VRCGPUTool.Util
 {
     partial class UpdateCheck
     {
-        internal void InitializeBackgroundWorker()
+        internal BackgroundWorker checkUpdateWorker;
+
+        const string boothUrl = "https://njm2360.booth.pm/items/3993173";
+
+        public UpdateCheck()
+        {
+            InitializeBackgroundWorker();
+        }
+
+        private void InitializeBackgroundWorker()
         {
             checkUpdateWorker = new BackgroundWorker();
             checkUpdateWorker.DoWork += new DoWorkEventHandler(checkUpdateWorker_DoWork);
             checkUpdateWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(checkUpdateWorker_RunWorkerCompleted);
         }
-
-        internal BackgroundWorker checkUpdateWorker;
-
-        const string boothUrl = "https://njm2360.booth.pm/items/3993173";
 
         private void checkUpdateWorker_DoWork(object sender, DoWorkEventArgs e)
         {
@@ -74,7 +79,7 @@ namespace VRCGPUTool.Util
                 var res = MessageBox.Show("アップデートがあります\n\n最新バージョンは " + tag_name + " です\n\n改定内容:\n" + body + "\n\nアップデートページ(Booth)を開きますか?", "アップデート", MessageBoxButtons.OKCancel);
                 if (res == DialogResult.OK)
                 {
-                    Process.Start(new ProcessStartInfo { FileName = boothUrl , UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo { FileName = boothUrl, UseShellExecute = true });
                 }
             }
         }

@@ -5,7 +5,7 @@ using System.Windows.Forms;
 
 namespace VRCGPUTool.Util
 {
-    public class Setting
+    public class PowerProfile
     {
         const string ProfileFileName = "profile.json";
 
@@ -13,7 +13,7 @@ namespace VRCGPUTool.Util
 
         internal Profile pfData;
 
-        public Setting()
+        public PowerProfile()
         {
             pfData = new Profile();
         }
@@ -41,12 +41,12 @@ namespace VRCGPUTool.Util
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("プロファイル作成時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"プロファイル作成時にエラーが発生しました\n\n{ex.Message.ToString()}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
             }
         }
 
-        internal void LoadProfile(Setting profile)
+        internal void LoadProfile(PowerProfile profile)
         {
             if (File.Exists(ProfileFileName))
             {
@@ -105,7 +105,7 @@ namespace VRCGPUTool.Util
             }
             catch (Exception ex)
             {
-                MessageBox.Show(string.Format("プロファイル更新時にエラーが発生しました\n\n{0}", ex.Message.ToString()), "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"プロファイル更新時にエラーが発生しました\n\n{ex.Message.ToString()}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(-1);
             }
         }
