@@ -18,6 +18,7 @@ namespace VRCGPUTool.Form
             dispDataMonth = DateTime.Today;
             powerPofile = new PowerProfile();
             powerPofile.LoadProfile(powerPofile);
+            UnitPriceRefresh();
         }
 
         readonly GPUPowerLog PlogData;
@@ -69,7 +70,7 @@ namespace VRCGPUTool.Form
             usageTotalDay /= (3600.0 * 1000.0); //Kwh
             priceOfDay /= (3600.0 * 1000.0);
 
-            //---.Text = string.Format({0:f2},proceOfDay);
+            priceDay.Text = string.Format("電気代:{0:f1}円",priceOfDay);
             DaylyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalDay);
 
             ChartArea area = new ChartArea("area");
@@ -183,7 +184,7 @@ namespace VRCGPUTool.Form
                 dayUsage += PlogData.rawdata.hourPowerLog[i];
                 priceOfMonth += hourOfPrice[i] * PlogData.rawdata.hourPowerLog[i];
             }
-            seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day, (double)dayUsage / 3600.0));
+            seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day,dayUsage / 3600.0));
             usageTotalMonth += dayUsage;
 
             int Days = DateTime.DaysInMonth(PlogData.rawdata.logdate.Year, PlogData.rawdata.logdate.Month);
@@ -204,14 +205,14 @@ namespace VRCGPUTool.Form
                         dayUsage += recentlog.rawdata.hourPowerLog[j];
                         priceOfMonth += hourOfPrice[i] * recentlog.rawdata.hourPowerLog[i];
                     }
-                    seriesColumn.Points.Add(new DataPoint(i, (double)dayUsage / 3600.0));
+                    seriesColumn.Points.Add(new DataPoint(i,dayUsage / 3600.0));
                     usageTotalMonth += dayUsage;
                 }
             }
             usageTotalMonth /= (3600.0 * 1000.0); //Kwh
             MonthlyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalMonth);
             priceOfMonth /= (3600.0 * 1000.0);
-            //.Text
+            priceMonth.Text = string.Format("電気代:{0:f1}円", priceOfMonth);
         }
 
         private void DataPointAddPreviousMonth(DateTime dt, Series seriesColumn)
@@ -290,6 +291,14 @@ namespace VRCGPUTool.Form
             pricesetting = new UnitPriceSetting(powerPofile);
             pricesetting.ShowDialog();
 
+            UnitPriceRefresh();
+
+            DrawHistoryDay(PlogData);
+            DrawHistoryMonth(dispDataMonth, true);
+        }
+
+        private void UnitPriceRefresh()
+        {
             int unitP;
             int lastread = 23;
             for (int i = (powerPofile.pfData.ProfileCount - 1); i >= 0; i--)

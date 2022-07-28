@@ -53,7 +53,19 @@ namespace VRCGPUTool.Util
                 SelectGPUIndex = 0
             };
 
-            var resmsg2 = MessageBox.Show("確認", "ようこそ", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            var resmsg2 = MessageBox.Show(
+                "本ツールではユーザビリティの向上のために\n" +
+                "GPUの使用率や制限の使用状況を取得し、\n" +
+                "開発者に送信することで今後の開発に\n" +
+                "役立てていきたいと考えております。\n" +
+                "なお情報に関しては個人を特定しない\n" +
+                "形でのデータ提供となります。\n\n" +
+                "データ提供に同意しますか？",
+                "使用データ提供について",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Information
+            );
+
             if (resmsg2 == DialogResult.Yes)
             {
                 config.AllowDataProvide = true;

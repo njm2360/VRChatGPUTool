@@ -86,6 +86,7 @@ namespace VRCGPUTool.Form
                 ForceLimit.Enabled = false;
                 CoreLimitEnable.Enabled = false;
                 CoreClockSetting.Enabled = false;
+                GpuIndex.Enabled = false;
 
                 if (CoreLimitEnable.Checked == true)
                 {
@@ -107,6 +108,7 @@ namespace VRCGPUTool.Form
                 ForceLimit.Enabled = true;
                 CoreLimitEnable.Enabled = true;
                 CoreClockSetting.Enabled = true;
+                GpuIndex.Enabled = true;
 
                 if (CoreLimitEnable.Checked == true)
                 {

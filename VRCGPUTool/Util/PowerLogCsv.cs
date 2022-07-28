@@ -25,7 +25,7 @@ namespace VRCGPUTool.Util
                 string fName = historyForm.saveFileDialog1.FileName;
                 using (FileStream fs = new FileStream(fName, FileMode.Create))
                 {
-                    using (StreamWriter sw = new StreamWriter(fs))
+                    using (StreamWriter sw = new StreamWriter(fs, System.Text.Encoding.Unicode))
                     {
                         DateTime dt = gPLog.rawdata.logdate;
 
@@ -34,7 +34,7 @@ namespace VRCGPUTool.Util
 
                         for (int i = 0; i < 24; i++)
                         {
-                            sw.WriteLine($"{i},{gPLog.rawdata.hourPowerLog[i]:f2}");
+                            sw.WriteLine($"{i},{(gPLog.rawdata.hourPowerLog[i] / 3600.0):f2}");
                         }
                     }
                 }
@@ -51,6 +51,9 @@ namespace VRCGPUTool.Util
                 {
                     using (StreamWriter sw = new StreamWriter(fs))
                     {
+                        sw.WriteLine($"{dt.Year}年{dt.Month}月");
+                        sw.WriteLine($"日,時,使用量(Wh)");
+
                         if (isThisMonth)
                         {
                             for (int i = 1; i < fm.gpuPlog.rawdata.logdate.Day; i++)
@@ -64,20 +67,20 @@ namespace VRCGPUTool.Util
                                 {
                                     for (int j = 0; j < 24; j++)
                                     {
-                                        sw.WriteLine($"{j},{recentlog.rawdata.hourPowerLog[j]}");
+                                        sw.WriteLine($"{i},{j},{(recentlog.rawdata.hourPowerLog[j] / 3600.0)}");
                                     }
                                 }
                                 else
                                 {
                                     for (int j = 0; j < 24; j++)
                                     {
-                                        sw.WriteLine($"{j},0");
+                                        sw.WriteLine($"{i},{j},0");
                                     }
                                 }
                             }
                             for (int i = 0; i < 24; i++)
                             {
-                                sw.WriteLine($"{i},{fm.gpuPlog.rawdata.hourPowerLog[i]}");
+                                sw.WriteLine($"{fm.gpuPlog.rawdata.logdate.Day},{i},{(fm.gpuPlog.rawdata.hourPowerLog[i] / 3600.0)}");
                             }
                         }
                         else
@@ -95,14 +98,14 @@ namespace VRCGPUTool.Util
                                 {
                                     for (int j = 0; j < 24; j++)
                                     {
-                                        sw.WriteLine($"{j},{recentlog.rawdata.hourPowerLog[j]}");
+                                        sw.WriteLine($"{i},{j},{(recentlog.rawdata.hourPowerLog[j] / 3600.0)}");
                                     }
                                 }
                                 else
                                 {
                                     for (int j = 0; j < 24; j++)
                                     {
-                                        sw.WriteLine($"{j},0");
+                                        sw.WriteLine($"{i},{j},0");
                                     }
                                 }
                             }

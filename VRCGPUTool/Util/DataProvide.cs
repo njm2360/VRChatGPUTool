@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using VRCGPUTool.Form;
 using System.Text;
 using System.Linq;
+using System.Windows.Forms;
 
 namespace VRCGPUTool.Util
 {
@@ -39,11 +40,12 @@ namespace VRCGPUTool.Util
             ProvData provData = new ProvData
             {
                 Guid = fm.guid,
-                Version = "0.0.0", //fileVersionInfo.ProductVersion,
+                Version = fm.Text,//fileVersionInfo.ProductVersion,
                 Name = g.Name,
                 PLimit = g.PLimit,
                 PLimitMax = g.PLimitMax,
-                PLimitMin = g.PLimitMin
+                PLimitMin = g.PLimitMin,
+                tag = "0"
             };
 
             if (dataSendWorker.IsBusy == false)
@@ -73,12 +75,6 @@ namespace VRCGPUTool.Util
                     RequestUri = new Uri(APIEndpoints.ProvideDataAPIEndPoint),
                 };
 
-                JsonSerializerOptions options = new JsonSerializerOptions()
-                {
-                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.
-                    Create(System.Text.Unicode.UnicodeRanges.All)
-                };
-
                 string json = JsonSerializer.Serialize(e.Argument);
 
                 message.Content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -93,11 +89,6 @@ namespace VRCGPUTool.Util
             worker.Wait();
 
             e.Result = worker.Result;
-
-            e.Result = JsonSerializer.Deserialize<ProvDataApiRes>(
-                worker.Result,
-                new JsonSerializerOptions(JsonSerializerDefaults.Web)
-            );
         }
 
         private void dataSendWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

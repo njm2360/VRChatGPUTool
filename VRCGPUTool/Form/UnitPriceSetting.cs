@@ -215,5 +215,10 @@ namespace VRCGPUTool.Form
         {
             Redraw(powerProfile.pfData.ProfileCount);
         }
+
+        private void CloseButton_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
     }
 }

@@ -34,13 +34,14 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.CloseButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // ConfigButton
             // 
-            this.ConfigButton.Location = new System.Drawing.Point(554, 414);
+            this.ConfigButton.Location = new System.Drawing.Point(417, 414);
             this.ConfigButton.Name = "ConfigButton";
-            this.ConfigButton.Size = new System.Drawing.Size(99, 23);
+            this.ConfigButton.Size = new System.Drawing.Size(121, 23);
             this.ConfigButton.TabIndex = 0;
             this.ConfigButton.Text = "設定を適用";
             this.ConfigButton.UseVisualStyleBackColor = true;
@@ -86,11 +87,22 @@
             this.label6.TabIndex = 4;
             this.label6.Text = "18";
             // 
+            // CloseButton
+            // 
+            this.CloseButton.Location = new System.Drawing.Point(544, 414);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(121, 23);
+            this.CloseButton.TabIndex = 5;
+            this.CloseButton.Text = "閉じる";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
+            // 
             // UnitPriceSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 449);
+            this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.label4);
@@ -116,5 +128,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button CloseButton;
     }
 }
