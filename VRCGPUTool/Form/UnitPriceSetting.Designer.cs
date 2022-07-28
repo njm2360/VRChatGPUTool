@@ -35,6 +35,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.CloseButton = new System.Windows.Forms.Button();
+            this.label7 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // ConfigButton
@@ -97,11 +98,23 @@
             this.CloseButton.UseVisualStyleBackColor = true;
             this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(414, 294);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(254, 117);
+            this.label7.TabIndex = 6;
+            this.label7.Text = "設定方法\r\n・時間帯別でない場合\r\n一番上の料金入力欄に単価を入力します\r\n・時間帯別の場合\r\n一番上の料金入力欄に0時地点の単価を入れます\r\n左の時刻設定を単価" +
+    "が変わるタイミングに変更します\r\n右側にはその時間から適用される単価を入力します\r\n※設定は時刻が早い順に入力してください\r\n　料金を入力していない欄は無視され" +
+    "ます";
+            // 
             // UnitPriceSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 449);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.label5);
@@ -129,5 +142,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button CloseButton;
+        private System.Windows.Forms.Label label7;
     }
 }
