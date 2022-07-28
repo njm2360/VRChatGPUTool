@@ -4,7 +4,7 @@ VRC向け GPU電力制限ツール
 
 ![image](https://user-images.githubusercontent.com/66125537/180787763-2033c50c-ad34-4ae4-b42a-95374fa401cd.png)
 
-## 最新リリース(Ver 2.0.0)
+## 最新リリース(Ver 2.0.1)
 
 [Download (GitHub)](https://github.com/njm2360/VRChatGPUTool/releases/latest)
 
