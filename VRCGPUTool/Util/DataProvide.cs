@@ -6,9 +6,9 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using VRCGPUTool.Form;
+using VRCGPUTool.Util;
 using System.Text;
 using System.Linq;
-using System.Windows.Forms;
 
 namespace VRCGPUTool.Util
 {
@@ -58,7 +58,26 @@ namespace VRCGPUTool.Util
 
         internal void LimitRepo(MainForm fm)
         {
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
+            GpuStatus g = fm.gpuStatuses.ElementAt(fm.GpuIndex.SelectedIndex);
+            int lt = fm.limittime;
 
+            ProvData provData = new ProvData
+            {
+                Guid = fm.guid,
+                Version = fileVersionInfo.ProductVersion,
+                Name = g.Name,
+                PLimit = g.PLimit,
+                PLimitMax = g.PLimitMax,
+                PLimitMin = g.PLimitMin,
+                tag = "1",
+                desc = "Limit:" + lt.ToString() + "s"
+            };
+
+            if (dataSendWorker.IsBusy == false)
+            {
+                dataSendWorker.RunWorkerAsync(provData);
+            }
         }
 
         private void InitializeDataProvideWorker()

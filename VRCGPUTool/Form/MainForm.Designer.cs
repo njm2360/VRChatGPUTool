@@ -69,7 +69,6 @@
             this.label11 = new System.Windows.Forms.Label();
             this.howtouse = new System.Windows.Forms.Button();
             this.bugreport = new System.Windows.Forms.Button();
-            this.functionsuggestion = new System.Windows.Forms.Button();
             this.PowerLogShow = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
@@ -115,7 +114,6 @@
             // 
             // PowerLimitValue
             // 
-            this.PowerLimitValue.Tag = 1;
             this.PowerLimitValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.PowerLimitValue.Location = new System.Drawing.Point(34, 56);
             this.PowerLimitValue.Maximum = new decimal(new int[] {
@@ -126,6 +124,7 @@
             this.PowerLimitValue.Name = "PowerLimitValue";
             this.PowerLimitValue.Size = new System.Drawing.Size(92, 35);
             this.PowerLimitValue.TabIndex = 3;
+            this.PowerLimitValue.Tag = 1;
             this.PowerLimitValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.PowerLimitValue.ValueChanged += new System.EventHandler(this.PowerLimitSettingChanged);
             // 
@@ -479,7 +478,6 @@
             // SpecificPLValue
             // 
             this.SpecificPLValue.Enabled = false;
-            this.SpecificPLValue.Tag = 2;
             this.SpecificPLValue.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SpecificPLValue.Location = new System.Drawing.Point(173, 148);
             this.SpecificPLValue.Maximum = new decimal(new int[] {
@@ -490,6 +488,7 @@
             this.SpecificPLValue.Name = "SpecificPLValue";
             this.SpecificPLValue.Size = new System.Drawing.Size(53, 21);
             this.SpecificPLValue.TabIndex = 34;
+            this.SpecificPLValue.Tag = 2;
             this.SpecificPLValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.SpecificPLValue.ValueChanged += new System.EventHandler(this.SpecificPLValue_ValueChanged);
             // 
@@ -541,25 +540,14 @@
             this.bugreport.Name = "bugreport";
             this.bugreport.Size = new System.Drawing.Size(99, 25);
             this.bugreport.TabIndex = 32;
-            this.bugreport.Tag = "0";
-            this.bugreport.Text = "バグ報告";
+            this.bugreport.Tag = "";
+            this.bugreport.Text = "フィードバック";
             this.bugreport.UseVisualStyleBackColor = true;
             this.bugreport.Click += new System.EventHandler(this.Reporter);
             // 
-            // functionsuggestion
-            // 
-            this.functionsuggestion.Location = new System.Drawing.Point(540, 103);
-            this.functionsuggestion.Name = "functionsuggestion";
-            this.functionsuggestion.Size = new System.Drawing.Size(99, 25);
-            this.functionsuggestion.TabIndex = 33;
-            this.functionsuggestion.Tag = "1";
-            this.functionsuggestion.Text = "機能要望等";
-            this.functionsuggestion.UseVisualStyleBackColor = true;
-            this.functionsuggestion.Click += new System.EventHandler(this.Reporter);
-            // 
             // PowerLogShow
             // 
-            this.PowerLogShow.Location = new System.Drawing.Point(542, 134);
+            this.PowerLogShow.Location = new System.Drawing.Point(540, 103);
             this.PowerLogShow.Name = "PowerLogShow";
             this.PowerLogShow.Size = new System.Drawing.Size(99, 25);
             this.PowerLogShow.TabIndex = 34;
@@ -574,7 +562,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(661, 507);
             this.Controls.Add(this.PowerLogShow);
-            this.Controls.Add(this.functionsuggestion);
             this.Controls.Add(this.bugreport);
             this.Controls.Add(this.howtouse);
             this.Controls.Add(this.groupBox4);
@@ -635,7 +622,6 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Button howtouse;
         private System.Windows.Forms.Button bugreport;
-        private System.Windows.Forms.Button functionsuggestion;
         private System.Windows.Forms.Label label10;
         internal System.Windows.Forms.ComboBox GpuIndex;
         internal System.Windows.Forms.Label GPUCoreTemp;

@@ -75,12 +75,21 @@ namespace VRCGPUTool.Util
 
             if (resmsg == DialogResult.Yes)
             {
-                MessageBox.Show("データ提供にご協力いただきありがとうございます。\nなお、データ提供は設定画面より切り替え可能です。", "【任意】使用データ提供について", MessageBoxButtons.OK);
+                MessageBox.Show(
+                    "データ提供にご協力いただきありがとうございます。\n" +
+                    "なお、データ提供は設定画面より切り替え可能です。",
+                    "【任意】使用データ提供について",
+                    MessageBoxButtons.OK
+                );
                 config.AllowDataProvide = true;
             }
             else
             {
-                MessageBox.Show("データ提供に同意しないを選択しました。\nなお、データ提供は設定画面より切り替え可能です。", "【任意】使用データ提供について", MessageBoxButtons.OK);
+                MessageBox.Show("データ提供に同意しないを選択しました。\n" +
+                    "なお、データ提供は設定画面より切り替え可能です。",
+                    "【任意】使用データ提供について",
+                    MessageBoxButtons.OK
+                );
             }
 
             string confjson = JsonSerializer.Serialize(config);
@@ -94,7 +103,11 @@ namespace VRCGPUTool.Util
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"設定ファイル作成時にエラーが発生しました\n\n{ex.Message.ToString()}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"設定ファイル作成時にエラーが発生しました\n\n{ex.Message.ToString()}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
         }
@@ -147,7 +160,13 @@ namespace VRCGPUTool.Util
                         }
                         catch (Exception)
                         {
-                            var res = MessageBox.Show("設定ファイルに誤りがあります。\n設定ファイルを再生成しますか?", "エラー", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+                            var res = MessageBox.Show(
+                                "設定ファイルに誤りがあります。\n" +
+                                "設定ファイルを再生成しますか?",
+                                "エラー",
+                                MessageBoxButtons.YesNo,
+                                MessageBoxIcon.Error
+                            );
                             if (res == DialogResult.Yes)
                             {
                                 try
@@ -156,7 +175,13 @@ namespace VRCGPUTool.Util
                                 }
                                 catch (Exception)
                                 {
-                                    MessageBox.Show("設定ファイルを削除できませんでした\n設定ファイルを手動で消してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show(
+                                        "設定ファイルを削除できませんでした\n" +
+                                        "設定ファイルを手動で消してください",
+                                        "エラー",
+                                        MessageBoxButtons.OK,
+                                        MessageBoxIcon.Error
+                                    );
                                     Environment.Exit(-1);
                                 }
                                 Application.Restart();
@@ -204,7 +229,12 @@ namespace VRCGPUTool.Util
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"設定ファイル更新時にエラーが発生しました\n\n{ex.Message.ToString()}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(
+                    $"設定ファイル更新時にエラーが発生しました\n\n{ex.Message.ToString()}",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
                 Environment.Exit(-1);
             }
         }

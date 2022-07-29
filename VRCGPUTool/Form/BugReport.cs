@@ -15,20 +15,11 @@ namespace VRCGPUTool.Form
 
         MainForm fm;
 
-        public BugReport(int typeIndex,MainForm fm)
+        public BugReport(MainForm fm)
         {
             InitializeComponent();
             InitializeReportWorker();
             this.fm = fm;
-            if (typeIndex == 0)
-            {
-                bug.Checked = true;
-            }
-            else
-            {
-                func.Checked = true;
-            }
-            openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
         }
 
         private void InitializeReportWorker()

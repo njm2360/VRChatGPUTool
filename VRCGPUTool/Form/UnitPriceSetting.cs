@@ -33,6 +33,31 @@ namespace VRCGPUTool.Form
 
         private void ConfigButton_Click(object sender, EventArgs e)
         {
+            if (listBox1.Items.Count != 0)
+            {
+                int firstProf = Convert.ToInt32(listBox1.Items[0].ToString().Substring(0, 2).Trim());
+                if(firstProf != 0)
+                {
+                    MessageBox.Show(
+                        "0時の単価設定が存在しません",
+                        "エラー",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return;
+                }
+            }
+            else
+            {
+                MessageBox.Show(
+                    "最低１つの単価設定が必要です",
+                    "エラー",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+
             int plancount = listBox1.Items.Count;
             powerProfile.pfData.ProfileCount = plancount;
             for (int i = 0; i < PowerProfile.maxPf; i++)

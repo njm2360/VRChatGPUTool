@@ -197,6 +197,15 @@ namespace VRCGPUTool.Form
 
                 Limit_Action(false, false);
             }
+
+            if (allowDataProvide)
+            {
+                if(limittime % 900 == 10)
+                {
+                    dataProvide = new DataProvide();
+                    dataProvide.LimitRepo(this);
+                }
+            }
         }
 
         private void PowerLimitSettingChanged(object sender, EventArgs e)
@@ -317,7 +326,7 @@ namespace VRCGPUTool.Form
 
         private void Reporter(object sender, EventArgs e)
         {
-            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag),this);
+            BugReport report = new BugReport(this);
             report.ShowDialog();
         }
 

@@ -66,6 +66,7 @@
             // bug
             // 
             this.bug.AutoSize = true;
+            this.bug.Checked = true;
             this.bug.Location = new System.Drawing.Point(25, 19);
             this.bug.Name = "bug";
             this.bug.Size = new System.Drawing.Size(68, 17);
@@ -81,7 +82,6 @@
             this.func.Name = "func";
             this.func.Size = new System.Drawing.Size(73, 17);
             this.func.TabIndex = 3;
-            this.func.TabStop = true;
             this.func.Text = "機能要望";
             this.func.UseVisualStyleBackColor = true;
             // 
@@ -123,6 +123,7 @@
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.Filter = "画像ファイル(*.png, *.jpg)|*.png;*.jpg";
             // 
             // fileadd
             // 
