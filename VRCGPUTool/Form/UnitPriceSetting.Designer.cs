@@ -36,6 +36,16 @@
             this.label6 = new System.Windows.Forms.Label();
             this.CloseButton = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
+            this.HourSplitInput = new System.Windows.Forms.NumericUpDown();
+            this.UnitPriceInput = new System.Windows.Forms.NumericUpDown();
+            this.ProfileAddButton = new System.Windows.Forms.Button();
+            this.listBox1 = new System.Windows.Forms.ListBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            ((System.ComponentModel.ISupportInitialize)(this.HourSplitInput)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UnitPriceInput)).BeginInit();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ConfigButton
@@ -101,19 +111,95 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(414, 294);
+            this.label7.Location = new System.Drawing.Point(415, 281);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(254, 117);
+            this.label7.Size = new System.Drawing.Size(250, 130);
             this.label7.TabIndex = 6;
-            this.label7.Text = "設定方法\r\n・時間帯別でない場合\r\n一番上の料金入力欄に単価を入力します\r\n・時間帯別の場合\r\n一番上の料金入力欄に0時地点の単価を入れます\r\n左の時刻設定を単価" +
-    "が変わるタイミングに変更します\r\n右側にはその時間から適用される単価を入力します\r\n※設定は時刻が早い順に入力してください\r\n　料金を入力していない欄は無視され" +
-    "ます";
+            this.label7.Text = "設定方法\r\n・時間帯別でない場合\r\n0時のまま右に単価を入れて追加して適用をクリック\r\n・時間帯別の場合\r\n0時地点の単価を入れて一度追加します\r\n左側の時刻設定" +
+    "を単価が変わるタイミングにしてから\r\n右側にはその時間から適用される単価を入力します\r\nすべてを追加したら適用をクリックしてください\r\n※削除したい場合は削除す" +
+    "るものを選択して\r\n　から右クリックと消去できます";
+            // 
+            // HourSplitInput
+            // 
+            this.HourSplitInput.Location = new System.Drawing.Point(12, 182);
+            this.HourSplitInput.Maximum = new decimal(new int[] {
+            23,
+            0,
+            0,
+            0});
+            this.HourSplitInput.Name = "HourSplitInput";
+            this.HourSplitInput.Size = new System.Drawing.Size(47, 20);
+            this.HourSplitInput.TabIndex = 7;
+            // 
+            // UnitPriceInput
+            // 
+            this.UnitPriceInput.Location = new System.Drawing.Point(90, 182);
+            this.UnitPriceInput.Name = "UnitPriceInput";
+            this.UnitPriceInput.Size = new System.Drawing.Size(47, 20);
+            this.UnitPriceInput.TabIndex = 8;
+            // 
+            // ProfileAddButton
+            // 
+            this.ProfileAddButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.ProfileAddButton.Cursor = System.Windows.Forms.Cursors.Default;
+            this.ProfileAddButton.Location = new System.Drawing.Point(106, 211);
+            this.ProfileAddButton.Name = "ProfileAddButton";
+            this.ProfileAddButton.Size = new System.Drawing.Size(51, 23);
+            this.ProfileAddButton.TabIndex = 9;
+            this.ProfileAddButton.Text = "追加";
+            this.ProfileAddButton.UseVisualStyleBackColor = true;
+            this.ProfileAddButton.Click += new System.EventHandler(this.ProfileAddButton_Click);
+            // 
+            // listBox1
+            // 
+            this.listBox1.FormattingEnabled = true;
+            this.listBox1.Location = new System.Drawing.Point(33, 19);
+            this.listBox1.Name = "listBox1";
+            this.listBox1.Size = new System.Drawing.Size(109, 147);
+            this.listBox1.Sorted = true;
+            this.listBox1.TabIndex = 10;
+            this.listBox1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.listBox1_MouseDown);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(59, 186);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(31, 13);
+            this.label1.TabIndex = 11;
+            this.label1.Text = "時～";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(138, 186);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(19, 13);
+            this.label2.TabIndex = 12;
+            this.label2.Text = "円";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.CausesValidation = false;
+            this.groupBox1.Controls.Add(this.listBox1);
+            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.HourSplitInput);
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.UnitPriceInput);
+            this.groupBox1.Controls.Add(this.ProfileAddButton);
+            this.groupBox1.Location = new System.Drawing.Point(491, 12);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(171, 249);
+            this.groupBox1.TabIndex = 13;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "電気代設定";
             // 
             // UnitPriceSetting
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(674, 449);
+            this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.label6);
@@ -129,6 +215,10 @@
             this.Text = "電気代設定";
             this.Load += new System.EventHandler(this.UnitPriceSetting_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Redraw_Form);
+            ((System.ComponentModel.ISupportInitialize)(this.HourSplitInput)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.UnitPriceInput)).EndInit();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -143,5 +233,12 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button CloseButton;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.NumericUpDown HourSplitInput;
+        private System.Windows.Forms.NumericUpDown UnitPriceInput;
+        private System.Windows.Forms.Button ProfileAddButton;
+        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.GroupBox groupBox1;
     }
 }

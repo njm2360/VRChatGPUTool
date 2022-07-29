@@ -15,71 +15,34 @@ namespace VRCGPUTool.Form
 
         readonly PowerProfile powerProfile;
 
-        const int margin = 30;
-
-        DateTimePicker[] dtPicker = new DateTimePicker[PowerProfile.maxPf];
-        TextBox[] textBox = new TextBox[PowerProfile.maxPf];
-        Label[] label1 = new Label[PowerProfile.maxPf];
-        Label[] label2 = new Label[PowerProfile.maxPf];
-
         private int sbCount = 0;
 
         private void UnitPriceSetting_Load(object sender, EventArgs e)
         {
-            SettingMenuDraw();
+            for (int i = 0; i < PowerProfile.maxPf; i++)
+            {
+                if (powerProfile.pfData.ProfileCount > i)
+                {
+                    int hour = powerProfile.pfData.SplitTime[i];
+                    int pr = powerProfile.pfData.Unit[i];
+
+                    listBox1.Items.Add($"{hour,02}時～{pr,03}円");
+                }
+            }
         }
 
         private void ConfigButton_Click(object sender, EventArgs e)
         {
-            int res = InputValueCheck();
-            if (res != -1)
-            {
-                SettingRefresh(res);
-            }
-            powerProfile.SaveProfileFile();
-            Redraw(res);
-        }
-
-        private int InputValueCheck()
-        {
-            int plancount = PowerProfile.maxPf;
-            for (int i = 0; i < PowerProfile.maxPf; i++)
-            {
-                if (textBox[i].Text == "")
-                {
-                    plancount = i;
-                    break;
-                }
-                else
-                {
-                    int res;
-                    if (!(int.TryParse(textBox[i].Text, out res)))
-                    {
-                        MessageBox.Show("整数を入力してください");
-                        return -1;
-                    }
-                    if (i >= 1)
-                    {
-                        if (dtPicker[i].Value.Hour <= dtPicker[i - 1].Value.Hour)
-                        {
-                            MessageBox.Show("入力順番が間違っています");
-                            return -1;
-                        }
-                    }
-                }
-            }
-            return plancount;
-        }
-
-        private void SettingRefresh(int plancount)
-        {
+            int plancount = listBox1.Items.Count;
             powerProfile.pfData.ProfileCount = plancount;
             for (int i = 0; i < PowerProfile.maxPf; i++)
             {
                 if (i < plancount)
                 {
-                    powerProfile.pfData.SplitTime[i] = dtPicker[i].Value.Hour;
-                    powerProfile.pfData.Unit[i] = Convert.ToInt32(textBox[i].Text);
+                    int splitHour = Convert.ToInt32(listBox1.Items[i].ToString().Substring(0, 2));
+                    int pr = Convert.ToInt32(listBox1.Items[i].ToString().Substring(4, 3)); //要調整
+                    powerProfile.pfData.SplitTime[i] = splitHour;
+                    powerProfile.pfData.Unit[i] = pr;
                 }
                 else
                 {
@@ -87,78 +50,8 @@ namespace VRCGPUTool.Form
                     powerProfile.pfData.Unit[i] = 0;
                 }
             }
-        }
 
-        private void SettingMenuDraw()
-        {
-            GroupBox groupBox1 = new GroupBox();
-            groupBox1.Location = new Point(481, 12);
-            groupBox1.Name = "SettingGroupBox";
-            groupBox1.Size = new Size(156, 270);
-            groupBox1.TabIndex = 4;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "電気代設定(時間別)";
-            groupBox1.SuspendLayout();
-
-            for (int i = 0; i < PowerProfile.maxPf; i++)
-            {
-                dtPicker[i] = new DateTimePicker();
-                dtPicker[i].CustomFormat = "H";
-                dtPicker[i].Value = new DateTime(2020, 1, 1, 0, 0, 0, 0);
-                dtPicker[i].Format = DateTimePickerFormat.Custom;
-                dtPicker[i].Location = new Point(10, 25 + i * margin);
-                dtPicker[i].Name = "Time";
-                dtPicker[i].ShowUpDown = true;
-                dtPicker[i].Size = new Size(40, 20);
-                if (powerProfile.pfData.ProfileCount > i)
-                {
-                    dtPicker[i].Value = new DateTime(2020, 1, 1, powerProfile.pfData.SplitTime[i], 0, 0);
-                }
-                dtPicker[i].ValueChanged += new EventHandler(UnitPriceSetting_ValueChanged);
-                groupBox1.Controls.Add(dtPicker[i]);
-
-                textBox[i] = new TextBox();
-                textBox[i].Location = new Point(85, 25 + i * margin);
-                textBox[i].Name = "Pr";
-                textBox[i].Size = new Size(30, 20);
-                if (powerProfile.pfData.ProfileCount > i)
-                {
-                    textBox[i].Text = powerProfile.pfData.Unit[i].ToString();
-                }
-                groupBox1.Controls.Add(textBox[i]);
-
-                label1[i] = new Label();
-                label1[i].Location = new Point(120, 27 + i * margin);
-                label1[i].Size = new Size(30, 20);
-                label1[i].Text = "円";
-                groupBox1.Controls.Add(label1[i]);
-
-                label2[i] = new Label();
-                label2[i].Location = new Point(50, 27 + i * margin);
-                label2[i].Size = new Size(40, 20);
-                label2[i].Text = "時～";
-                groupBox1.Controls.Add(label2[i]);
-            }
-
-            dtPicker[0].Enabled = false;
-
-            groupBox1.ResumeLayout(false);
-            Controls.Add(groupBox1);
-        }
-
-        private void UnitPriceSetting_ValueChanged(object sender, EventArgs e)
-        {
-            int res = InputValueCheck();
-            if (res != -1)
-            {
-                SettingRefresh(res);
-            }
-            else
-            {
-                return;
-            }
             powerProfile.SaveProfileFile();
-            Redraw(res);
         }
 
         private SolidBrush NewSB()
@@ -176,37 +69,31 @@ namespace VRCGPUTool.Form
             }
         }
 
-        private void Redraw(int count)
+        private void Redraw()
         {
             Graphics g = CreateGraphics();
-            Pen p = new Pen(Color.Black);
 
             sbCount = 0;
 
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < listBox1.Items.Count; i++)
             {
-                if (i + 1 == count)
+                int dt1 = Convert.ToInt32(listBox1.Items[i].ToString().Substring(0, 2).Trim());
+
+                if (i + 1 == listBox1.Items.Count)
                 {
-                    string res = string.Format("{0}-End", dtPicker[i].Value);
-                    Console.WriteLine(res);
-                    int minOfDay = dtPicker[i].Value.Hour * 60 + dtPicker[i].Value.Minute;
-                    TimeSpan duration = new DateTime(2020, 1, 2, 0, 0, 0) - dtPicker[i].Value;
+                    int minOfDay = dt1 * 60;
+                    TimeSpan duration = new TimeSpan(0, 24 - dt1, 0, 0);
                     int startAngle = (630 + (int)(360.0 * minOfDay / 1440.0)) % 360;
                     int sweepAngle = (int)(360.0 * duration.TotalMinutes / 1440.0);
-                    res = string.Format("{0}~{1}deg", startAngle, sweepAngle);
-                    Console.WriteLine(res);
                     g.FillPie(NewSB(), 50, 50, 350, 350, startAngle, sweepAngle);
                 }
                 else
                 {
-                    string res = string.Format("{0}-{1}", dtPicker[i].Value, dtPicker[i + 1].Value);
-                    Console.WriteLine(res);
-                    int minOfDay = dtPicker[i].Value.Hour * 60 + dtPicker[i].Value.Minute;
-                    TimeSpan duration = dtPicker[i + 1].Value - dtPicker[i].Value;
+                    int dt2 = Convert.ToInt32(listBox1.Items[i + 1].ToString().Substring(0, 2).Trim());
+                    int minOfDay = dt1 * 60;
+                    TimeSpan duration = new TimeSpan(0, dt2 - dt1, 0, 0);
                     int startAngle = (630 + (int)(360.0 * minOfDay / 1440.0)) % 360;
                     int sweepAngle = (int)(360.0 * duration.TotalMinutes / 1440.0);
-                    res = string.Format("{0}~{1}deg", startAngle, sweepAngle);
-                    Console.WriteLine(res);
                     g.FillPie(NewSB(), 50, 50, 350, 350, startAngle, sweepAngle);
                 }
             }
@@ -214,12 +101,70 @@ namespace VRCGPUTool.Form
 
         private void Redraw_Form(object sender, PaintEventArgs e)
         {
-            Redraw(powerProfile.pfData.ProfileCount);
+            Redraw();
         }
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
             Close();
+        }
+
+        private void ProfileAddButton_Click(object sender, EventArgs e)
+        {
+            if (PowerProfile.maxPf > listBox1.Items.Count)
+            {
+                for (int i = 0; i < listBox1.Items.Count; i++)
+                {
+                    int hour = Convert.ToInt32(listBox1.Items[i].ToString().Substring(0, 2).Trim());
+                    if (hour == Convert.ToInt32(HourSplitInput.Value))
+                    {
+                        MessageBox.Show(
+                            "同じ時刻で複数登録できません\n" +
+                            "単価を変更したい場合は削除してから追加してください"
+                            , "エラー",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Error
+                        );
+                        return;
+                    }
+                }
+                listBox1.Items.Add($"{HourSplitInput.Value,02}時～{UnitPriceInput.Value,03}円");
+                Redraw();
+            }
+            else
+            {
+                MessageBox.Show("これ以上追加できません", "エラー");
+            }
+        }
+
+        private void listBox1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right)
+            {
+                if (listBox1.SelectedIndex != -1)
+                {
+                    var res = MessageBox.Show(
+                        "選択中の単価設定を削除してよろしいですか",
+                        "確認",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question
+                    );
+                    if (res == DialogResult.Yes)
+                    {
+                        listBox1.Items.RemoveAt(listBox1.SelectedIndex);
+                        Redraw();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "削除対象が選択されていません",
+                        "エラー",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                }
+            }
         }
     }
 }
