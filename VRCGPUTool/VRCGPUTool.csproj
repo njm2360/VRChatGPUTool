@@ -6,6 +6,12 @@
     <Version>2.0.1</Version>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>VRCGPUTool.ico</ApplicationIcon>
+    <PlatformTarget>x64</PlatformTarget>
+    <SignAssembly>False</SignAssembly>
+    <Copyright>njm2360</Copyright>
+    <Description>VRChat向けGPU電力制限ツール</Description>
+    <PackageLicenseFile>C:\Users\Owner\source\repos\VRCGPUTool\LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
