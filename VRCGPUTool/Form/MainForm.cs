@@ -49,9 +49,6 @@ namespace VRCGPUTool.Form
 
             update.checkUpdateWorker.RunWorkerAsync();
 
-            BeginTime.Value = DateTime.Now.AddMinutes(15);
-            EndTime.Value = DateTime.Now.AddMinutes(30);
-
             ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
 
@@ -272,6 +269,13 @@ namespace VRCGPUTool.Form
                 return;
             }
 
+            /*if (reportSendWorker.IsBusy == true)
+            {
+                MessageBox.Show("フィードバック送信中です。時間をおいてお試しください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true;
+                return;
+            }*/
+
             ConfigFile config = new ConfigFile(this);
             config.SaveConfig();
 
@@ -313,7 +317,7 @@ namespace VRCGPUTool.Form
 
         private void Reporter(object sender, EventArgs e)
         {
-            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag));
+            BugReport report = new Form.BugReport(Convert.ToInt32(((Button)sender).Tag),this);
             report.ShowDialog();
         }
 

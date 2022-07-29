@@ -13,10 +13,13 @@ namespace VRCGPUTool.Form
 
         private string selectFilePath = null;
 
-        public BugReport(int typeIndex)
+        MainForm fm;
+
+        public BugReport(int typeIndex,MainForm fm)
         {
             InitializeComponent();
             InitializeReportWorker();
+            this.fm = fm;
             if (typeIndex == 0)
             {
                 bug.Checked = true;
@@ -46,20 +49,21 @@ namespace VRCGPUTool.Form
 
                 var multipart = new MultipartFormDataContent();
 
-                if(bug.Checked == true)
+                if (bug.Checked == true)
                 {
                     multipart.Add(new StringContent("BugReport"), "Type");
                 }
-                if(func.Checked == true)
+                if (func.Checked == true)
                 {
                     multipart.Add(new StringContent("Function"), "Type");
                 }
-                if(emailinput.Text != "")
+                if (emailinput.Text != "")
                 {
                     multipart.Add(new StringContent(emailinput.Text), "Email");
                 }
 
-                multipart.Add(new StringContent(body.Text),"Text");
+                multipart.Add(new StringContent(fm.guid), "UUID");
+                multipart.Add(new StringContent(body.Text), "Text");
 
                 if (selectFilePath != null)
                 {
@@ -71,7 +75,6 @@ namespace VRCGPUTool.Form
                     ByteArrayContent imageContent = new ByteArrayContent(br.ReadBytes((int)fs.Length));
 
                     multipart.Add(imageContent, "Image", finfo.Name);
-
                 }
 
                 var result = await client.PostAsync(APIEndpoints.FeedbackEndpoint, multipart).ConfigureAwait(false);
@@ -94,7 +97,7 @@ namespace VRCGPUTool.Form
         private void reportSendWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
-            { 
+            {
                 MessageBox.Show(string.Format("送信中にエラーが発生しました。\n\n{0}", e.Error.ToString()));
                 return;
             }
@@ -102,12 +105,12 @@ namespace VRCGPUTool.Form
 
         private void Submit(object sender, EventArgs e)
         {
-            if(body.Text == "")
+            if (body.Text == "")
             {
-                MessageBox.Show("内容が入力されていません","エラー",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("内容が入力されていません", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            var res = MessageBox.Show("送信してもよろしいですか?","確認",MessageBoxButtons.OKCancel,MessageBoxIcon.Question);
+            var res = MessageBox.Show("送信してもよろしいですか?", "確認", MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
             if (res == DialogResult.OK)
             {
                 if (reportSendWorker.IsBusy == false)
@@ -123,7 +126,6 @@ namespace VRCGPUTool.Form
                     MessageBox.Show("送信エラーが発生しました。時間をおいてからやり直してください", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            
         }
 
         private void fileadd_Click(object sender, EventArgs e)
@@ -139,7 +141,7 @@ namespace VRCGPUTool.Form
                     selectFilePath = null;
                     return;
                 }
-                string [] fPath = selectFilePath.Split('\\');
+                string[] fPath = selectFilePath.Split('\\');
                 fileCount.Text = fPath[fPath.Length - 1];
             }
         }

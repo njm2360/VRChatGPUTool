@@ -59,7 +59,7 @@ namespace VRCGPUTool.Util
                     }
                 }
 
-                if (max_util - min_util < Convert.ToInt16(MainObj.GPUusageThreshold.Value) && !MainObj.limitstatus)
+                if (max_util - min_util < Convert.ToInt32(MainObj.GPUusageThreshold.Value) && !MainObj.limitstatus)
                 {
                     return true;
                 }

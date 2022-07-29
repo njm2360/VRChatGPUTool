@@ -70,7 +70,7 @@ namespace VRCGPUTool.Form
             usageTotalDay /= (3600.0 * 1000.0); //Kwh
             priceOfDay /= (3600.0 * 1000.0);
 
-            priceDay.Text = string.Format("電気代:{0:f1}円",priceOfDay);
+            priceDay.Text = string.Format("電気代:{0:f1}円", priceOfDay);
             DaylyTotalPower.Text = string.Format("合計: {0:f2}kWh", usageTotalDay);
 
             ChartArea area = new ChartArea("area");
@@ -184,7 +184,7 @@ namespace VRCGPUTool.Form
                 dayUsage += PlogData.rawdata.hourPowerLog[i];
                 priceOfMonth += hourOfPrice[i] * PlogData.rawdata.hourPowerLog[i];
             }
-            seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day,dayUsage / 3600.0));
+            seriesColumn.Points.Add(new DataPoint(PlogData.rawdata.logdate.Day, dayUsage / 3600.0));
             usageTotalMonth += dayUsage;
 
             int Days = DateTime.DaysInMonth(PlogData.rawdata.logdate.Year, PlogData.rawdata.logdate.Month);
@@ -205,7 +205,7 @@ namespace VRCGPUTool.Form
                         dayUsage += recentlog.rawdata.hourPowerLog[j];
                         priceOfMonth += hourOfPrice[i] * recentlog.rawdata.hourPowerLog[i];
                     }
-                    seriesColumn.Points.Add(new DataPoint(i,dayUsage / 3600.0));
+                    seriesColumn.Points.Add(new DataPoint(i, dayUsage / 3600.0));
                     usageTotalMonth += dayUsage;
                 }
             }
@@ -297,6 +297,8 @@ namespace VRCGPUTool.Form
             DrawHistoryMonth(dispDataMonth, true);
         }
 
+
+        //プロファイルが0の場合に何か表示したほうがよさそう
         private void UnitPriceRefresh()
         {
             int unitP;
@@ -321,7 +323,7 @@ namespace VRCGPUTool.Form
 
         private void SaveAction(object sender, EventArgs e)
         {
-            PowerLogCsv logcsv = new PowerLogCsv(MainObj,this);
+            PowerLogCsv logcsv = new PowerLogCsv(MainObj, this);
             if (TabRange.SelectedIndex == 0)
             {
                 if (DateTime.Now.Date == dispDataDay.Date)

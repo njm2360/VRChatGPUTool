@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Net.Http;
@@ -34,24 +35,30 @@ namespace VRCGPUTool.Util
 
         internal void InitializeRepo(MainForm fm)
         {
-            //FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location);
             GpuStatus g = fm.gpuStatuses.ElementAt(fm.GpuIndex.SelectedIndex);
 
             ProvData provData = new ProvData
             {
                 Guid = fm.guid,
-                Version = fm.Text,//fileVersionInfo.ProductVersion,
+                Version = fileVersionInfo.ProductVersion,
                 Name = g.Name,
                 PLimit = g.PLimit,
                 PLimitMax = g.PLimitMax,
                 PLimitMin = g.PLimitMin,
-                tag = "0"
+                tag = "0",
+                desc = "Initialize"
             };
 
             if (dataSendWorker.IsBusy == false)
             {
                 dataSendWorker.RunWorkerAsync(provData);
             }
+        }
+
+        internal void LimitRepo(MainForm fm)
+        {
+
         }
 
         private void InitializeDataProvideWorker()

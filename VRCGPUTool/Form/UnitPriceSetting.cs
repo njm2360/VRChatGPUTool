@@ -32,7 +32,7 @@ namespace VRCGPUTool.Form
         private void ConfigButton_Click(object sender, EventArgs e)
         {
             int res = InputValueCheck();
-            if(res != -1)
+            if (res != -1)
             {
                 SettingRefresh(res);
             }
@@ -166,12 +166,13 @@ namespace VRCGPUTool.Form
             sbCount++;
             switch (sbCount)
             {
-                case 1: return new SolidBrush(Color.FromArgb(60,179,113));
-                case 2: return new SolidBrush(Color.FromArgb(30,144,255));
-                case 3: return new SolidBrush(Color.FromArgb(178,34,34));
-                case 4: return new SolidBrush(Color.FromArgb(255,127,80));
-                case 5: return new SolidBrush(Color.FromArgb(0,139,139));
-                default: return new SolidBrush(Color.FromArgb(0,0,0));
+                case 1: return new SolidBrush(Color.FromArgb(60, 179, 113));
+                case 2: return new SolidBrush(Color.FromArgb(30, 144, 255));
+                case 3: return new SolidBrush(Color.FromArgb(178, 34, 34));
+                case 4: return new SolidBrush(Color.FromArgb(255, 127, 80));
+                case 5: return new SolidBrush(Color.FromArgb(0, 139, 139));
+                //8まで作らないとダメ（現状）
+                default: return new SolidBrush(Color.FromArgb(0, 0, 0));
             }
         }
 

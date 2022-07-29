@@ -16,6 +16,7 @@ namespace VRCGPUTool.Util
         {
             MainObj = Main_Obj;
         }
+
         private class Config
         {
             public string Guid { get; set; } = "";
@@ -40,6 +41,9 @@ namespace VRCGPUTool.Util
                 Process.Start(new ProcessStartInfo { FileName = "https://github.com/njm2360/VRChatGPUTool#readme", UseShellExecute = true });
             }
 
+            MainObj.BeginTime.Value = DateTime.Now.AddMinutes(15);
+            MainObj.EndTime.Value = DateTime.Now.AddMinutes(30);
+
             Config config = new Config
             {
                 Guid = Guid.NewGuid().ToString(),
@@ -53,22 +57,30 @@ namespace VRCGPUTool.Util
                 SelectGPUIndex = 0
             };
 
-            var resmsg2 = MessageBox.Show(
-                "本ツールではユーザビリティの向上のために\n" +
+            resmsg = MessageBox.Show(
+                "本ツールではユーザビリティの向上や、\n" +
+                "バグ等のシステムレポート用のために \n" +
                 "GPUの使用率や制限の使用状況を取得し、\n" +
                 "開発者に送信することで今後の開発に\n" +
-                "役立てていきたいと考えております。\n" +
+                "役立てていきたいと考えております。\n\n" +
                 "なお情報に関しては個人を特定しない\n" +
-                "形でのデータ提供となります。\n\n" +
+                "形でのデータ提供となり、情報を第三者\n" +
+                "に提供することはありません。\n\n" +
                 "データ提供に同意しますか？",
-                "使用データ提供について",
+                "【任意】使用データ提供について",
                 MessageBoxButtons.YesNo,
-                MessageBoxIcon.Information
+                MessageBoxIcon.Information,
+                MessageBoxDefaultButton.Button2
             );
 
-            if (resmsg2 == DialogResult.Yes)
+            if (resmsg == DialogResult.Yes)
             {
+                MessageBox.Show("データ提供にご協力いただきありがとうございます。\nなお、データ提供は設定画面より切り替え可能です。", "【任意】使用データ提供について", MessageBoxButtons.OK);
                 config.AllowDataProvide = true;
+            }
+            else
+            {
+                MessageBox.Show("データ提供に同意しないを選択しました。\nなお、データ提供は設定画面より切り替え可能です。", "【任意】使用データ提供について", MessageBoxButtons.OK);
             }
 
             string confjson = JsonSerializer.Serialize(config);

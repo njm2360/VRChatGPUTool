@@ -10,7 +10,6 @@ namespace VRCGPUTool.Util
         MainForm fm;
         PowerHistory historyForm;
 
-
         public PowerLogCsv(MainForm mainform, PowerHistory historyForm)
         {
             fm = mainform;
