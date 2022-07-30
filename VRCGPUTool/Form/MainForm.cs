@@ -84,6 +84,7 @@ namespace VRCGPUTool.Form
                 CoreLimitEnable.Enabled = false;
                 CoreClockSetting.Enabled = false;
                 GpuIndex.Enabled = false;
+                SettingButton.Enabled = false;
 
                 if (CoreLimitEnable.Checked == true)
                 {
@@ -106,6 +107,7 @@ namespace VRCGPUTool.Form
                 CoreLimitEnable.Enabled = true;
                 CoreClockSetting.Enabled = true;
                 GpuIndex.Enabled = true;
+                SettingButton.Enabled = true;
 
                 if (CoreLimitEnable.Checked == true)
                 {
@@ -278,13 +280,6 @@ namespace VRCGPUTool.Form
                 return;
             }
 
-            /*if (reportSendWorker.IsBusy == true)
-            {
-                MessageBox.Show("フィードバック送信中です。時間をおいてお試しください。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                e.Cancel = true;
-                return;
-            }*/
-
             ConfigFile config = new ConfigFile(this);
             config.SaveConfig();
 
@@ -337,6 +332,12 @@ namespace VRCGPUTool.Form
                 history = new PowerHistory(this);
                 history.Show();
             }
+        }
+
+        private void SettingButton_Click(object sender, EventArgs e)
+        {
+            SettingForm fm = new SettingForm(this);
+            fm.ShowDialog();
         }
     }
 }

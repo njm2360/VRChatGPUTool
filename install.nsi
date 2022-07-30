@@ -14,6 +14,9 @@ SetDatablockOptimize ON
 
 !define MUI_ABORTWARNING
 
+!define MUI_ICON "VRCGPUTool\VRCGPUTool.ico"
+!define MUI_UNICON "VRCGPUTool\VRCGPUTool.ico"
+
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "LICENSE"
 !insertmacro MUI_PAGE_DIRECTORY

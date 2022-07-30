@@ -70,6 +70,7 @@
             this.howtouse = new System.Windows.Forms.Button();
             this.bugreport = new System.Windows.Forms.Button();
             this.PowerLogShow = new System.Windows.Forms.Button();
+            this.SettingButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.PowerLimitValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GPUusageThreshold)).BeginInit();
             this.groupBox1.SuspendLayout();
@@ -526,7 +527,7 @@
             // 
             // howtouse
             // 
-            this.howtouse.Location = new System.Drawing.Point(540, 39);
+            this.howtouse.Location = new System.Drawing.Point(542, 36);
             this.howtouse.Name = "howtouse";
             this.howtouse.Size = new System.Drawing.Size(99, 25);
             this.howtouse.TabIndex = 27;
@@ -536,7 +537,7 @@
             // 
             // bugreport
             // 
-            this.bugreport.Location = new System.Drawing.Point(540, 72);
+            this.bugreport.Location = new System.Drawing.Point(542, 69);
             this.bugreport.Name = "bugreport";
             this.bugreport.Size = new System.Drawing.Size(99, 25);
             this.bugreport.TabIndex = 32;
@@ -547,7 +548,7 @@
             // 
             // PowerLogShow
             // 
-            this.PowerLogShow.Location = new System.Drawing.Point(540, 103);
+            this.PowerLogShow.Location = new System.Drawing.Point(542, 100);
             this.PowerLogShow.Name = "PowerLogShow";
             this.PowerLogShow.Size = new System.Drawing.Size(99, 25);
             this.PowerLogShow.TabIndex = 34;
@@ -556,11 +557,23 @@
             this.PowerLogShow.UseVisualStyleBackColor = true;
             this.PowerLogShow.Click += new System.EventHandler(this.PowerLogShow_Click);
             // 
+            // SettingButton
+            // 
+            this.SettingButton.Location = new System.Drawing.Point(542, 131);
+            this.SettingButton.Name = "SettingButton";
+            this.SettingButton.Size = new System.Drawing.Size(99, 25);
+            this.SettingButton.TabIndex = 35;
+            this.SettingButton.Tag = "1";
+            this.SettingButton.Text = "設定";
+            this.SettingButton.UseVisualStyleBackColor = true;
+            this.SettingButton.Click += new System.EventHandler(this.SettingButton_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(661, 507);
+            this.Controls.Add(this.SettingButton);
             this.Controls.Add(this.PowerLogShow);
             this.Controls.Add(this.bugreport);
             this.Controls.Add(this.howtouse);
@@ -639,6 +652,7 @@
         internal System.Windows.Forms.RadioButton ResetGPUDefaultPL;
         private System.Windows.Forms.Button PowerLogShow;
         internal System.Windows.Forms.NumericUpDown GPUusageThreshold;
+        private System.Windows.Forms.Button SettingButton;
     }
 }
 
