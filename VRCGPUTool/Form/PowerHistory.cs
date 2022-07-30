@@ -203,7 +203,7 @@ namespace VRCGPUTool.Form
                     for (int j = 0; j < 24; j++)
                     {
                         dayUsage += recentlog.rawdata.hourPowerLog[j];
-                        priceOfMonth += hourOfPrice[i] * recentlog.rawdata.hourPowerLog[i];
+                        priceOfMonth += hourOfPrice[j] * recentlog.rawdata.hourPowerLog[j];
                     }
                     seriesColumn.Points.Add(new DataPoint(i, dayUsage / 3600.0));
                     usageTotalMonth += dayUsage;
