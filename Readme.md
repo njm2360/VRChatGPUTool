@@ -4,17 +4,23 @@ VRC向け GPU電力制限ツール
 
 ![image](https://user-images.githubusercontent.com/66125537/180787763-2033c50c-ad34-4ae4-b42a-95374fa401cd.png)
 
-## 最新リリース(Ver 2.0.1)
+## 最新リリース(Ver 2.1.0)
 
 [Download (GitHub)](https://github.com/njm2360/VRChatGPUTool/releases/latest)
 
 [Download (BOOTH)](https://njm2360.booth.pm/items/3993173)
 
 
-## 使用法
+## 使用法（インストーラー版）
 
-1. `VRCGPUTool.exe`を実行
+1. `VRCGPUTool_installer.exe`を実行
    + 管理者権限が必要なためUACが出ますが**はい**を選択して実行してください。
+   
+1. インストール
+   + 画面の指示に従ってインストールします。完了するとスタートメニューとデスクトップにショートカットが作成されます。
+   
+1. アプリの起動
+   + デスクトップ、またはスタートメニュー内のVRChatGPUToolを開きます
   
 1. 電力制限値を設定します
    + 設定可能な電力制限値はグラフィックボードによって異なります。設定不可能な値を入力した際にはメッセージが表示されます。
@@ -36,7 +42,9 @@ VRC向け GPU電力制限ツール
 
 1. 電力使用履歴の閲覧機能
    + GPUの消費電力をモニタリングしているため、１時間ごと、１日ごとでの電力使用量を分析することができます
-![image](https://user-images.githubusercontent.com/66125537/180788989-8861d67f-c3b6-429b-ae44-0289c72f83b6.png)
+   + 【New】v2.1.0より電気代設定（時間帯別料金も可）に対応したため電気料金も分析できます
+   + CSVエクスポート機能によりデータを出力可能です
+![image](https://user-images.githubusercontent.com/66125537/181913629-93d09f40-1d35-4330-9ed8-ba9f5451bd30.png)
 
 1. フィードバック機能の搭載
    + バグ報告、新機能の要望などを送れる専用フォームを追加しました。4MBまでの画像ファイルのアップロードに対応しています
