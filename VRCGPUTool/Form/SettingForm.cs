@@ -18,8 +18,8 @@ namespace VRCGPUTool.Form
         private void ConfigFileRecreate_Click(object sender, EventArgs e)
         {
             var res = MessageBox.Show(
-                "設定ファイルを再生成してよろしいですか\n" +
-                "再生成すると保存している情報が失われます",
+                "設定ファイルを削除してよろしいですか\n" +
+                "削除すると保存している情報が失われます",
                 "確認",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -27,15 +27,15 @@ namespace VRCGPUTool.Form
             if(res == DialogResult.Yes)
             {
                 File.Delete("config.json");
-                Application.Restart();
+                Environment.Exit(0);
             }
         }
 
         private void PriceSettingRecreate_Click(object sender, EventArgs e)
         {
             var res = MessageBox.Show(
-                "電気代設定ファイルを再生成してよろしいですか\n" +
-                "再生成すると保存している情報が失われます",
+                "電気代設定ファイルを削除してよろしいですか\n" +
+                "削除すると保存している情報が失われます",
                 "確認",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
@@ -43,7 +43,7 @@ namespace VRCGPUTool.Form
             if (res == DialogResult.Yes)
             {
                 File.Delete("profile.json");
-                Application.Restart();
+                Environment.Exit(0);
             }
         }
 
@@ -59,7 +59,7 @@ namespace VRCGPUTool.Form
             if (res == DialogResult.Yes)
             {
                 Directory.Delete("powerlog");
-                Application.Restart();
+                Environment.Exit(0);
             }
         }
 

@@ -3,7 +3,7 @@
 !include "LogicLib.nsh"
 
 Name "VRChatGPUTool"
-OutFile "VRCChatGPUTool_Installer.exe"
+OutFile "VRChatGPUTool_Installer.exe"
 Unicode True
 
 InstallDir "$LOCALAPPDATA\VRChatGPUTool"
@@ -86,6 +86,11 @@ Section "Uninstall"
   Delete "$INSTDIR\System.ValueTuple.dll"
   Delete "$INSTDIR\VRCGPUTool.exe.config"
   Delete "$INSTDIR\VRCGPUTool.pdb"
+  Delete "$INSTDIR\config.json"
+  Delete "$INSTDIR\profile.json"
+
+  RMDir "$SMPROGRAMS\VRChatGPUTool\powerlog"
+  RMDir "$SMPROGRAMS\VRChatGPUTool"
 
   Delete "$SMPROGRAMS\VRChatGPUTool\VRChatGPUTool.lnk"
   Delete "$DESKTOP\VRChatGPUTool.lnk"
