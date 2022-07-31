@@ -24,9 +24,9 @@ namespace VRCGPUTool.Form
                 if (powerProfile.pfData.ProfileCount > i)
                 {
                     int hour = powerProfile.pfData.SplitTime[i];
-                    int pr = powerProfile.pfData.Unit[i];
+                    double pr = powerProfile.pfData.Unit[i];
 
-                    listBox1.Items.Add($"{hour,02}時～{pr,03}円");
+                    listBox1.Items.Add($"{hour,02} 時～ {pr:F2} 円");
                 }
             }
         }
@@ -35,7 +35,16 @@ namespace VRCGPUTool.Form
         {
             if (listBox1.Items.Count != 0)
             {
-                int firstProf = Convert.ToInt32(listBox1.Items[0].ToString().Substring(0, 2).Trim());
+                string[] split = listBox1.Items[0].ToString().Split(' ');
+                int firstProf;
+                if (split[0] == "")
+                {
+                    firstProf = Convert.ToInt32(split[1].Trim());
+                }
+                else
+                {
+                    firstProf = Convert.ToInt32(split[0].Trim());
+                }
                 if(firstProf != 0)
                 {
                     MessageBox.Show(
@@ -60,12 +69,24 @@ namespace VRCGPUTool.Form
 
             int plancount = listBox1.Items.Count;
             powerProfile.pfData.ProfileCount = plancount;
+
             for (int i = 0; i < PowerProfile.maxPf; i++)
             {
                 if (i < plancount)
                 {
-                    int splitHour = Convert.ToInt32(listBox1.Items[i].ToString().Substring(0, 2));
-                    int pr = Convert.ToInt32(listBox1.Items[i].ToString().Substring(4, 3)); //要調整
+                    string[] split = listBox1.Items[i].ToString().Split(' ');
+                    int splitHour;
+                    double pr;
+                    if (split[0] == "")
+                    {
+                        splitHour = Convert.ToInt32(split[1].Trim());
+                        pr = Convert.ToDouble(split[3]);
+                    }
+                    else
+                    {
+                        splitHour = Convert.ToInt32(split[0].Trim());
+                        pr = Convert.ToDouble(split[2]);
+                    }
                     powerProfile.pfData.SplitTime[i] = splitHour;
                     powerProfile.pfData.Unit[i] = pr;
                 }
@@ -153,7 +174,7 @@ namespace VRCGPUTool.Form
                         return;
                     }
                 }
-                listBox1.Items.Add($"{HourSplitInput.Value,02}時～{UnitPriceInput.Value,03}円");
+                listBox1.Items.Add($"{HourSplitInput.Value,02} 時～ {UnitPriceInput.Value:F2} 円");
                 Redraw();
             }
             else

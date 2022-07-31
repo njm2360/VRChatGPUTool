@@ -20,9 +20,6 @@ namespace VRCGPUTool
                     Application.SetCompatibleTextRenderingDefault(false);
                     Application.Run(new MainForm());
                 }
-                catch
-                {
-                }
                 finally
                 {
                     mutex.ReleaseMutex();

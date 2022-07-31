@@ -121,21 +121,22 @@
             // 
             // HourSplitInput
             // 
-            this.HourSplitInput.Location = new System.Drawing.Point(12, 182);
+            this.HourSplitInput.Location = new System.Drawing.Point(6, 182);
             this.HourSplitInput.Maximum = new decimal(new int[] {
             23,
             0,
             0,
             0});
             this.HourSplitInput.Name = "HourSplitInput";
-            this.HourSplitInput.Size = new System.Drawing.Size(47, 20);
+            this.HourSplitInput.Size = new System.Drawing.Size(41, 20);
             this.HourSplitInput.TabIndex = 7;
             // 
             // UnitPriceInput
             // 
-            this.UnitPriceInput.Location = new System.Drawing.Point(90, 182);
+            this.UnitPriceInput.DecimalPlaces = 2;
+            this.UnitPriceInput.Location = new System.Drawing.Point(85, 182);
             this.UnitPriceInput.Name = "UnitPriceInput";
-            this.UnitPriceInput.Size = new System.Drawing.Size(47, 20);
+            this.UnitPriceInput.Size = new System.Drawing.Size(57, 20);
             this.UnitPriceInput.TabIndex = 8;
             // 
             // ProfileAddButton
@@ -163,7 +164,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(59, 186);
+            this.label1.Location = new System.Drawing.Point(53, 186);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(31, 13);
             this.label1.TabIndex = 11;
@@ -172,7 +173,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(138, 186);
+            this.label2.Location = new System.Drawing.Point(146, 186);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(19, 13);
             this.label2.TabIndex = 12;

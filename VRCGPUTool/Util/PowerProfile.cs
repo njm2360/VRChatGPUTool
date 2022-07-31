@@ -22,7 +22,7 @@ namespace VRCGPUTool.Util
         {
             public int ProfileCount { get; set; } = 0;
             public int[] SplitTime { get; set; } = new int[maxPf];
-            public int[] Unit { get; set; } = new int[maxPf];
+            public double[] Unit { get; set; } = new double[maxPf];
         }
 
         private void CreateProfileFile()

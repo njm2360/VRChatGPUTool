@@ -9,7 +9,7 @@ namespace VRCGPUTool.Form
     {
         public MainForm MainObj;
 
-        public PowerHistory(Form.MainForm fm)
+        public PowerHistory(MainForm fm)
         {
             MainObj = fm;
             InitializeComponent();
@@ -25,7 +25,7 @@ namespace VRCGPUTool.Form
         readonly PowerProfile powerPofile;
         UnitPriceSetting pricesetting;
 
-        int[] hourOfPrice = new int[24];
+        double[] hourOfPrice = new double[24];
 
         private DateTime dispDataDay;
         private DateTime dispDataMonth;
@@ -297,11 +297,9 @@ namespace VRCGPUTool.Form
             DrawHistoryMonth(dispDataMonth, true);
         }
 
-
-        //プロファイルが0の場合に何か表示したほうがよさそう
         private void UnitPriceRefresh()
         {
-            int unitP;
+            double unitP;
             int lastread = 23;
             for (int i = (powerPofile.pfData.ProfileCount - 1); i >= 0; i--)
             {
