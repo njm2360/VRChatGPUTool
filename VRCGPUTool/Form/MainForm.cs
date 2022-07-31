@@ -53,6 +53,7 @@ namespace VRCGPUTool.Form
             config.LoadConfig();
 
             PowerLogFile plog = new PowerLogFile(gpuPlog);
+            Directory.CreateDirectory("powerlog");
             plog.LoadPowerLog(DateTime.Now, false);
 
             SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);

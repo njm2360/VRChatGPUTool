@@ -35,16 +35,20 @@
             this.UsageLogDelete = new System.Windows.Forms.Button();
             this.PriceSettingRecreate = new System.Windows.Forms.Button();
             this.ConfigFileRecreate = new System.Windows.Forms.Button();
+            this.RegisterStartup = new System.Windows.Forms.Button();
+            this.DeleteStartup = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.DeleteStartup);
+            this.groupBox1.Controls.Add(this.RegisterStartup);
             this.groupBox1.Controls.Add(this.DataProvideAllow);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(208, 47);
+            this.groupBox1.Size = new System.Drawing.Size(208, 121);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "一般";
@@ -52,7 +56,7 @@
             // DataProvideAllow
             // 
             this.DataProvideAllow.AutoSize = true;
-            this.DataProvideAllow.Location = new System.Drawing.Point(28, 19);
+            this.DataProvideAllow.Location = new System.Drawing.Point(28, 25);
             this.DataProvideAllow.Name = "DataProvideAllow";
             this.DataProvideAllow.Size = new System.Drawing.Size(102, 17);
             this.DataProvideAllow.TabIndex = 0;
@@ -65,7 +69,7 @@
             this.groupBox2.Controls.Add(this.UsageLogDelete);
             this.groupBox2.Controls.Add(this.PriceSettingRecreate);
             this.groupBox2.Controls.Add(this.ConfigFileRecreate);
-            this.groupBox2.Location = new System.Drawing.Point(12, 65);
+            this.groupBox2.Location = new System.Drawing.Point(12, 139);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(208, 129);
             this.groupBox2.TabIndex = 1;
@@ -102,11 +106,31 @@
             this.ConfigFileRecreate.UseVisualStyleBackColor = true;
             this.ConfigFileRecreate.Click += new System.EventHandler(this.ConfigFileRecreate_Click);
             // 
+            // RegisterStartup
+            // 
+            this.RegisterStartup.Location = new System.Drawing.Point(28, 51);
+            this.RegisterStartup.Name = "RegisterStartup";
+            this.RegisterStartup.Size = new System.Drawing.Size(144, 23);
+            this.RegisterStartup.TabIndex = 1;
+            this.RegisterStartup.Text = "スタートアップ登録";
+            this.RegisterStartup.UseVisualStyleBackColor = true;
+            this.RegisterStartup.Click += new System.EventHandler(this.RegisterStartup_Click);
+            // 
+            // DeleteStartup
+            // 
+            this.DeleteStartup.Location = new System.Drawing.Point(28, 80);
+            this.DeleteStartup.Name = "DeleteStartup";
+            this.DeleteStartup.Size = new System.Drawing.Size(144, 23);
+            this.DeleteStartup.TabIndex = 2;
+            this.DeleteStartup.Text = "スタートアップ解除";
+            this.DeleteStartup.UseVisualStyleBackColor = true;
+            this.DeleteStartup.Click += new System.EventHandler(this.DeleteStartup_Click);
+            // 
             // SettingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(237, 205);
+            this.ClientSize = new System.Drawing.Size(237, 279);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -130,5 +154,7 @@
         private System.Windows.Forms.Button UsageLogDelete;
         private System.Windows.Forms.Button PriceSettingRecreate;
         private System.Windows.Forms.Button ConfigFileRecreate;
+        private System.Windows.Forms.Button RegisterStartup;
+        private System.Windows.Forms.Button DeleteStartup;
     }
 }
