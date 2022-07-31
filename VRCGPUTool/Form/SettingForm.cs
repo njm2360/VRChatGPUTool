@@ -61,7 +61,8 @@ namespace VRCGPUTool.Form
             );
             if (res == DialogResult.Yes)
             {
-                Directory.Delete("powerlog");
+                DirectoryInfo di = new DirectoryInfo("powerlog");
+                di.Delete(true);
                 Directory.CreateDirectory("powerlog");
                 Environment.Exit(0);
             }
