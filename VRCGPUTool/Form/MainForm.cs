@@ -170,7 +170,10 @@ namespace VRCGPUTool.Form
 
         private void GPUreadTimer_Tick(object sender, EventArgs e)
         {
-            nvsmi.NvsmiWorker.RunWorkerAsync();
+            if(nvsmi.NvsmiWorker.IsBusy == false)
+            {
+                nvsmi.NvsmiWorker.RunWorkerAsync();
+            }
 
             if (limitstatus)
             {
