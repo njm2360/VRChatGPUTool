@@ -47,7 +47,10 @@ namespace VRCGPUTool.Form
             nvsmi.CheckNvidiaSmi();
             nvsmi.InitGPU();
 
-            update.checkUpdateWorker.RunWorkerAsync();
+            if(update.checkUpdateWorker.IsBusy == false)
+            {
+                update.checkUpdateWorker.RunWorkerAsync();
+            }
 
             ConfigFile config = new ConfigFile(this);
             config.LoadConfig();
