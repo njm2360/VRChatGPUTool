@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using VRCGPUTool.Util;
 
 namespace VRCGPUTool.Form
 {
@@ -36,8 +37,6 @@ namespace VRCGPUTool.Form
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
 
-                var client = new HttpClient();
-
                 var multipart = new MultipartFormDataContent();
 
                 if (bug.Checked == true)
@@ -68,7 +67,7 @@ namespace VRCGPUTool.Form
                     multipart.Add(imageContent, "Image", finfo.Name);
                 }
 
-                var result = await client.PostAsync(APIEndpoints.FeedbackEndpoint, multipart).ConfigureAwait(false);
+                var result = await HttpRequest.client.PostAsync(APIEndpoints.FeedbackEndpoint, multipart).ConfigureAwait(false);
 
                 result.EnsureSuccessStatusCode();
 

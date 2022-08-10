@@ -35,8 +35,6 @@ namespace VRCGPUTool.Util
             Task<string> worker = Task.Run<string>(async () => {
                 BackgroundWorker w = sender as BackgroundWorker;
 
-                var client = new HttpClient();
-
                 var message = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,
@@ -45,7 +43,7 @@ namespace VRCGPUTool.Util
 
                 message.Headers.UserAgent.Add(new ProductInfoHeaderValue("VRChatGPUTool", "0.0.0.0"));
 
-                var result = await client.SendAsync(message).ConfigureAwait(false);
+                var result = await HttpRequest.client.SendAsync(message).ConfigureAwait(false);
 
                 result.EnsureSuccessStatusCode();
 

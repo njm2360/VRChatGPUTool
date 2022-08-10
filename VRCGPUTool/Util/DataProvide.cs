@@ -93,8 +93,6 @@ namespace VRCGPUTool.Util
             {
                 BackgroundWorker w = sender as BackgroundWorker;
 
-                var client = new HttpClient();
-
                 var message = new HttpRequestMessage
                 {
                     Method = HttpMethod.Post,
@@ -105,7 +103,7 @@ namespace VRCGPUTool.Util
 
                 message.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var result = await client.SendAsync(message).ConfigureAwait(false);
+                var result = await HttpRequest.client.SendAsync(message).ConfigureAwait(false);
 
                 result.EnsureSuccessStatusCode();
 

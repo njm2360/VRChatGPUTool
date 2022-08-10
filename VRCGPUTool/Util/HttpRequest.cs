@@ -1,20 +1,14 @@
-﻿using System;
-using System.ComponentModel;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
 
 namespace VRCGPUTool.Util
 {
     internal class HttpRequest
     {
-        public static HttpClient client;
+        public static readonly HttpClient client;
 
-        public void HttpClientUtil()
+        static HttpRequest()
         {
             client = new HttpClient();
         }
-
     }
 }
