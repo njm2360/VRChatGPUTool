@@ -1,18 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using VRCGPUTool.Util;
 
 namespace VRCGPUTool.Form
 {
     public partial class SettingForm : System.Windows.Forms.Form
     {
         MainForm fm;
+        StartupTask startupTask;
 
         public SettingForm(MainForm　fm)
         {
             InitializeComponent();
             this.fm = fm;
             DataProvideAllow.Checked = fm.allowDataProvide;
+            startupTask = new StartupTask();
         }
 
         private void ConfigFileRecreate_Click(object sender, EventArgs e)
@@ -82,26 +85,12 @@ namespace VRCGPUTool.Form
 
         private void RegisterStartup_Click(object sender, EventArgs e)
         {
-            string shortcutPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), @"VRCGPUTool.lnk");
-            string targetPath = Application.ExecutablePath;
-
-            IWshRuntimeLibrary.WshShell shell = new IWshRuntimeLibrary.WshShell();
-            IWshRuntimeLibrary.WshShortcut shortcut = shell.CreateShortcut(shortcutPath);
-
-            shortcut.TargetPath = targetPath;
-            shortcut.WorkingDirectory = Application.StartupPath;
-            shortcut.WindowStyle = 1;
-            shortcut.IconLocation = Application.ExecutablePath + ",0";
-
-            shortcut.Save();
-
-            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shortcut);
-            System.Runtime.InteropServices.Marshal.FinalReleaseComObject(shell);
+            startupTask.registerTask();
         }
 
         private void DeleteStartup_Click(object sender, EventArgs e)
         {
-            File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Startup), @"VRCGPUTool.lnk"));
+            startupTask.removeTask();
         }
     }
 }

@@ -19,6 +19,7 @@ namespace VRCGPUTool.Form
             nvsmi = new NvidiaSmi(this);
             gpuPlog = new GPUPowerLog();
             autoLimit = new AutoLimit(this);
+            notifyIcon.Visible = false;
         }
 
         private NvidiaSmi nvsmi;
@@ -345,6 +346,48 @@ namespace VRCGPUTool.Form
         {
             SettingForm fm = new SettingForm(this);
             fm.ShowDialog();
+        }
+
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                this.Visible = true;
+                this.WindowState = FormWindowState.Normal;
+
+                notifyIcon.Visible = false;
+            }
+        }
+
+        private void MainWindowOpenStrip_Click(object sender, EventArgs e)
+        {
+            this.Visible = true;
+            this.WindowState = FormWindowState.Normal;
+
+            notifyIcon.Visible = false;
+        }
+
+        private void ShowVersionInfoStrip_Click(object sender, EventArgs e)
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string versionInfo = fileVersionInfo.ProductVersion;    
+
+            MessageBox.Show("Version v" + versionInfo + "\n\nCopyright© njm2360 Allrights reserved 2022" ,"バージョン情報");
+        }
+
+        private void ApplicationExitStrip_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+            if (this.WindowState == FormWindowState.Minimized)
+            {
+                this.Visible = false;
+                notifyIcon.Visible = true;
+            }
         }
     }
 }
