@@ -60,8 +60,8 @@ namespace VRCGPUTool.Form
             Directory.CreateDirectory("powerlog");
             plog.LoadPowerLog(DateTime.Now, false);
 
-            SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
-            PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
+            //SpecificPLValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
+            //PowerLimitValue.Value = Convert.ToDecimal(gpuStatuses.First().PLimit);
             GPUCorePLValue.Text = "GPUコア電力制限: " + gpuStatuses.First().PLimit.ToString() + "W";
 
             if (allowDataProvide)
