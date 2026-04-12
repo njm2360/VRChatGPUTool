@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <!-- WPF UI層, 外部依存サービス, DTOs を除外 -->
+          <Exclude>[VRCGPUTool]VRCGPUTool.Views.*,[VRCGPUTool]VRCGPUTool.Converters.*,[VRCGPUTool]VRCGPUTool.Behaviors.*,[VRCGPUTool]VRCGPUTool.App,[VRCGPUTool]VRCGPUTool.Services.DialogService,[VRCGPUTool]VRCGPUTool.Services.JsonConfigService,[VRCGPUTool]VRCGPUTool.Services.JsonElectricityProfileService,[VRCGPUTool]VRCGPUTool.Services.PowerLogService,[VRCGPUTool]VRCGPUTool.Services.GitHubUpdateCheckService,[VRCGPUTool]VRCGPUTool.Services.NvidiaSmiProxyService,[VRCGPUTool]VRCGPUTool.Services.StartupService,[VRCGPUTool]VRCGPUTool.Services.Mock.*,[NvidiaSmiProxy]*,[VRCGPUTool.Shared]*</Exclude>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

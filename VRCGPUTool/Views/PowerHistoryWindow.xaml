@@ -1,0 +1,247 @@
+<Window x:Class="VRCGPUTool.Views.PowerHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="電力履歴"
+        Width="640" Height="460" MinWidth="500" MinHeight="360"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <DockPanel Margin="12">
+
+        <TabControl>
+
+            <!-- ══ 時間別タブ ══ -->
+            <TabItem Header="時間別">
+                <DockPanel Margin="0,8,0,0" DataContext="{Binding DailyVm}">
+
+                    <!-- 日付ナビゲーション + CSV -->
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Button DockPanel.Dock="Right" Content="CSV エクスポート"
+                                Command="{Binding ExportCsvCommand}" Padding="8,4" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Left" Content="◀"
+                                Command="{Binding PreviousDayCommand}"
+                                Width="30" Margin="0,0,6,0"/>
+                        <Button DockPanel.Dock="Left" Content="▶"
+                                Command="{Binding NextDayCommand}"
+                                Width="30" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding DateText}"
+                                   VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </DockPanel>
+
+                    <!-- 合計・電気代 -->
+                    <TextBlock DockPanel.Dock="Bottom"
+                               Text="{Binding TotalText}"
+                               HorizontalAlignment="Right"
+                               FontSize="12" Margin="0,6,0,0" Foreground="#444"/>
+
+                    <!-- 棒グラフ -->
+                    <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="4" Padding="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="44"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Y軸ラベル -->
+                            <ItemsControl Grid.Column="0" Grid.Row="0"
+                                          ItemsSource="{Binding YTicks}" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="4" Columns="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" FontSize="8" Foreground="Gray"
+                                                   Width="42" TextAlignment="Right" VerticalAlignment="Top"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- グラフエリア -->
+                            <Grid Grid.Column="1" Grid.Row="0" ClipToBounds="True">
+                                <!-- グリッド線 (25% / 50% / 75%) -->
+                                <Grid IsHitTestVisible="False">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Grid.Row="1" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                    <Rectangle Grid.Row="2" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                    <Rectangle Grid.Row="3" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding Bars}" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="{Binding EmptyRatio, Converter={StaticResource RatioToGridLengthConverter}}"/>
+                                                    <RowDefinition Height="{Binding BarRatio,   Converter={StaticResource RatioToGridLengthConverter}}"/>
+                                                </Grid.RowDefinitions>
+                                                <Rectangle Grid.Row="1" Fill="#5C6BC0" Margin="1,0">
+                                                    <Rectangle.ToolTip>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding Label, StringFormat='{}{0}:00'}"/>
+                                                            <Run Text=" — "/>
+                                                            <Run Text="{Binding WhLabel}"/>
+                                                        </TextBlock>
+                                                    </Rectangle.ToolTip>
+                                                </Rectangle>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Rectangle VerticalAlignment="Bottom" Height="1" Fill="#CCCCCC"/>
+                            </Grid>
+
+                            <!-- X軸ラベル -->
+                            <ItemsControl Grid.Column="1" Grid.Row="1" ItemsSource="{Binding Bars}" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" FontSize="8"
+                                                   HorizontalAlignment="Center" Foreground="Gray"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                </DockPanel>
+            </TabItem>
+
+            <!-- ══ 日別タブ ══ -->
+            <TabItem Header="日別">
+                <DockPanel Margin="0,8,0,0" DataContext="{Binding MonthlyVm}">
+
+                    <!-- 月ナビゲーション + CSV -->
+                    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Button DockPanel.Dock="Right" Content="CSV エクスポート"
+                                Command="{Binding ExportMonthCsvCommand}" Padding="8,4" Margin="4,0,0,0"/>
+                        <Button DockPanel.Dock="Left" Content="◀"
+                                Command="{Binding PreviousMonthCommand}"
+                                Width="30" Margin="0,0,6,0"/>
+                        <Button DockPanel.Dock="Left" Content="▶"
+                                Command="{Binding NextMonthCommand}"
+                                Width="30" Margin="0,0,8,0"/>
+                        <TextBlock Text="{Binding MonthText}"
+                                   VerticalAlignment="Center" FontSize="14" FontWeight="SemiBold"/>
+                    </DockPanel>
+
+                    <!-- 合計・電気代 -->
+                    <TextBlock DockPanel.Dock="Bottom"
+                               Text="{Binding MonthTotalText}"
+                               HorizontalAlignment="Right"
+                               FontSize="12" Margin="0,6,0,0" Foreground="#444"/>
+
+                    <!-- 棒グラフ -->
+                    <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="4" Padding="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="44"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Y軸ラベル -->
+                            <ItemsControl Grid.Column="0" Grid.Row="0"
+                                          ItemsSource="{Binding DayYTicks}" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="4" Columns="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" FontSize="8" Foreground="Gray"
+                                                   Width="42" TextAlignment="Right" VerticalAlignment="Top"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <!-- グラフエリア -->
+                            <Grid Grid.Column="1" Grid.Row="0" ClipToBounds="True">
+                                <!-- グリッド線 (25% / 50% / 75%) -->
+                                <Grid IsHitTestVisible="False">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Grid.Row="1" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                    <Rectangle Grid.Row="2" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                    <Rectangle Grid.Row="3" VerticalAlignment="Top" Height="1" Fill="#EBEBEB"/>
+                                </Grid>
+                                <ItemsControl ItemsSource="{Binding DayBars}" Focusable="False">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1"/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="{Binding EmptyRatio, Converter={StaticResource RatioToGridLengthConverter}}"/>
+                                                    <RowDefinition Height="{Binding BarRatio,   Converter={StaticResource RatioToGridLengthConverter}}"/>
+                                                </Grid.RowDefinitions>
+                                                <Rectangle Grid.Row="1" Fill="#26A69A" Margin="1,0">
+                                                    <Rectangle.ToolTip>
+                                                        <TextBlock>
+                                                            <Run Text="{Binding Label, StringFormat='{}{}日'}"/>
+                                                            <Run Text=" — "/>
+                                                            <Run Text="{Binding WhLabel}"/>
+                                                        </TextBlock>
+                                                    </Rectangle.ToolTip>
+                                                </Rectangle>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <Rectangle VerticalAlignment="Bottom" Height="1" Fill="#CCCCCC"/>
+                            </Grid>
+
+                            <!-- X軸ラベル -->
+                            <ItemsControl Grid.Column="1" Grid.Row="1" ItemsSource="{Binding DayBars}" Focusable="False">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Rows="1"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Label}" FontSize="8"
+                                                   HorizontalAlignment="Center" Foreground="Gray"/>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+
+                </DockPanel>
+            </TabItem>
+
+        </TabControl>
+
+    </DockPanel>
+</Window>
