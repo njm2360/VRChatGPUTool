@@ -14,16 +14,14 @@ public sealed class JsonConfigService : IConfigService
 
     public async Task<AppConfig> LoadAsync()
     {
-        string fileToLoad = File.Exists(FileName) ? FileName
-                          : File.Exists(AppPaths.LegacyConfigFile) ? AppPaths.LegacyConfigFile
-                          : string.Empty;
+        string fileToLoad = File.Exists(FileName) ? FileName : string.Empty;
 
         if (fileToLoad == string.Empty)
             return new AppConfig();
 
         try
         {
-            var json = await File.ReadAllTextAsync(fileToLoad, Encoding.UTF8).ConfigureAwait(false);
+            string json = await File.ReadAllTextAsync(fileToLoad, Encoding.UTF8).ConfigureAwait(false);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 

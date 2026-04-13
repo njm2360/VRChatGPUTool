@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Win32;
 
 namespace VRCGPUTool.Services;
@@ -6,7 +7,8 @@ public sealed class StartupService : IStartupService
 {
     private const string RegistryKeyPath =
         @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
-    private const string ValueName = "VRCGPUTool";
+    private static readonly string ValueName =
+        Assembly.GetExecutingAssembly().GetName().Name!;
 
     public bool IsEnabled()
     {

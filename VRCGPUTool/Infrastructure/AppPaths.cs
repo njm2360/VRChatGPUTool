@@ -12,8 +12,4 @@ internal static class AppPaths
     public static readonly string ConfigFile = Path.Combine(DataDir, "config.json");
     public static readonly string ElecFile = Path.Combine(DataDir, "elec_profile.json");
     public static readonly string PowerLogDir = Path.Combine(DataDir, "powerlog");
-
-    public static readonly string LegacyConfigFile =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                     "VRChatGPUTool", "config.json");
 }

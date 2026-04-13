@@ -1,20 +1,20 @@
 #define AppName        "VRChatGPUTool"
 #define AppVersion     "3.0.0"
-#define AppExeName     "VRCGPUTool.exe"
+#define AppExeName     "VRChatGPUTool.exe"
 #define ServiceExeName "NvidiaSmiProxy.exe"
 #define ServiceName    "VRCGPUToolNvidiaSmiProxy"
 #define ServiceDisplay "VRCGPUTool NvidiaSmi Proxy"
 
 [Setup]
-AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
+AppId={{e94c57b2-b490-46d5-9c46-5f6a0517c973}
 AppName={#AppName}
 AppVersion={#AppVersion}
-AppVerName={#AppName} {#AppVersion}
+AppVerName={#AppName}
 AppPublisher=njm2360
 DefaultDirName={autopf64}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=dist
-OutputBaseFilename=VRCGPUTool-v{#AppVersion}-setup
+OutputBaseFilename=VRChatGPUTool-v{#AppVersion}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
@@ -40,37 +40,75 @@ Name: "{group}\{#AppName} のアンインストール"; Filename: "{uninstallexe
 Name: "{autodesktop}\{#AppName}";              Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
 [Run]
+; Always create — existing service removed in [Code] before install
 Filename: "{sys}\sc.exe"; \
     Parameters: "create ""{#ServiceName}"" binPath= ""{app}\Service\{#ServiceExeName}"" DisplayName= ""{#ServiceDisplay}"" start= auto obj= LocalSystem"; \
     Flags: runhidden waituntilterminated; \
     StatusMsg: "サービスを登録しています..."
 
-; サービス起動
 Filename: "{sys}\sc.exe"; \
     Parameters: "start ""{#ServiceName}"""; \
     Flags: runhidden waituntilterminated; \
     StatusMsg: "サービスを起動しています..."
 
-; インストール完了後にアプリを起動（任意）
 Filename: "{app}\{#AppExeName}"; \
     Description: "{#AppName} を起動する"; \
     Flags: nowait postinstall skipifsilent runascurrentuser
 
 [UninstallRun]
-; サービスを停止（起動していない場合もエラーを無視して続行）
 Filename: "{sys}\sc.exe"; \
     Parameters: "stop ""{#ServiceName}"""; \
     Flags: runhidden waituntilterminated; \
     RunOnceId: "StopService"
 
-; 停止完了を少し待つ（SCM が非同期で止めるため）
+; Wait for SCM to stop the service asynchronously
 Filename: "{sys}\timeout.exe"; \
     Parameters: "/t 3 /nobreak"; \
     Flags: runhidden waituntilterminated; \
     RunOnceId: "WaitServiceStop"
 
-; サービス登録を削除
 Filename: "{sys}\sc.exe"; \
     Parameters: "delete ""{#ServiceName}"""; \
     Flags: runhidden waituntilterminated; \
     RunOnceId: "DeleteService"
+
+Filename: "{sys}\reg.exe"; \
+    Parameters: "delete ""HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"" /v ""{#AppName}"" /f"; \
+    Flags: runhidden waituntilterminated; \
+    RunOnceId: "DeleteStartupReg"
+
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+var
+  ResultCode: Integer;
+begin
+  if CurStep = ssInstall then
+  begin
+    // Kill app to avoid file lock during upgrade
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM "{#AppExeName}" /F', '',
+         SW_HIDE, ewWaitUntilTerminated, ResultCode);
+
+    // Stop and delete existing service so sc create in [Run] always succeeds
+    Exec(ExpandConstant('{sys}\sc.exe'), 'stop "{#ServiceName}"', '',
+         SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(2000);
+    Exec(ExpandConstant('{sys}\sc.exe'), 'delete "{#ServiceName}"', '',
+         SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(1000);
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  ResultCode: Integer;
+begin
+  if CurUninstallStep = usUninstall then
+  begin
+    Exec(ExpandConstant('{sys}\taskkill.exe'), '/IM "{#AppExeName}" /F', '',
+         SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Sleep(500);
+
+    if MsgBox('設定ファイルを削除しますか？', mbConfirmation, MB_YESNO) = IDYES then
+      DelTree(ExpandConstant('{localappdata}\{#AppName}'), True, True, True);
+  end;
+end;
