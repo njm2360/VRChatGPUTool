@@ -97,7 +97,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         if (AutoLimitEnabled && AutoLimitThreshold is < 1 or > 99)
         {
-            _dialogService.ShowWarning("安定判定閾値は 1〜99 で指定してください。", "入力エラー");
+            _dialogService.ShowWarning("安定判定閾値は1〜99で指定してください。", "入力エラー");
+            return;
+        }
+
+        if (CoreClockLimitEnabled && CoreClockMaxMhz is < 200 or > 2000)
+        {
+            _dialogService.ShowWarning("最大クロックは200〜2000MHzで指定してください。", "入力エラー");
             return;
         }
 

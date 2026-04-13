@@ -86,6 +86,7 @@
                 <StackPanel Orientation="Horizontal" IsEnabled="{Binding AutoLimitEnabled}">
                     <TextBlock Text="安定判定閾値:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <TextBox Text="{Binding AutoLimitThreshold, UpdateSourceTrigger=PropertyChanged}"
+                             b:NumericInputBehavior.IsEnabled="True"
                              Width="50" VerticalContentAlignment="Center" TextAlignment="Center"/>
                     <TextBlock Text="%" VerticalAlignment="Center" Margin="4,0,0,0"/>
                 </StackPanel>
@@ -101,6 +102,7 @@
                 <StackPanel Orientation="Horizontal" IsEnabled="{Binding CoreClockLimitEnabled}">
                     <TextBlock Text="最大クロック:" VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <TextBox Text="{Binding CoreClockMaxMhz, UpdateSourceTrigger=PropertyChanged}"
+                             b:NumericInputBehavior.IsEnabled="True"
                              Width="60" VerticalContentAlignment="Center" TextAlignment="Center"/>
                     <TextBlock Text="MHz" VerticalAlignment="Center" Margin="4,0,0,0"/>
                 </StackPanel>
