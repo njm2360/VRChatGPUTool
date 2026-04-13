@@ -957,7 +957,7 @@ public class MainViewModelTests
         SetField(vm, "_config", new AppConfig
         {
             RestoreDefaultOnUnlimit = false,
-            RestoreToWatts          = 200,
+            RestoreToWatts = 200,
             Schedules =
             [
                 new ScheduleSlot
@@ -1001,7 +1001,7 @@ public class MainViewModelTests
         SetField(vm, "_config", new AppConfig
         {
             CoreClockLimitEnabled = true,
-            CoreClockMaxMhz       = 1200,
+            CoreClockMaxMhz = 1200,
             Schedules =
             [
                 new ScheduleSlot
