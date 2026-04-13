@@ -1,0 +1,163 @@
+<Window x:Class="VRCGPUTool.Views.UnitPriceSettingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:VRCGPUTool.ViewModels"
+        Title="電気代単価設定"
+        Width="500"
+        SizeToContent="Height"
+        MaxHeight="760"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DayProfileViewModel}">
+            <StackPanel>
+
+                <!-- 24時間バー -->
+                <Border BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="3" Margin="0,0,0,4">
+                    <ItemsControl ItemsSource="{Binding HourBlocks}" Focusable="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Rows="1"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="24"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    <Rectangle Grid.Row="0" Fill="{Binding Fill}">
+                                        <Rectangle.ToolTip>
+                                            <TextBlock Text="{Binding ToolTip}"/>
+                                        </Rectangle.ToolTip>
+                                    </Rectangle>
+                                    <TextBlock Grid.Row="1" Text="{Binding Hour}"
+                                               FontSize="8" HorizontalAlignment="Center" Foreground="Gray"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
+
+                <!-- 凡例 -->
+                <ItemsControl ItemsSource="{Binding Legend}" Margin="0,0,0,6" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,1,10,1">
+                                <Rectangle Width="10" Height="10" Fill="{Binding Fill}"
+                                           VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <TextBlock Text="{Binding Label}" FontSize="11" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <!-- スロット一覧 -->
+                <DataGrid ItemsSource="{Binding Slots}"
+                          SelectedItem="{Binding SelectedSlot}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False" CanUserDeleteRows="False"
+                          CanUserReorderColumns="False" CanUserResizeRows="False"
+                          HeadersVisibility="Column" SelectionMode="Single"
+                          Height="90" Margin="0,0,0,6">
+                    <DataGrid.Columns>
+                        <DataGridTemplateColumn Header="開始時" Width="80">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Hour, StringFormat='{}{0}時'}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding Hour, UpdateSourceTrigger=PropertyChanged}"
+                                             IsEnabled="{Binding IsFixed, Converter={StaticResource InverseBoolConverter}}"
+                                             HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTemplateColumn Header="単価 (円/kWh)" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding UnitPrice, StringFormat='{}{0:F2}'}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <TextBox Text="{Binding UnitPrice, UpdateSourceTrigger=LostFocus}"
+                                             HorizontalAlignment="Stretch"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- 追加 / 削除 -->
+                <DockPanel LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal">
+                        <Label Content="開始:" VerticalAlignment="Center"/>
+                        <TextBox Text="{Binding InputHour, UpdateSourceTrigger=PropertyChanged}"
+                                 Width="34" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Content="時  単価:" VerticalAlignment="Center" Margin="6,0,0,0"/>
+                        <TextBox Text="{Binding InputPrice, UpdateSourceTrigger=LostFocus, StringFormat='{}{0:F2}'}"
+                                 Width="60" TextAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Content="円/kWh" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                    </StackPanel>
+                    <Button DockPanel.Dock="Right" Content="削除" Width="56" Margin="6,0,0,0"
+                            Command="{Binding RemoveSlotCommand}"/>
+                    <Button DockPanel.Dock="Right" Content="追加" Width="56" Margin="6,0,0,0"
+                            Command="{Binding AddSlotCommand}"/>
+                </DockPanel>
+
+                <!-- プロファイル個別エラー -->
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" FontSize="11" Margin="0,4,0,0"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToCollapsedConverter}}"/>
+
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <StackPanel Margin="14" VerticalAlignment="Top">
+
+        <GroupBox Header="平日 (月〜金)" Margin="0,0,0,10">
+            <ContentControl Content="{Binding WeekdayProfile}" Margin="0,4,0,0" Focusable="False"/>
+        </GroupBox>
+
+        <!-- 休日 -->
+        <GroupBox Header="休日 (土・日)" Margin="0,0,0,10">
+            <StackPanel Margin="0,4,0,0">
+                <DockPanel LastChildFill="False" Margin="0,0,0,6">
+                    <CheckBox DockPanel.Dock="Left" Content="平日と同じ設定を使用する"
+                              IsChecked="{Binding HolidayUseSameAsWeekday}"
+                              VerticalAlignment="Center"/>
+                    <Button DockPanel.Dock="Right" Content="平日の設定をコピー" Width="130"
+                            Command="{Binding CopyWeekdayToHolidayCommand}"
+                            IsEnabled="{Binding HolidayUseSameAsWeekday,
+                                Converter={StaticResource InverseBoolConverter}}"/>
+                </DockPanel>
+                <ContentControl Content="{Binding HolidayProfile}"
+                                IsEnabled="{Binding HolidayUseSameAsWeekday,
+                                    Converter={StaticResource InverseBoolConverter}}"
+                                Focusable="False"/>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- OK / キャンセル -->
+        <DockPanel LastChildFill="False" Margin="0,0,0,4">
+            <Button DockPanel.Dock="Right" Content="OK" Width="80"
+                    Command="{Binding SaveAndCloseCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Button DockPanel.Dock="Right" Content="キャンセル" Width="80" Margin="0,0,8,0"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+        </DockPanel>
+
+    </StackPanel>
+</Window>

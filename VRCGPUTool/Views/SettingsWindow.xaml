@@ -1,0 +1,124 @@
+<Window x:Class="VRCGPUTool.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="clr-namespace:VRCGPUTool.Behaviors"
+        Title="設定"
+        Width="355" SizeToContent="Height"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <StackPanel Margin="12,10,12,12">
+
+        <!-- GPU選択 -->
+        <GroupBox Header="GPU" Margin="0,0,0,6">
+            <ComboBox ItemsSource="{Binding Gpus}"
+                      SelectedIndex="{Binding SelectedGpuIndex}"
+                      DisplayMemberPath="Name"
+                      Margin="0,3,0,0"/>
+        </GroupBox>
+
+        <!-- 電力制限値 -->
+        <GroupBox Header="電力制限値" Margin="0,0,0,6">
+            <StackPanel Margin="0,3,0,0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <TextBlock Text="制限値:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBox Text="{Binding PowerLimitWatts, UpdateSourceTrigger=LostFocus}"
+                             b:NumericInputBehavior.IsEnabled="True"
+                             Width="70" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                    <TextBlock Text="W" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="最小"      Command="{Binding LoadMinWattsCommand}"
+                            Width="60" Margin="0,0,4,0"/>
+                    <Button Content="デフォルト" Command="{Binding LoadDefaultWattsCommand}"
+                            Width="70" Margin="0,0,4,0"/>
+                    <Button Content="最大"      Command="{Binding LoadMaxWattsCommand}"
+                            Width="60"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 制限解除時の電力値 -->
+        <GroupBox Header="制限解除時の電力値" Margin="0,0,0,6">
+            <StackPanel Margin="0,3,0,0">
+                <RadioButton Content="デフォルト値に戻す"
+                             IsChecked="{Binding RestoreDefaultOnUnlimit}"
+                             Margin="0,0,0,4"/>
+                <RadioButton IsChecked="{Binding RestoreDefaultOnUnlimit,
+                                                 Converter={StaticResource InverseBoolConverter}}">
+                    <RadioButton.Content>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="指定値: " VerticalAlignment="Center"/>
+                            <TextBox Text="{Binding RestoreToWatts, UpdateSourceTrigger=LostFocus}"
+                                     IsEnabled="{Binding RestoreDefaultOnUnlimit,
+                                                         Converter={StaticResource InverseBoolConverter}}"
+                                     b:NumericInputBehavior.IsEnabled="True"
+                                     Width="60" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                            <TextBlock Text="W" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                        </StackPanel>
+                    </RadioButton.Content>
+                </RadioButton>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- 電気代 -->
+        <GroupBox Header="電気代" Margin="0,0,0,6">
+            <Button Content="単価設定..."
+                    Command="{Binding OpenPriceSettingCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    HorizontalAlignment="Left" Padding="10,3" Margin="0,3,0,0"/>
+        </GroupBox>
+
+        <!-- スタートアップ -->
+        <GroupBox Header="システム" Margin="0,0,0,6">
+            <CheckBox Content="Windows 起動時に自動起動"
+                      IsChecked="{Binding LaunchAtStartup}"
+                      Margin="0,3,0,0"/>
+        </GroupBox>
+
+        <!-- 自動制限 -->
+        <GroupBox Header="自動制限" Margin="0,0,0,6">
+            <StackPanel>
+                <CheckBox Content="GPU 使用率が安定したら自動的に制限を開始する"
+                          IsChecked="{Binding AutoLimitEnabled}"
+                          Margin="0,3,0,4"/>
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding AutoLimitEnabled}">
+                    <TextBlock Text="安定判定閾値:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBox Text="{Binding AutoLimitThreshold, UpdateSourceTrigger=PropertyChanged}"
+                             b:NumericInputBehavior.IsEnabled="True"
+                             Width="50" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                    <TextBlock Text="%" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- コアクロック制限 -->
+        <GroupBox Header="コアクロック制限" Margin="0,0,0,6">
+            <StackPanel>
+                <CheckBox Content="電力制限と同時にコアクロックも制限する"
+                          IsChecked="{Binding CoreClockLimitEnabled}"
+                          Margin="0,3,0,4"/>
+                <StackPanel Orientation="Horizontal" IsEnabled="{Binding CoreClockLimitEnabled}">
+                    <TextBlock Text="最大クロック:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBox Text="{Binding CoreClockMaxMhz, UpdateSourceTrigger=PropertyChanged}"
+                             b:NumericInputBehavior.IsEnabled="True"
+                             Width="60" VerticalContentAlignment="Center" TextAlignment="Center"/>
+                    <TextBlock Text="MHz" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- ボタン -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,6,0,0">
+            <Button Content="キャンセル" Width="80" Margin="0,0,8,0"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Button Content="OK" Width="80"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    IsDefault="True"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

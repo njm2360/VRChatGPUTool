@@ -1,44 +1,31 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFrameworks>net472</TargetFrameworks>
-    <UseWindowsForms>true</UseWindowsForms>
-    <Version>2.3.1</Version>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <ApplicationIcon>VRCGPUTool.ico</ApplicationIcon>
+    <AssemblyName>VRChatGPUTool</AssemblyName>
+    <RootNamespace>VRCGPUTool</RootNamespace>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
+    <ProductVersion>3.0.0</ProductVersion>
+    <Platforms>x64</Platforms>
     <PlatformTarget>x64</PlatformTarget>
-    <SignAssembly>False</SignAssembly>
-    <Copyright>njm2360</Copyright>
-    <Description>VRChat向けGPU電力制限ツール</Description>
-    <PackageLicenseFile>C:\Users\Owner\source\repos\VRCGPUTool\LICENSE</PackageLicenseFile>
-    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>
+    <LangVersion>latest</LangVersion>
+    <ApplicationIcon>VRCGPUTool.ico</ApplicationIcon>
   </PropertyGroup>
+
   <ItemGroup>
-    <COMReference Include="IWshRuntimeLibrary">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>f935dc20-1cf0-11d0-adb9-00c04fd58a0b</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-    <COMReference Include="TaskScheduler">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>e34cb9f1-c7f7-424c-be29-027dcc09363a</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.4.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.5" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="System.Net.Http" Version="4.3.4" />
-    <PackageReference Include="System.Text.Json" Version="6.0.5" />
+    <ProjectReference Include="..\VRCGPUTool.Shared\VRCGPUTool.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Windows.Forms.DataVisualization" />
-  </ItemGroup>
+
 </Project>

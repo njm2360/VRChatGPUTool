@@ -1,0 +1,165 @@
+<Window x:Class="VRCGPUTool.Views.ScheduleSettingWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:b="clr-namespace:VRCGPUTool.Behaviors"
+        xmlns:conv="clr-namespace:VRCGPUTool.Converters"
+        Title="スケジュール設定"
+        SizeToContent="WidthAndHeight"
+        MaxHeight="640"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+
+        <!-- 時刻入力コンバーター -->
+        <conv:TimePartConverter x:Key="HourConv"   Max="23" ZeroSuppress="True"/>
+        <conv:TimePartConverter x:Key="MinuteConv" Max="59"/>
+
+        <!-- 曜日トグルボタン共通スタイル -->
+        <Style x:Key="DayToggleStyle" TargetType="ToggleButton">
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="Margin" Value="0,0,3,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="border"
+                                Background="#F0F0F0"
+                                BorderBrush="#AAAAAA"
+                                BorderThickness="1"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#1976D2"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#1565C0"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#555555"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <StackPanel Margin="14">
+
+        <!-- スロット一覧 -->
+        <ScrollViewer MaxHeight="440" VerticalScrollBarVisibility="Auto" Margin="0,0,0,8">
+            <ItemsControl ItemsSource="{Binding Slots}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="1" CornerRadius="4"
+                                Margin="0,0,0,6" Padding="10,8">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderBrush" Value="#CCCCCC"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsValid}" Value="False">
+                                            <Setter Property="BorderBrush" Value="#E53935"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="6"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- 有効チェック + 時刻 + 削除ボタン -->
+                                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+
+                                    <CheckBox IsChecked="{Binding Enabled}"
+                                              VerticalAlignment="Center"
+                                              Margin="0,0,10,0"
+                                              ToolTip="このスロットを有効にする"/>
+
+                                    <TextBlock Text="開始" VerticalAlignment="Center"
+                                               Margin="0,0,5,0" Foreground="#555"/>
+                                    <TextBox Text="{Binding StartHour,   Converter={StaticResource HourConv},   UpdateSourceTrigger=PropertyChanged}"
+                                             b:TimeInputBehavior.MaxValue="23"
+                                             Width="32" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                    <TextBlock Text=":" VerticalAlignment="Center"
+                                               Margin="3,0" FontSize="15" FontWeight="SemiBold"/>
+                                    <TextBox Text="{Binding StartMinute, Converter={StaticResource MinuteConv}, UpdateSourceTrigger=PropertyChanged}"
+                                             b:TimeInputBehavior.MaxValue="59"
+                                             Width="32" TextAlignment="Center" VerticalContentAlignment="Center"/>
+
+                                    <TextBlock Text=" 〜 " VerticalAlignment="Center"
+                                               Margin="6,0" Foreground="#555"/>
+
+                                    <TextBlock Text="終了" VerticalAlignment="Center"
+                                               Margin="0,0,5,0" Foreground="#555"/>
+                                    <TextBox Text="{Binding EndHour,   Converter={StaticResource HourConv},   UpdateSourceTrigger=PropertyChanged}"
+                                             b:TimeInputBehavior.MaxValue="23"
+                                             Width="32" TextAlignment="Center" VerticalContentAlignment="Center"/>
+                                    <TextBlock Text=":" VerticalAlignment="Center"
+                                               Margin="3,0" FontSize="15" FontWeight="SemiBold"/>
+                                    <TextBox Text="{Binding EndMinute, Converter={StaticResource MinuteConv}, UpdateSourceTrigger=PropertyChanged}"
+                                             b:TimeInputBehavior.MaxValue="59"
+                                             Width="32" TextAlignment="Center" VerticalContentAlignment="Center"/>
+
+                                    <Button Content="✕" Width="26" Height="26"
+                                            FontSize="11" Foreground="#888"
+                                            Margin="10,0,0,0"
+                                            Command="{Binding DataContext.RemoveSlotCommand,
+                                                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip="このスロットを削除"/>
+
+                                </StackPanel>
+
+                                <!-- 曜日トグル -->
+                                <UniformGrid Grid.Row="2" Rows="1">
+                                    <ToggleButton Content="日" IsChecked="{Binding Sunday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="月" IsChecked="{Binding Monday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="火" IsChecked="{Binding Tuesday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="水" IsChecked="{Binding Wednesday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="木" IsChecked="{Binding Thursday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="金" IsChecked="{Binding Friday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                    <ToggleButton Content="土" IsChecked="{Binding Saturday}"
+                                                  Style="{StaticResource DayToggleStyle}"/>
+                                </UniformGrid>
+
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <!-- 追加ボタン -->
+        <Button Content="追加"
+                Command="{Binding AddSlotCommand}"
+                HorizontalAlignment="Left"
+                Padding="12,5" Margin="0,0,0,14"/>
+
+        <!-- OK / キャンセル -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="キャンセル" Width="80" Margin="0,0,8,0"
+                    Command="{Binding CancelCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"/>
+            <Button Content="OK" Width="80"
+                    Command="{Binding SaveCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    IsDefault="True"/>
+        </StackPanel>
+
+    </StackPanel>
+</Window>

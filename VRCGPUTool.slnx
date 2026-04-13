@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="VRCGPUTool\VRCGPUTool.csproj" />
+  <Project Path="VRCGPUTool.Tests\VRCGPUTool.Tests.csproj" />
+  <Project Path="VRCGPUTool.Shared\VRCGPUTool.Shared.csproj" />
+  <Project Path="NvidiaSmiProxy\NvidiaSmiProxy.csproj" />
+</Solution>
