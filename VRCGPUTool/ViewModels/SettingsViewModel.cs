@@ -8,7 +8,7 @@ namespace VRCGPUTool.ViewModels;
 
 public sealed partial class SettingsViewModel : ObservableObject
 {
-    private readonly StartupService _startupService;
+    private readonly IStartupService _startupService;
     private readonly IElectricityProfileService _profileService;
     private readonly ElectricityProfile _profile;
     private readonly IDialogService _dialogService;
@@ -30,7 +30,7 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public string SelectedGpuUuid => SelectedGpu?.Uuid ?? string.Empty;
 
-    public SettingsViewModel(AppConfig config, StartupService startupService,
+    public SettingsViewModel(AppConfig config, IStartupService startupService,
         IElectricityProfileService profileService, ElectricityProfile profile,
         IReadOnlyList<GpuStatus> gpus, string selectedGpuUuid,
         IDialogService dialogService)

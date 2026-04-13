@@ -1,12 +1,8 @@
-using System.Diagnostics;
 using System.Reflection;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
-using VRCGPUTool.ViewModels.PowerHistory;
-using VRCGPUTool.Views;
 using static VRCGPUTool.Services.ScheduleEvaluator;
 
 namespace VRCGPUTool.ViewModels;
@@ -17,18 +13,22 @@ public sealed partial class MainViewModel(
     IPowerLogService powerLogService,
     IElectricityProfileService electricityProfileService,
     IUpdateCheckService updateCheckService,
-    AutoLimitDetector autoLimitDetector,
-    StartupService startupService,
-    IDialogService dialogService) : ObservableObject, IAsyncDisposable
+    IAutoLimitDetector autoLimitDetector,
+    IDialogService dialogService,
+    IApplicationHost applicationHost,
+    INavigationService navigationService,
+    TimeProvider timeProvider) : ObservableObject, IAsyncDisposable
 {
     private readonly INvidiaSmiService _nvidiaSmi = nvidiaSmi;
     private readonly IConfigService _configService = configService;
     private readonly IPowerLogService _powerLogService = powerLogService;
     private readonly IElectricityProfileService _electricityProfileService = electricityProfileService;
     private readonly IUpdateCheckService _updateCheckService = updateCheckService;
-    private readonly AutoLimitDetector _autoLimitDetector = autoLimitDetector;
-    private readonly StartupService _startupService = startupService;
+    private readonly IAutoLimitDetector _autoLimitDetector = autoLimitDetector;
     private readonly IDialogService _dialogService = dialogService;
+    private readonly IApplicationHost _applicationHost = applicationHost;
+    private readonly INavigationService _navigationService = navigationService;
+    private readonly TimeProvider _timeProvider = timeProvider;
 
     private AppConfig _config = new();
     private HourlyPowerLog _todayLog = new();
@@ -90,13 +90,14 @@ public sealed partial class MainViewModel(
             _dialogService.ShowError(
                 "Nvidia-Smi-Proxyに接続できませんでした。\n" +
                 "サービスが起動しているか確認してください。");
-            Application.Current.Shutdown();
+            _applicationHost.Shutdown();
             return;
         }
 
         StatusText = "設定読み込み中...";
         _config = await _configService.LoadAsync().ConfigureAwait(true);
-        _todayLog = await _powerLogService.LoadForDateAsync(DateOnly.FromDateTime(DateTime.Today)).ConfigureAwait(true);
+        _todayLog = await _powerLogService.LoadForDateAsync(
+            DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime)).ConfigureAwait(true);
         _electricityProfile = await _electricityProfileService.LoadAsync().ConfigureAwait(true);
 
         StatusText = "GPU情報取得中...";
@@ -104,7 +105,7 @@ public sealed partial class MainViewModel(
         if (gpus.Count == 0)
         {
             _dialogService.ShowError("NVIDIA GPUが検出されませんでした。");
-            Application.Current.Shutdown();
+            _applicationHost.Shutdown();
             return;
         }
 
@@ -122,7 +123,7 @@ public sealed partial class MainViewModel(
         // 起動時にスケジュール範囲内なら即制限
         if (GetSelectedGpu() is { } gpuAtStart)
         {
-            var now = DateTime.Now;
+            var now = _timeProvider.GetLocalNow().DateTime;
             if (_config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now)))
                 await ApplyLimitInternalAsync(gpuAtStart).ConfigureAwait(true);
         }
@@ -142,9 +143,9 @@ public sealed partial class MainViewModel(
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(1));
         do
         {
-            var now = DateTime.Now;
+            var now = _timeProvider.GetLocalNow().DateTime;
             var text = $"{now:yyyy/MM/dd}({DateTimeLabels.DayLabel(now.DayOfWeek)}) {now:HH:mm:ss}";
-            await Application.Current.Dispatcher.InvokeAsync(() => CurrentTimeText = text);
+            await _applicationHost.InvokeOnUiAsync(() => CurrentTimeText = text);
         }
         while (await timer.WaitForNextTickAsync(ct).ConfigureAwait(false));
     }
@@ -158,14 +159,12 @@ public sealed partial class MainViewModel(
             try
             {
                 var gpus = await _nvidiaSmi.QueryAllGpusAsync(ct).ConfigureAwait(false);
-
-                await Application.Current.Dispatcher.InvokeAsync(() =>
-                    ProcessGpuUpdate(gpus));
+                await _applicationHost.InvokeOnUiAsync(() => ProcessGpuUpdate(gpus));
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
             catch (Exception ex)
             {
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await _applicationHost.InvokeOnUiAsync(() =>
                     StatusText = $"GPUの読み取りエラー: {ex.Message}");
             }
         }
@@ -213,13 +212,13 @@ public sealed partial class MainViewModel(
         MemClockText = $"{gpu.MemoryClock} MHz";
         GpuUtilText = $"{gpu.GpuUtilization} %";
 
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
         if (_todayLog.Date != today)
         {
             _ = _powerLogService.SaveAsync(_todayLog);
             _todayLog = new HourlyPowerLog { Date = today };
         }
-        _todayLog.Accumulate(DateTime.Now.Hour, gpu.PowerDraw);
+        _todayLog.Accumulate(_timeProvider.GetLocalNow().DateTime.Hour, gpu.PowerDraw);
 
         CheckSchedule(gpu);
 
@@ -243,7 +242,7 @@ public sealed partial class MainViewModel(
 
     private void CheckSchedule(GpuStatus gpu)
     {
-        var now = DateTime.Now;
+        var now = _timeProvider.GetLocalNow().DateTime;
         int currentMinutes = now.Hour * 60 + now.Minute;
 
         // スケジュール設定の最小は1分単位のため分が変わらない時はスキップ
@@ -274,7 +273,7 @@ public sealed partial class MainViewModel(
     }
 
     private void UpdateScheduleSummary()
-        => ScheduleSummaryText = GetSummaryText(_config.Schedules, IsLimiting, DateTime.Now);
+        => ScheduleSummaryText = GetSummaryText(_config.Schedules, IsLimiting, _timeProvider.GetLocalNow().DateTime);
 
     // ─────────────────────────────────────────
     // Commands — Limit
@@ -353,76 +352,52 @@ public sealed partial class MainViewModel(
     [RelayCommand]
     private void OpenSettings()
     {
-        var vm = new SettingsViewModel(_config, _startupService, _electricityProfileService, _electricityProfile,
-            _gpus, _selectedGpuUuid, _dialogService);
-        var window = new SettingsWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+        var result = _navigationService.ShowSettingsDialog(_config, _gpus, _selectedGpuUuid, _electricityProfile);
+        if (result is null) return;
 
-        if (window.ShowDialog() == true)
-        {
-            vm.ApplyTo(_config);
-            var match = _gpus.Select((g, i) => (g, i)).FirstOrDefault(t => t.g.Uuid == _config.SelectedGpuUuid);
-            SetSelectedGpuIndex(match.g is not null ? match.i : 0);
-            _ = _configService.SaveAsync(_config);
+        result.ApplyTo(_config);
+        var match = _gpus.Select((g, i) => (g, i)).FirstOrDefault(t => t.g.Uuid == _config.SelectedGpuUuid);
+        SetSelectedGpuIndex(match.g is not null ? match.i : 0);
+        _ = _configService.SaveAsync(_config);
 
-            // 制限中に制限値が変更された場合は即時再適用
-            if (IsLimiting && GetSelectedGpu() is { } gpu)
-                _ = ApplyLimitInternalAsync(gpu);
-        }
+        // 制限中に制限値が変更された場合は即時再適用
+        if (IsLimiting && GetSelectedGpu() is { } gpu)
+            _ = ApplyLimitInternalAsync(gpu);
     }
 
     [RelayCommand]
     private void OpenScheduleSetting()
     {
-        var vm = new ScheduleSettingViewModel(_config.Schedules);
-        var window = new ScheduleSettingWindow { DataContext = vm, Owner = Application.Current.MainWindow };
+        var now = _timeProvider.GetLocalNow().DateTime;
+        // 変更前のスケジュールで現在時刻がアクティブかどうか
+        bool wasScheduled = _config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now));
 
-        if (window.ShowDialog() == true)
-        {
-            var now = DateTime.Now;
-            // 変更前のスケジュールで現在時刻がアクティブかどうか
-            bool wasScheduled = _config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now));
+        var newSlots = _navigationService.ShowScheduleDialog(_config.Schedules);
+        if (newSlots is null) return;
 
-            _config.Schedules = vm.GetSlots();
-            UpdateScheduleSummary();
-            _ = _configService.SaveAsync(_config);
+        _config.Schedules = newSlots;
+        UpdateScheduleSummary();
+        _ = _configService.SaveAsync(_config);
 
-            // 変更後のスケジュールで現在時刻がアクティブかどうか
-            bool shouldLimit = _config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now));
+        // 変更後のスケジュールで現在時刻がアクティブかどうか
+        bool shouldLimit = _config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now));
 
-            if (shouldLimit && !IsLimiting && GetSelectedGpu() is { } gpuToLimit)
-                _ = ApplyLimitInternalAsync(gpuToLimit);
-            // 変更前もスケジュール範囲外だった場合は手動制限の可能性があるため解除しない
-            else if (!shouldLimit && wasScheduled && IsLimiting && GetSelectedGpu() is { } gpuToRelease)
-                _ = RemoveLimitInternalAsync(gpuToRelease, reason: "スケジュール変更により制限を解除しました");
-        }
+        if (shouldLimit && !IsLimiting && GetSelectedGpu() is { } gpuToLimit)
+            _ = ApplyLimitInternalAsync(gpuToLimit);
+        // 変更前もスケジュール範囲外だった場合は手動制限の可能性があるため解除しない
+        else if (!shouldLimit && wasScheduled && IsLimiting && GetSelectedGpu() is { } gpuToRelease)
+            _ = RemoveLimitInternalAsync(gpuToRelease, reason: "スケジュール変更により制限を解除しました");
     }
-
-    private PowerHistoryWindow? _powerHistoryWindow;
 
     [RelayCommand]
     private void OpenPowerHistory()
-    {
-        if (_powerHistoryWindow is not null)
-        {
-            _powerHistoryWindow.Activate();
-            return;
-        }
-
-        var vm = new PowerHistoryViewModel(_powerLogService, () => _todayLog, _electricityProfile);
-        _powerHistoryWindow = new PowerHistoryWindow { DataContext = vm };
-        _powerHistoryWindow.Closed += (_, _) => _powerHistoryWindow = null;
-        _powerHistoryWindow.Show();
-    }
+        => _navigationService.ShowOrActivatePowerHistory(_powerLogService, () => _todayLog, _electricityProfile);
 
     [RelayCommand]
     private void OpenReleasePage()
     {
         if (AvailableUpdate is null) return;
-        Process.Start(new ProcessStartInfo
-        {
-            FileName = "https://github.com/njm2360/VRChatGPUTool/releases/latest",
-            UseShellExecute = true,
-        });
+        _navigationService.OpenUrl("https://github.com/njm2360/VRChatGPUTool/releases/latest");
     }
 
     [RelayCommand]

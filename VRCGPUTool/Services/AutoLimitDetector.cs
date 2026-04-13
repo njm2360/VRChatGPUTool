@@ -8,7 +8,7 @@ namespace VRCGPUTool.Services;
 ///   300 サンプルをリングバッファに貯め、20 サンプル単位で平均化した
 ///   セグメント群の最大値と最小値の差が閾値未満なら「安定」と判定する。
 /// </summary>
-public sealed class AutoLimitDetector
+public sealed class AutoLimitDetector : IAutoLimitDetector
 {
     private const int BufferSize = 300;
     private const int SegmentSize = 20;

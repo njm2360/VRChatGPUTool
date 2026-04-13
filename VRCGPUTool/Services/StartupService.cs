@@ -2,7 +2,7 @@ using Microsoft.Win32;
 
 namespace VRCGPUTool.Services;
 
-public sealed class StartupService
+public sealed class StartupService : IStartupService
 {
     private const string RegistryKeyPath =
         @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";

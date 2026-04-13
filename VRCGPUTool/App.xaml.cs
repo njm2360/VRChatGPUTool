@@ -79,9 +79,12 @@ public partial class App : Application
         services.AddSingleton<IPowerLogService, PowerLogService>();
         services.AddSingleton<IElectricityProfileService, JsonElectricityProfileService>();
         services.AddSingleton<IUpdateCheckService, MockUpdateCheckService>();
-        services.AddSingleton<AutoLimitDetector>();
-        services.AddSingleton<StartupService>();
+        services.AddSingleton<IAutoLimitDetector, AutoLimitDetector>();
+        services.AddSingleton<IStartupService, StartupService>();
+        services.AddSingleton<IApplicationHost, WpfApplicationHost>();
+        services.AddSingleton<INavigationService, WpfNavigationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton(TimeProvider.System);
 
         // ViewModels
         services.AddTransient<MainViewModel>();

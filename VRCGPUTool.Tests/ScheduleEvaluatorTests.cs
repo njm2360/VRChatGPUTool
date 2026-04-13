@@ -358,7 +358,7 @@ public class ScheduleEvaluatorTests
     // IsEndTrigger — 日またぎスロット (start > end)
     // ─────────────────────────────────────────────────────────
 
-    // 翌日の終了時刻ちょうど・昨日が開始曜日 → true（バグ修正の核心）
+    // 翌日の終了時刻ちょうど・昨日が開始曜日 → true
     [Fact]
     public void IsEndTrigger_Overnight_AtExactEnd_YesterdayIsStartDay_ReturnsTrue()
     {
