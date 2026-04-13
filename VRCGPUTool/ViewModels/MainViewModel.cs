@@ -43,6 +43,7 @@ public sealed partial class MainViewModel(
 
     private int _lastCheckedMinute = -1;
     private int _appliedPowerLimitWatts;
+    private bool _isApplyingLimit;
 
     // ─────────────────────────────────────────
     // Observable Properties
@@ -230,7 +231,7 @@ public sealed partial class MainViewModel(
         }
 
         // 外部ツールによる制限変更検出
-        if (IsLimiting && gpu.PowerLimit != _appliedPowerLimitWatts)
+        if (IsLimiting && !_isApplyingLimit && gpu.PowerLimit != _appliedPowerLimitWatts)
         {
             _dialogService.ShowWarning(
                 $"外部ツールによって電力制限値が変更されたため制限を終了しました。\n" +
@@ -302,6 +303,7 @@ public sealed partial class MainViewModel(
         int powerLimitWatts = _config.PowerLimitWatts;
         IsLimiting = true;
         _appliedPowerLimitWatts = powerLimitWatts;
+        _isApplyingLimit = true;
         try
         {
             if (_config.CoreClockLimitEnabled)
@@ -317,6 +319,10 @@ public sealed partial class MainViewModel(
             IsLimiting = false;
             _appliedPowerLimitWatts = 0;
             StatusText = $"制限の適用に失敗しました: {ex.Message}";
+        }
+        finally
+        {
+            _isApplyingLimit = false;
         }
     }
 

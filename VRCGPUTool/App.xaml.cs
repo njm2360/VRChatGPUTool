@@ -72,13 +72,13 @@ public partial class App : Application
 
         // Services
 
-        // services.AddSingleton<INvidiaSmiService, NvidiaSmiProxyService>(); // GPU
-        services.AddSingleton<INvidiaSmiService, MockNvidiaSmiService>(); // Mock
+        services.AddSingleton<INvidiaSmiService, NvidiaSmiProxyService>(); // GPU
+        // services.AddSingleton<INvidiaSmiService, MockNvidiaSmiService>(); // Mock
 
         services.AddSingleton<IConfigService, JsonConfigService>();
         services.AddSingleton<IPowerLogService, PowerLogService>();
         services.AddSingleton<IElectricityProfileService, JsonElectricityProfileService>();
-        services.AddSingleton<IUpdateCheckService, MockUpdateCheckService>();
+        services.AddSingleton<IUpdateCheckService, GitHubUpdateCheckService>();
         services.AddSingleton<IAutoLimitDetector, AutoLimitDetector>();
         services.AddSingleton<IStartupService, StartupService>();
         services.AddSingleton<IApplicationHost, WpfApplicationHost>();
