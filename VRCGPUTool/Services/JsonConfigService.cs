@@ -14,14 +14,12 @@ public sealed class JsonConfigService : IConfigService
 
     public async Task<AppConfig> LoadAsync()
     {
-        string fileToLoad = File.Exists(FileName) ? FileName : string.Empty;
-
-        if (fileToLoad == string.Empty)
+        if (!File.Exists(FileName))
             return new AppConfig();
 
         try
         {
-            string json = await File.ReadAllTextAsync(fileToLoad, Encoding.UTF8).ConfigureAwait(false);
+            string json = await File.ReadAllTextAsync(FileName, Encoding.UTF8).ConfigureAwait(false);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
@@ -29,18 +27,38 @@ public sealed class JsonConfigService : IConfigService
             if (!root.TryGetProperty("Version", out _))
             {
                 var migrated = ConfigMigration.MigrateV1ToV2(root);
-                // マイグレーション済み設定を即座に V2 形式で保存
-                await SaveAsync(migrated).ConfigureAwait(false);
+                try
+                {
+                    await SaveAsync(migrated).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // 保存失敗は無視
+                }
                 return migrated;
             }
 
             var config = JsonSerializer.Deserialize<AppConfig>(json, JsonOptions);
             return config ?? new AppConfig();
         }
-        catch (JsonException)
+        catch
         {
-            // 設定ファイルが壊れている場合はデフォルト値で起動
+            // 既存ファイルを退避してからデフォルト値で起動
+            BackupExistingFile();
             return new AppConfig();
+        }
+    }
+
+    private static void BackupExistingFile()
+    {
+        try
+        {
+            if (File.Exists(FileName))
+                File.Copy(FileName, FileName + ".bak", overwrite: true);
+        }
+        catch
+        {
+            // 退避失敗は無視
         }
     }
 
@@ -48,6 +66,6 @@ public sealed class JsonConfigService : IConfigService
     {
         Directory.CreateDirectory(AppPaths.DataDir);
         string json = JsonSerializer.Serialize(config, JsonOptions);
-        await File.WriteAllTextAsync(FileName, json, Encoding.UTF8).ConfigureAwait(false);
+        await AtomicFile.WriteAllTextAsync(FileName, json, Encoding.UTF8).ConfigureAwait(false);
     }
 }

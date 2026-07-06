@@ -24,9 +24,24 @@ public sealed class JsonElectricityProfileService : IElectricityProfileService
                 .ConfigureAwait(false);
             return profile ?? new ElectricityProfile();
         }
-        catch (JsonException)
+        catch
         {
+            // 既存ファイルを退避してからデフォルト値で起動
+            BackupExistingFile();
             return new ElectricityProfile();
+        }
+    }
+
+    private static void BackupExistingFile()
+    {
+        try
+        {
+            if (File.Exists(FileName))
+                File.Copy(FileName, FileName + ".bak", overwrite: true);
+        }
+        catch
+        {
+            // 退避失敗は無視
         }
     }
 
@@ -34,6 +49,6 @@ public sealed class JsonElectricityProfileService : IElectricityProfileService
     {
         Directory.CreateDirectory(AppPaths.DataDir);
         string json = JsonSerializer.Serialize(profile, JsonOptions);
-        await File.WriteAllTextAsync(FileName, json, Encoding.UTF8).ConfigureAwait(false);
+        await AtomicFile.WriteAllTextAsync(FileName, json, Encoding.UTF8).ConfigureAwait(false);
     }
 }
