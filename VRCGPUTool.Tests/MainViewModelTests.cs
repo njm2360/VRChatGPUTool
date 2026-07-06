@@ -417,6 +417,71 @@ public class MainViewModelTests
         vm.IsLimiting.Should().BeFalse();
     }
 
+    [Fact]
+    public void ProcessGpuUpdate_WhenExternalPowerLimitChange_RemovesLimitBeforeDialogIsAcknowledged()
+    {
+        // 制限解除はユーザーの応答を待たずに先行して行われる（警告表示前に IsLimiting=false になる）
+        var dialogService = new Mock<IDialogService>();
+        var powerLogService = new Mock<IPowerLogService>();
+        powerLogService.Setup(s => s.SaveAsync(It.IsAny<HourlyPowerLog>())).Returns(Task.CompletedTask);
+
+        var vm = CreateVm(powerLogService: powerLogService, dialogService: dialogService);
+        var gpu = MakeGpu("gpu0", powerLimit: 200);
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_appliedPowerLimitWatts", 100); // 適用値(100) ≠ 現在値(200) → 外部変更
+        vm.IsLimiting = true;
+
+        // 警告ダイアログが表示された時点での IsLimiting を記録する
+        bool? limitingWhenDialogShown = null;
+        dialogService.Setup(d => d.ShowWarning(It.IsAny<string>(), It.IsAny<string>()))
+                     .Callback(() => limitingWhenDialogShown = vm.IsLimiting);
+
+        CallProcessGpuUpdate(vm, [gpu]);
+
+        // ダイアログ表示時点で既に制限解除済み → 状態変更がダイアログを待っていない
+        limitingWhenDialogShown.Should().BeFalse();
+        vm.IsLimiting.Should().BeFalse();
+    }
+
+    [Fact]
+    public void ProcessGpuUpdate_WhenExternalPowerLimitChange_ReentrantTicksDuringOpenDialog_ShowsWarningOnce()
+    {
+        // 警告表示中（未応答）に後続ポーリングが走り、かつ解除失敗で IsLimiting が true に
+        // 戻っても、外部変更警告は多重表示されないことを検証する。
+        var dialogService = new Mock<IDialogService>();
+        var nvidiaSmi = new Mock<INvidiaSmiService>();
+        var powerLogService = new Mock<IPowerLogService>();
+        powerLogService.Setup(s => s.SaveAsync(It.IsAny<HourlyPowerLog>())).Returns(Task.CompletedTask);
+        // CoreClock リセットを失敗させ、RemoveLimitInternalAsync の catch で IsLimiting=true に戻す
+        nvidiaSmi.Setup(s => s.ResetCoreClockLimitAsync(It.IsAny<string>(), default))
+                 .ThrowsAsync(new InvalidOperationException("リセット失敗"));
+
+        var vm = CreateVm(nvidiaSmi: nvidiaSmi, powerLogService: powerLogService, dialogService: dialogService);
+        var gpu = MakeGpu("gpu0", powerLimit: 200);
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_appliedPowerLimitWatts", 100); // 適用値(100) ≠ 現在値(200) → 外部変更
+        SetField(vm, "_config", new AppConfig { CoreClockLimitEnabled = true });
+        vm.IsLimiting = true;
+
+        dialogService.Setup(d => d.ShowWarning(It.IsAny<string>(), It.IsAny<string>()))
+                     .Callback(() =>
+                     {
+                         // 解除失敗で条件が再成立している状態でも
+                         vm.IsLimiting.Should().BeTrue();
+                         // ダイアログが開いたままポーリングが再入する状況を再現する
+                         CallProcessGpuUpdate(vm, [gpu]);
+                         CallProcessGpuUpdate(vm, [gpu]);
+                     });
+
+        CallProcessGpuUpdate(vm, [gpu]);
+
+        dialogService.Verify(d => d.ShowWarning(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
+    }
+
     // ─────────────────────────────────────────────────────────
     // CheckSchedule — スケジュール開始トリガー
     // ─────────────────────────────────────────────────────────
