@@ -7,6 +7,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <AssemblyName>VRChatGPUTool</AssemblyName>
     <RootNamespace>VRCGPUTool</RootNamespace>
     <AssemblyVersion>3.0.0.0</AssemblyVersion>
