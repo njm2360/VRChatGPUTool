@@ -10,7 +10,8 @@ namespace VRCGPUTool.Services;
 public sealed class WpfNavigationService(
     IStartupService startupService,
     IElectricityProfileService electricityProfileService,
-    IDialogService dialogService) : INavigationService
+    IDialogService dialogService,
+    PowerLogCsvExporter exporter) : INavigationService
 {
     private PowerHistoryWindow? _powerHistoryWindow;
 
@@ -55,7 +56,7 @@ public sealed class WpfNavigationService(
             return;
         }
 
-        var vm = new PowerHistoryViewModel(logService, todayLogGetter, profile);
+        var vm = new PowerHistoryViewModel(logService, exporter, todayLogGetter, profile);
         _powerHistoryWindow = new PowerHistoryWindow { DataContext = vm };
         _powerHistoryWindow.Closed += (_, _) => _powerHistoryWindow = null;
         _powerHistoryWindow.Show();

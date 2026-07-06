@@ -29,7 +29,11 @@ public class MonthlyHistoryViewModelTests
         liveLog ??= new HourlyPowerLog();
         powerLogMock ??= DefaultPowerLogMock();
         profile ??= new ElectricityProfile();
-        return new MonthlyHistoryViewModel(powerLogMock.Object, () => liveLog, profile);
+        return new MonthlyHistoryViewModel(
+            powerLogMock.Object,
+            new PowerLogCsvExporter(powerLogMock.Object),
+            () => liveLog,
+            profile);
     }
 
     // ─────────────────────────────────────────────────────────

@@ -10,6 +10,7 @@ namespace VRCGPUTool.ViewModels.PowerHistory;
 public sealed partial class MonthlyHistoryViewModel : ObservableObject
 {
     private readonly IPowerLogService _powerLogService;
+    private readonly PowerLogCsvExporter _exporter;
     private readonly Func<HourlyPowerLog> _getLiveLog;
     private readonly ElectricityProfile _profile;
 
@@ -31,10 +32,12 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
 
     public MonthlyHistoryViewModel(
         IPowerLogService powerLogService,
+        PowerLogCsvExporter exporter,
         Func<HourlyPowerLog> getLiveLog,
         ElectricityProfile profile)
     {
         _powerLogService = powerLogService;
+        _exporter = exporter;
         _getLiveLog = getLiveLog;
         _profile = profile;
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -73,7 +76,7 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
             DefaultExt = ".csv",
         };
         if (dialog.ShowDialog() != true) return;
-        await _powerLogService.ExportMonthToCsvAsync(SelectedMonth, dialog.FileName);
+        await _exporter.ExportMonthToCsvAsync(SelectedMonth, dialog.FileName);
     }
 
     internal Task ReloadAsync() => LoadDayBarsAsync();
