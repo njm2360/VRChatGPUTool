@@ -98,22 +98,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         using var tx = conn.BeginTransaction();
         var migratedFiles = new List<string>(v1Files.Length + v2Files.Length);
 
-        // V1: powerlog_YYYYMMDD.json
-        foreach (string file in v1Files)
-        {
-            string datePart = Path.GetFileNameWithoutExtension(file)["powerlog_".Length..];
-            if (!DateOnly.TryParseExact(datePart, "yyyyMMdd", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out DateOnly date))
-                continue;
-            try
-            {
-                var v1 = JsonSerializer.Deserialize<V1RawData>(File.ReadAllText(file));
-                if (v1?.HourPowerLog is not { Length: 24 }) { MarkCorrupt(file); continue; }
-                InsertRowIfAbsent(conn, tx, date, v1.HourPowerLog);
-                migratedFiles.Add(file);
-            }
-            catch { MarkCorrupt(file); }
-        }
+        // 同一日付に両形式がある場合は (優先順位: DB > V2 > V1)
 
         // V2: YYYY-MM-DD.json
         foreach (string file in v2Files)
@@ -127,6 +112,23 @@ public sealed class SqlitePowerLogService : IPowerLogService
                 int[]? data = JsonSerializer.Deserialize<int[]>(File.ReadAllText(file));
                 if (data is not { Length: 24 }) { MarkCorrupt(file); continue; }
                 InsertRowIfAbsent(conn, tx, date, data);
+                migratedFiles.Add(file);
+            }
+            catch { MarkCorrupt(file); }
+        }
+
+        // V1: powerlog_YYYYMMDD.json
+        foreach (string file in v1Files)
+        {
+            string datePart = Path.GetFileNameWithoutExtension(file)["powerlog_".Length..];
+            if (!DateOnly.TryParseExact(datePart, "yyyyMMdd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateOnly date))
+                continue;
+            try
+            {
+                var v1 = JsonSerializer.Deserialize<V1RawData>(File.ReadAllText(file));
+                if (v1?.HourPowerLog is not { Length: 24 }) { MarkCorrupt(file); continue; }
+                InsertRowIfAbsent(conn, tx, date, v1.HourPowerLog);
                 migratedFiles.Add(file);
             }
             catch { MarkCorrupt(file); }
