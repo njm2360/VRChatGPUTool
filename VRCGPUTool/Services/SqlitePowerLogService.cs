@@ -35,7 +35,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
             await EnsureInitializedAsync().ConfigureAwait(false);
             return await Task.Run(() => LoadForDate(date)).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex) when (ex is SqliteException or IOException or UnauthorizedAccessException)
         {
             return new HourlyPowerLog { Date = date };
         }
@@ -48,8 +48,9 @@ public sealed class SqlitePowerLogService : IPowerLogService
             await EnsureInitializedAsync().ConfigureAwait(false);
             return await Task.Run(() => LoadMonth(month)).ConfigureAwait(false);
         }
-        catch
+        catch (Exception ex) when (ex is SqliteException or IOException or UnauthorizedAccessException)
         {
+            // DB・ファイル起因の失敗のみ空ログにフォールバック (バグは表面化させる)
             return CreateEmptyMonth(month);
         }
     }
@@ -107,14 +108,16 @@ public sealed class SqlitePowerLogService : IPowerLogService
             if (!DateOnly.TryParseExact(name, "yyyy-MM-dd", CultureInfo.InvariantCulture,
                     DateTimeStyles.None, out DateOnly date))
                 continue;
+            if (TryReadFile(file) is not { } json)
+                continue;
             try
             {
-                int[]? data = JsonSerializer.Deserialize<int[]>(File.ReadAllText(file));
+                int[]? data = JsonSerializer.Deserialize<int[]>(json);
                 if (data is not { Length: 24 }) { MarkCorrupt(file); continue; }
                 InsertRowIfAbsent(conn, tx, date, data);
                 migratedFiles.Add(file);
             }
-            catch { MarkCorrupt(file); }
+            catch (JsonException) { MarkCorrupt(file); }
         }
 
         // V1: powerlog_YYYYMMDD.json
@@ -124,14 +127,16 @@ public sealed class SqlitePowerLogService : IPowerLogService
             if (!DateOnly.TryParseExact(datePart, "yyyyMMdd", CultureInfo.InvariantCulture,
                     DateTimeStyles.None, out DateOnly date))
                 continue;
+            if (TryReadFile(file) is not { } json)
+                continue;
             try
             {
-                var v1 = JsonSerializer.Deserialize<V1RawData>(File.ReadAllText(file));
+                var v1 = JsonSerializer.Deserialize<V1RawData>(json);
                 if (v1?.HourPowerLog is not { Length: 24 }) { MarkCorrupt(file); continue; }
                 InsertRowIfAbsent(conn, tx, date, v1.HourPowerLog);
                 migratedFiles.Add(file);
             }
-            catch { MarkCorrupt(file); }
+            catch (JsonException) { MarkCorrupt(file); }
         }
 
         tx.Commit();
@@ -145,6 +150,18 @@ public sealed class SqlitePowerLogService : IPowerLogService
                 Directory.Delete(jsonDir);
         }
         catch { }
+    }
+
+    private static string? TryReadFile(string file)
+    {
+        try
+        {
+            return File.ReadAllText(file);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     private static void MarkCorrupt(string file)
