@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -9,19 +10,40 @@ namespace VRCGPUTool.Services;
 
 public sealed class SqlitePowerLogService : IPowerLogService
 {
-    private readonly Lazy<Task> _initTask = new(
-        () => Task.Run(Initialize),
-        LazyThreadSafetyMode.ExecutionAndPublication);
+    private readonly object _initLock = new();
+    private Task? _initTask;
+
+    private Task EnsureInitializedAsync()
+    {
+        var task = _initTask;
+        if (task is null || task.IsFaulted || task.IsCanceled)
+        {
+            lock (_initLock)
+            {
+                task = _initTask;
+                if (task is null || task.IsFaulted || task.IsCanceled)
+                    task = _initTask = Task.Run(Initialize);
+            }
+        }
+        return task;
+    }
 
     public async Task<HourlyPowerLog> LoadForDateAsync(DateOnly date)
     {
-        await _initTask.Value.ConfigureAwait(false);
-        return await Task.Run(() => LoadForDate(date)).ConfigureAwait(false);
+        try
+        {
+            await EnsureInitializedAsync().ConfigureAwait(false);
+            return await Task.Run(() => LoadForDate(date)).ConfigureAwait(false);
+        }
+        catch
+        {
+            return new HourlyPowerLog { Date = date };
+        }
     }
 
     public async Task SaveAsync(HourlyPowerLog log)
     {
-        await _initTask.Value.ConfigureAwait(false);
+        await EnsureInitializedAsync().ConfigureAwait(false);
         await Task.Run(() => Save(log)).ConfigureAwait(false);
     }
 
@@ -67,34 +89,34 @@ public sealed class SqlitePowerLogService : IPowerLogService
         foreach (string file in v1Files)
         {
             string datePart = Path.GetFileNameWithoutExtension(file)["powerlog_".Length..];
-            if (!DateOnly.TryParseExact(datePart, "yyyyMMdd", null,
-                    System.Globalization.DateTimeStyles.None, out DateOnly date))
+            if (!DateOnly.TryParseExact(datePart, "yyyyMMdd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateOnly date))
                 continue;
             try
             {
                 var v1 = JsonSerializer.Deserialize<V1RawData>(File.ReadAllText(file));
-                if (v1?.HourPowerLog is not { Length: 24 }) continue;
-                UpsertRow(conn, tx, date, v1.HourPowerLog);
+                if (v1?.HourPowerLog is not { Length: 24 }) { MarkCorrupt(file); continue; }
+                InsertRowIfAbsent(conn, tx, date, v1.HourPowerLog);
                 migratedFiles.Add(file);
             }
-            catch { /* 壊れたファイルはスキップ（削除もしない） */ }
+            catch { MarkCorrupt(file); }
         }
 
         // V2: YYYY-MM-DD.json
         foreach (string file in v2Files)
         {
             string name = Path.GetFileNameWithoutExtension(file);
-            if (!DateOnly.TryParseExact(name, "yyyy-MM-dd", null,
-                    System.Globalization.DateTimeStyles.None, out DateOnly date))
+            if (!DateOnly.TryParseExact(name, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out DateOnly date))
                 continue;
             try
             {
                 int[]? data = JsonSerializer.Deserialize<int[]>(File.ReadAllText(file));
-                if (data is not { Length: 24 }) continue;
-                UpsertRow(conn, tx, date, data);
+                if (data is not { Length: 24 }) { MarkCorrupt(file); continue; }
+                InsertRowIfAbsent(conn, tx, date, data);
                 migratedFiles.Add(file);
             }
-            catch { /* 壊れたファイルはスキップ（削除もしない） */ }
+            catch { MarkCorrupt(file); }
         }
 
         tx.Commit();
@@ -110,13 +132,15 @@ public sealed class SqlitePowerLogService : IPowerLogService
         catch { }
     }
 
+    private static void MarkCorrupt(string file)
+    {
+        try { File.Move(file, file + ".corrupt", overwrite: true); } catch { }
+    }
+
     private sealed class V1RawData
     {
         [System.Text.Json.Serialization.JsonPropertyName("hourPowerLog")]
         public int[]? HourPowerLog { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("logdate")]
-        public DateTime LogDate { get; set; }
     }
 
     // ────────────────────────────────────────────────
@@ -135,7 +159,9 @@ public sealed class SqlitePowerLogService : IPowerLogService
         if (reader.Read())
         {
             var blob = (byte[])reader["watts"];
-            MemoryMarshal.Cast<byte, int>(blob).CopyTo(log.HourlyWatts);
+            // 長さ不正 (破損行) は空ログ扱いにする
+            if (blob.Length == log.HourlyWatts.Length * sizeof(int))
+                MemoryMarshal.Cast<byte, int>(blob).CopyTo(log.HourlyWatts);
         }
         return log;
     }
@@ -143,38 +169,48 @@ public sealed class SqlitePowerLogService : IPowerLogService
     private static void Save(HourlyPowerLog log)
     {
         using var conn = OpenConnection();
-        UpsertRow(conn, null, log.Date, log.HourlyWatts);
-    }
-
-    private static void UpsertRow(SqliteConnection conn, SqliteTransaction? tx,
-                                   DateOnly date, int[] watts)
-    {
-        byte[] blob = MemoryMarshal.AsBytes(watts.AsSpan()).ToArray(); // int[24] → byte[96]
 
         using var cmd = conn.CreateCommand();
-        if (tx is not null) cmd.Transaction = tx;
         cmd.CommandText = """
             INSERT INTO power_log (date, watts) VALUES (@date, @watts)
             ON CONFLICT(date) DO UPDATE SET watts = excluded.watts
             """;
-        cmd.Parameters.AddWithValue("@date", DateKey(date));
-        cmd.Parameters.AddWithValue("@watts", blob);
+        cmd.Parameters.AddWithValue("@date", DateKey(log.Date));
+        cmd.Parameters.AddWithValue("@watts", ToBlob(log.HourlyWatts));
         cmd.ExecuteNonQuery();
     }
 
-    // WAL モードは DB ファイルに永続化されるため、初回のみ設定すれば十分。
+    // 移行用: 既にDBに行がある日はDB側を正とし古いJSONで上書きしない
+    private static void InsertRowIfAbsent(SqliteConnection conn, SqliteTransaction tx,
+                                          DateOnly date, int[] watts)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            INSERT INTO power_log (date, watts) VALUES (@date, @watts)
+            ON CONFLICT(date) DO NOTHING
+            """;
+        cmd.Parameters.AddWithValue("@date", DateKey(date));
+        cmd.Parameters.AddWithValue("@watts", ToBlob(watts));
+        cmd.ExecuteNonQuery();
+    }
+
+    private static byte[] ToBlob(int[] watts)
+        => MemoryMarshal.AsBytes(watts.AsSpan()).ToArray(); // int[24] → byte[96]
+
+    // WAL モードは DB ファイルに永続化されるが、synchronous は接続ごとの設定のため毎回設定する。
     private static SqliteConnection OpenConnection(bool setWal = false)
     {
         var conn = new SqliteConnection($"Data Source={AppPaths.PowerLogDb}");
         conn.Open();
-        if (setWal)
-        {
-            using var pragma = conn.CreateCommand();
-            pragma.CommandText = "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;";
-            pragma.ExecuteNonQuery();
-        }
+        using var pragma = conn.CreateCommand();
+        pragma.CommandText = setWal
+            ? "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;"
+            : "PRAGMA synchronous=NORMAL;";
+        pragma.ExecuteNonQuery();
         return conn;
     }
 
-    private static string DateKey(DateOnly date) => date.ToString("yyyy-MM-dd");
+    private static string DateKey(DateOnly date)
+        => date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 }
