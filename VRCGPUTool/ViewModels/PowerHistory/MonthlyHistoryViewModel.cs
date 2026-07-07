@@ -89,22 +89,24 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
         var today = DateOnly.FromDateTime(DateTime.Today);
         var liveLog = _getLiveLog();
 
-        var tasks = Enumerable.Range(1, daysInMonth).Select(async d =>
+        IReadOnlyList<HourlyPowerLog> logs =
+            await _powerLogService.LoadMonthAsync(SelectedMonth).ConfigureAwait(true);
+        double[] weekdayPrices = _profile.ComputeHourlyPrices(isWeekday: true);
+        double[] holidayPrices = _profile.ComputeHourlyPrices(isWeekday: false);
+
+        var results = new (int TotalWs, double TotalPrice)[daysInMonth];
+        for (int d = 0; d < daysInMonth; d++)
         {
-            var date = new DateOnly(year, month, d);
-            if (date > today) return (TotalWs: 0, TotalPrice: 0.0);
-            HourlyPowerLog log = date == liveLog.Date
-                ? liveLog
-                : await _powerLogService.LoadForDateAsync(date).ConfigureAwait(false);
+            var date = new DateOnly(year, month, d + 1);
+            if (date > today) continue;
+            HourlyPowerLog log = date == liveLog.Date ? liveLog : logs[d];
             bool isWeekday = date.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday);
-            double[] unitPrices = _profile.ComputeHourlyPrices(isWeekday);
+            double[] unitPrices = isWeekday ? weekdayPrices : holidayPrices;
             double price = 0;
             for (int h = 0; h < 24; h++)
                 price += unitPrices[h] * log.HourlyWatts[h];
-            return (TotalWs: log.HourlyWatts.Sum(), TotalPrice: price);
-        });
-
-        var results = await Task.WhenAll(tasks).ConfigureAwait(true);
+            results[d] = (log.HourlyWatts.Sum(), price);
+        }
         int[] totals = [.. results.Select(r => r.TotalWs)];
         int max = totals.Length > 0 ? totals.Max() : 0;
 

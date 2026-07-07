@@ -41,6 +41,19 @@ public sealed class SqlitePowerLogService : IPowerLogService
         }
     }
 
+    public async Task<IReadOnlyList<HourlyPowerLog>> LoadMonthAsync(DateOnly month)
+    {
+        try
+        {
+            await EnsureInitializedAsync().ConfigureAwait(false);
+            return await Task.Run(() => LoadMonth(month)).ConfigureAwait(false);
+        }
+        catch
+        {
+            return CreateEmptyMonth(month);
+        }
+    }
+
     public async Task SaveAsync(HourlyPowerLog log)
     {
         await EnsureInitializedAsync().ConfigureAwait(false);
@@ -157,13 +170,44 @@ public sealed class SqlitePowerLogService : IPowerLogService
         using var reader = cmd.ExecuteReader();
         var log = new HourlyPowerLog { Date = date };
         if (reader.Read())
-        {
-            var blob = (byte[])reader["watts"];
-            // 長さ不正 (破損行) は空ログ扱いにする
-            if (blob.Length == log.HourlyWatts.Length * sizeof(int))
-                MemoryMarshal.Cast<byte, int>(blob).CopyTo(log.HourlyWatts);
-        }
+            CopyBlob((byte[])reader["watts"], log);
         return log;
+    }
+
+    private static HourlyPowerLog[] LoadMonth(DateOnly month)
+    {
+        var logs = CreateEmptyMonth(month);
+
+        using var conn = OpenConnection();
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT date, watts FROM power_log WHERE date BETWEEN @start AND @end";
+        cmd.Parameters.AddWithValue("@start", DateKey(logs[0].Date));
+        cmd.Parameters.AddWithValue("@end", DateKey(logs[^1].Date));
+
+        using var reader = cmd.ExecuteReader();
+        while (reader.Read())
+        {
+            if (DateOnly.TryParseExact((string)reader["date"], "yyyy-MM-dd",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateOnly date))
+                CopyBlob((byte[])reader["watts"], logs[date.Day - 1]);
+        }
+        return logs;
+    }
+
+    private static HourlyPowerLog[] CreateEmptyMonth(DateOnly month)
+    {
+        int days = DateTime.DaysInMonth(month.Year, month.Month);
+        var logs = new HourlyPowerLog[days];
+        for (int d = 0; d < days; d++)
+            logs[d] = new HourlyPowerLog { Date = new DateOnly(month.Year, month.Month, d + 1) };
+        return logs;
+    }
+
+    private static void CopyBlob(byte[] blob, HourlyPowerLog log)
+    {
+        // 長さ不正 (破損行) は空ログ扱いにする
+        if (blob.Length == log.HourlyWatts.Length * sizeof(int))
+            MemoryMarshal.Cast<byte, int>(blob).CopyTo(log.HourlyWatts);
     }
 
     private static void Save(HourlyPowerLog log)

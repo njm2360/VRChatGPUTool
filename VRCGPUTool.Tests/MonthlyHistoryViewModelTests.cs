@@ -18,7 +18,21 @@ public class MonthlyHistoryViewModelTests
         var mock = new Mock<IPowerLogService>();
         mock.Setup(s => s.LoadForDateAsync(It.IsAny<DateOnly>()))
             .ReturnsAsync(new HourlyPowerLog());
+        mock.Setup(s => s.LoadMonthAsync(It.IsAny<DateOnly>()))
+            .ReturnsAsync((DateOnly m) => MonthLogs(m));
         return mock;
+    }
+
+    /// <summary>指定月の空ログ一覧を作り、指定日だけ差し替える。</summary>
+    private static HourlyPowerLog[] MonthLogs(DateOnly month, params (int Day, HourlyPowerLog Log)[] overrides)
+    {
+        int days = DateTime.DaysInMonth(month.Year, month.Month);
+        var logs = new HourlyPowerLog[days];
+        for (int d = 0; d < days; d++)
+            logs[d] = new HourlyPowerLog { Date = new DateOnly(month.Year, month.Month, d + 1) };
+        foreach (var (day, log) in overrides)
+            logs[day - 1] = log;
+        return logs;
     }
 
     private static MonthlyHistoryViewModel CreateViewModel(
@@ -124,7 +138,7 @@ public class MonthlyHistoryViewModelTests
         var jan1 = new DateOnly(2025, 1, 1);
         var fileLog = new HourlyPowerLog();
         for (int h = 0; h < 24; h++) fileLog.Accumulate(h, 300000);
-        powerLogMock.Setup(s => s.LoadForDateAsync(jan1)).ReturnsAsync(fileLog);
+        powerLogMock.Setup(s => s.LoadMonthAsync(jan1)).ReturnsAsync(MonthLogs(jan1, (1, fileLog)));
 
         var vm = CreateViewModel(powerLogMock: powerLogMock);
         vm.SelectedMonth = new DateOnly(2025, 1, 1);
@@ -158,7 +172,7 @@ public class MonthlyHistoryViewModelTests
         var jan1 = new DateOnly(2025, 1, 1);
         var fileLog = new HourlyPowerLog();
         for (int h = 0; h < 24; h++) fileLog.Accumulate(h, 150000);
-        powerLogMock.Setup(s => s.LoadForDateAsync(jan1)).ReturnsAsync(fileLog);
+        powerLogMock.Setup(s => s.LoadMonthAsync(jan1)).ReturnsAsync(MonthLogs(jan1, (1, fileLog)));
 
         var vm = CreateViewModel(powerLogMock: powerLogMock);
         vm.SelectedMonth = new DateOnly(2025, 1, 1);
@@ -186,17 +200,17 @@ public class MonthlyHistoryViewModelTests
     }
 
     // ─────────────────────────────────────────────────────────
-    // 過去日付 → LoadForDateAsync を使う
+    // 過去日付 → LoadMonthAsync のデータを使う
     // ─────────────────────────────────────────────────────────
 
     [Fact]
-    public async Task LoadDayBars_PastDate_UsesLoadForDateAsync()
+    public async Task LoadDayBars_PastDate_UsesLoadedMonthData()
     {
         var powerLogMock = DefaultPowerLogMock();
         var jan1 = new DateOnly(2025, 1, 1);
         var fileLog = new HourlyPowerLog();
         fileLog.Accumulate(0, 7200);
-        powerLogMock.Setup(s => s.LoadForDateAsync(jan1)).ReturnsAsync(fileLog);
+        powerLogMock.Setup(s => s.LoadMonthAsync(jan1)).ReturnsAsync(MonthLogs(jan1, (1, fileLog)));
 
         var vm = CreateViewModel(powerLogMock: powerLogMock);
         vm.SelectedMonth = new DateOnly(2025, 1, 1);
@@ -221,7 +235,8 @@ public class MonthlyHistoryViewModelTests
         await vm.ReloadAsync();
 
         vm.DayBars[today.Day - 1].TotalWs.Should().Be(3600);
-        powerLogMock.Verify(s => s.LoadForDateAsync(today), Times.Never);
+        // 月次表示は日別の個別読み込みを行わない
+        powerLogMock.Verify(s => s.LoadForDateAsync(It.IsAny<DateOnly>()), Times.Never);
     }
 
     // ─────────────────────────────────────────────────────────
@@ -233,12 +248,11 @@ public class MonthlyHistoryViewModelTests
     {
         var powerLogMock = DefaultPowerLogMock();
         var jan1 = new DateOnly(2025, 1, 1);
-        var jan2 = new DateOnly(2025, 1, 2);
 
         var logMax = new HourlyPowerLog(); logMax.Accumulate(0, 200);
         var logHalf = new HourlyPowerLog(); logHalf.Accumulate(0, 100);
-        powerLogMock.Setup(s => s.LoadForDateAsync(jan1)).ReturnsAsync(logMax);
-        powerLogMock.Setup(s => s.LoadForDateAsync(jan2)).ReturnsAsync(logHalf);
+        powerLogMock.Setup(s => s.LoadMonthAsync(jan1))
+            .ReturnsAsync(MonthLogs(jan1, (1, logMax), (2, logHalf)));
 
         var vm = CreateViewModel(powerLogMock: powerLogMock);
         vm.SelectedMonth = new DateOnly(2025, 1, 1);

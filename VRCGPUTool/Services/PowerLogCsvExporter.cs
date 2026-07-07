@@ -21,10 +21,7 @@ public sealed class PowerLogCsvExporter(IPowerLogService powerLogService)
     public async Task ExportMonthToCsvAsync(DateOnly month, string filePath)
     {
         int daysInMonth = DateTime.DaysInMonth(month.Year, month.Month);
-
-        var tasks = Enumerable.Range(1, daysInMonth)
-            .Select(d => powerLogService.LoadForDateAsync(new DateOnly(month.Year, month.Month, d)));
-        HourlyPowerLog[] logs = await Task.WhenAll(tasks).ConfigureAwait(false);
+        IReadOnlyList<HourlyPowerLog> logs = await powerLogService.LoadMonthAsync(month).ConfigureAwait(false);
 
         var sb = new StringBuilder();
         sb.AppendLine("日時,使用量(Wh)");
