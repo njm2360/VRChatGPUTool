@@ -10,8 +10,19 @@ namespace VRCGPUTool.Services;
 
 public sealed class SqlitePowerLogService : IPowerLogService
 {
+    private readonly string _dbPath;
+    private readonly string _jsonDir;
+
     private readonly object _initLock = new();
     private Task? _initTask;
+
+    public SqlitePowerLogService() : this(AppPaths.PowerLogDb, AppPaths.PowerLogDir) { }
+
+    internal SqlitePowerLogService(string dbPath, string jsonDir)
+    {
+        _dbPath = dbPath;
+        _jsonDir = jsonDir;
+    }
 
     private Task EnsureInitializedAsync()
     {
@@ -61,9 +72,9 @@ public sealed class SqlitePowerLogService : IPowerLogService
         await Task.Run(() => Save(log)).ConfigureAwait(false);
     }
 
-    private static void Initialize()
+    private void Initialize()
     {
-        Directory.CreateDirectory(AppPaths.DataDir);
+        Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
 
         using var conn = OpenConnection(setWal: true);
         CreateTable(conn);
@@ -87,9 +98,9 @@ public sealed class SqlitePowerLogService : IPowerLogService
     /// V1: powerlog_YYYYMMDD.json — {"hourPowerLog":[...],"logdate":"..."}
     /// V2: YYYY-MM-DD.json        — [0,0,...] (int[24] 配列)
     /// </remarks>
-    private static void MigrateFromJson(SqliteConnection conn)
+    private void MigrateFromJson(SqliteConnection conn)
     {
-        string jsonDir = AppPaths.PowerLogDir;
+        string jsonDir = _jsonDir;
         if (!Directory.Exists(jsonDir)) return;
 
         string[] v1Files = Directory.GetFiles(jsonDir, "powerlog_????????.json");
@@ -179,7 +190,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
     // 内部 DB 操作
     // ────────────────────────────────────────────────
 
-    private static HourlyPowerLog LoadForDate(DateOnly date)
+    private HourlyPowerLog LoadForDate(DateOnly date)
     {
         using var conn = OpenConnection();
         using var cmd = conn.CreateCommand();
@@ -193,7 +204,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         return log;
     }
 
-    private static HourlyPowerLog[] LoadMonth(DateOnly month)
+    private HourlyPowerLog[] LoadMonth(DateOnly month)
     {
         var logs = CreateEmptyMonth(month);
 
@@ -229,7 +240,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
             MemoryMarshal.Cast<byte, int>(blob).CopyTo(log.HourlyWatts);
     }
 
-    private static void Save(HourlyPowerLog log)
+    private void Save(HourlyPowerLog log)
     {
         using var conn = OpenConnection();
 
@@ -262,9 +273,9 @@ public sealed class SqlitePowerLogService : IPowerLogService
         => MemoryMarshal.AsBytes(watts.AsSpan()).ToArray(); // int[24] → byte[96]
 
     // WAL モードは DB ファイルに永続化されるが、synchronous は接続ごとの設定のため毎回設定する。
-    private static SqliteConnection OpenConnection(bool setWal = false)
+    private SqliteConnection OpenConnection(bool setWal = false)
     {
-        var conn = new SqliteConnection($"Data Source={AppPaths.PowerLogDb}");
+        var conn = new SqliteConnection($"Data Source={_dbPath}");
         conn.Open();
         using var pragma = conn.CreateCommand();
         pragma.CommandText = setWal
