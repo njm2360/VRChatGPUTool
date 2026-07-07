@@ -130,9 +130,9 @@ public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
 
     private void ResetConnection()
     {
-        _reader?.Dispose();
-        _writer?.Dispose();
-        _pipe?.Dispose();
+        try { _reader?.Dispose(); } catch { }
+        try { _writer?.Dispose(); } catch { }
+        try { _pipe?.Dispose(); } catch { }
         _reader = null;
         _writer = null;
         _pipe = null;
