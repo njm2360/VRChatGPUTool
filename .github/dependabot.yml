@@ -1,0 +1,7 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: "/"
+    target-branch: "develop"
+    schedule:
+      interval: daily
