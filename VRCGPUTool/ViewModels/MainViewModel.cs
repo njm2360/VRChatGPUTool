@@ -313,7 +313,7 @@ public sealed partial class MainViewModel(
 
     private async Task ApplyLimitInternalAsync(GpuStatus gpu, string statusLabel = "制限中")
     {
-        int powerLimitWatts = _config.PowerLimitWatts;
+        int powerLimitWatts = Math.Clamp(_config.PowerLimitWatts, gpu.PowerLimitMin, gpu.PowerLimitMax);
         IsLimiting = true;
         _appliedPowerLimitWatts = powerLimitWatts;
         _isApplyingLimit = true;
@@ -349,7 +349,9 @@ public sealed partial class MainViewModel(
 
             if (restorePowerLimit)
             {
-                int restoreWatts = _config.RestoreDefaultOnUnlimit ? gpu.PowerLimitDefault : _config.RestoreToWatts;
+                int restoreWatts = Math.Clamp(
+                    _config.RestoreDefaultOnUnlimit ? gpu.PowerLimitDefault : _config.RestoreToWatts,
+                    gpu.PowerLimitMin, gpu.PowerLimitMax);
                 await _nvidiaSmi.SetPowerLimitAsync(gpu.Uuid, restoreWatts).ConfigureAwait(true);
             }
 

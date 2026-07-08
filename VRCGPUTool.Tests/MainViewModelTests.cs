@@ -1198,6 +1198,68 @@ public class MainViewModelTests
     }
 
     // ─────────────────────────────────────────────────────────
+    // 電力制限値のクランプ (GPUの許容範囲外の設定値)
+    // ─────────────────────────────────────────────────────────
+
+    [Fact]
+    public void ApplyLimitAsync_WhenConfigBelowGpuMin_ClampsToMin()
+    {
+        var nvidiaSmi = new Mock<INvidiaSmiService>();
+        nvidiaSmi.Setup(s => s.SetPowerLimitAsync(It.IsAny<string>(), It.IsAny<int>(), default))
+                 .Returns(Task.CompletedTask);
+
+        var gpu = MakeGpu("gpu0"); // PowerLimitMin = 50
+        var vm = CreateVm(nvidiaSmi: nvidiaSmi);
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_config", new AppConfig { PowerLimitWatts = 30 });
+
+        vm.ApplyLimitCommand.Execute(null);
+
+        nvidiaSmi.Verify(s => s.SetPowerLimitAsync("gpu0", 50, default), Times.Once);
+    }
+
+    [Fact]
+    public void ApplyLimitAsync_WhenConfigAboveGpuMax_ClampsToMax()
+    {
+        var nvidiaSmi = new Mock<INvidiaSmiService>();
+        nvidiaSmi.Setup(s => s.SetPowerLimitAsync(It.IsAny<string>(), It.IsAny<int>(), default))
+                 .Returns(Task.CompletedTask);
+
+        var gpu = MakeGpu("gpu0"); // PowerLimitMax = 350
+        var vm = CreateVm(nvidiaSmi: nvidiaSmi);
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_config", new AppConfig { PowerLimitWatts = 999 });
+
+        vm.ApplyLimitCommand.Execute(null);
+
+        nvidiaSmi.Verify(s => s.SetPowerLimitAsync("gpu0", 350, default), Times.Once);
+    }
+
+    [Fact]
+    public void RemoveLimitAsync_WhenRestoreToWattsOutOfRange_ClampsToRange()
+    {
+        var nvidiaSmi = new Mock<INvidiaSmiService>();
+        nvidiaSmi.Setup(s => s.SetPowerLimitAsync(It.IsAny<string>(), It.IsAny<int>(), default))
+                 .Returns(Task.CompletedTask);
+
+        var gpu = MakeGpu("gpu0"); // PowerLimitMax = 350
+        var vm = CreateVm(nvidiaSmi: nvidiaSmi);
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_config", new AppConfig { RestoreDefaultOnUnlimit = false, RestoreToWatts = 999 });
+        vm.IsLimiting = true;
+
+        vm.RemoveLimitCommand.Execute(null);
+
+        nvidiaSmi.Verify(s => s.SetPowerLimitAsync("gpu0", 350, default), Times.Once);
+    }
+
+    // ─────────────────────────────────────────────────────────
     // ProcessGpuUpdate — GPU切断 & IsLimiting=false
     // ─────────────────────────────────────────────────────────
 
