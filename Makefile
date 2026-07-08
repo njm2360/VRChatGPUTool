@@ -3,7 +3,7 @@ ISCC := C:/Program Files (x86)/Inno Setup 6/ISCC.exe
 PUBLISH_FLAGS := -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true --nologo
 
 SVC_EXE := NvidiaSmiProxy/bin/Debug/net10.0-windows/NvidiaSmiProxy.exe
-APP_EXE := VRCGPUTool/bin/Debug/net10.0-windows/VRCGPUTool.exe
+APP_EXE := VRCGPUTool/bin/Debug/net10.0-windows/VRChatGPUTool.exe
 
 .PHONY: all build test coverage publish installer run clean
 

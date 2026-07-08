@@ -73,14 +73,23 @@ public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
 
             try
             {
-                return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                try
+                {
+                    return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                }
+                catch (IOException)
+                {
+                    // 接続が切れていたら再接続して1回リトライ
+                    ResetConnection();
+                    await EnsureConnectedAsync(ct).ConfigureAwait(false);
+                    return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                }
             }
-            catch (IOException)
+            catch
             {
-                // 接続が切れていたら再接続して1回リトライ
+                // 交換に失敗した接続は応答がずれる可能性があるため破棄
                 ResetConnection();
-                await EnsureConnectedAsync(ct).ConfigureAwait(false);
-                return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                throw;
             }
         }
         finally
@@ -121,9 +130,9 @@ public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
 
     private void ResetConnection()
     {
-        _reader?.Dispose();
-        _writer?.Dispose();
-        _pipe?.Dispose();
+        try { _reader?.Dispose(); } catch { }
+        try { _writer?.Dispose(); } catch { }
+        try { _pipe?.Dispose(); } catch { }
         _reader = null;
         _writer = null;
         _pipe = null;

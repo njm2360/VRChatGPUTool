@@ -91,8 +91,12 @@ public sealed partial class NvidiaSmiExecutor
         string stderr = await stderrTask.ConfigureAwait(false);
 
         if (process.ExitCode != 0)
+        {
+            string detail = string.Join(" ",
+                new[] { output.Trim(), stderr.Trim() }.Where(s => s.Length > 0));
             throw new InvalidOperationException(
-                $"nvidia-smi exited with code {process.ExitCode}. {stderr}".TrimEnd());
+                $"nvidia-smi exited with code {process.ExitCode}. {detail}".TrimEnd());
+        }
 
         return output;
     }

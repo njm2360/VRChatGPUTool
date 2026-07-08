@@ -32,6 +32,7 @@ public class DailyHistoryViewModelTests
 
         return new DailyHistoryViewModel(
             powerLogMock.Object,
+            new PowerLogCsvExporter(powerLogMock.Object),
             () => log,
             profile);
     }

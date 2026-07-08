@@ -1,6 +1,17 @@
 <Solution>
-  <Project Path="VRCGPUTool\VRCGPUTool.csproj" />
-  <Project Path="VRCGPUTool.Tests\VRCGPUTool.Tests.csproj" />
-  <Project Path="VRCGPUTool.Shared\VRCGPUTool.Shared.csproj" />
-  <Project Path="NvidiaSmiProxy\NvidiaSmiProxy.csproj" />
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Project Path="VRCGPUTool\VRCGPUTool.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="VRCGPUTool.Tests\VRCGPUTool.Tests.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="VRCGPUTool.Shared\VRCGPUTool.Shared.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="NvidiaSmiProxy\NvidiaSmiProxy.csproj">
+    <Platform Project="x64" />
+  </Project>
 </Solution>

@@ -10,6 +10,7 @@ namespace VRCGPUTool.ViewModels.PowerHistory;
 public sealed partial class DailyHistoryViewModel : ObservableObject
 {
     private readonly IPowerLogService _powerLogService;
+    private readonly PowerLogCsvExporter _exporter;
     private readonly Func<HourlyPowerLog> _getLiveLog;
 
     private readonly ElectricityProfile _profile;
@@ -35,10 +36,12 @@ public sealed partial class DailyHistoryViewModel : ObservableObject
 
     public DailyHistoryViewModel(
         IPowerLogService powerLogService,
+        PowerLogCsvExporter exporter,
         Func<HourlyPowerLog> getLiveLog,
         ElectricityProfile profile)
     {
         _powerLogService = powerLogService;
+        _exporter = exporter;
         _getLiveLog = getLiveLog;
         _selectedDate = getLiveLog().Date;
         _profile = profile;
@@ -76,7 +79,7 @@ public sealed partial class DailyHistoryViewModel : ObservableObject
         if (dialog.ShowDialog() != true) return;
 
         var log = await _powerLogService.LoadForDateAsync(SelectedDate);
-        await _powerLogService.ExportToCsvAsync(log, dialog.FileName);
+        await _exporter.ExportDayToCsvAsync(log, dialog.FileName);
     }
 
     internal async Task ReloadAsync()

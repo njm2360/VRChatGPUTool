@@ -44,6 +44,7 @@ public sealed partial class MainViewModel(
     private int _lastCheckedMinute = -1;
     private int _appliedPowerLimitWatts;
     private bool _isApplyingLimit;
+    private bool _externalChangeWarningPending;
 
     // ─────────────────────────────────────────
     // Observable Properties
@@ -231,13 +232,25 @@ public sealed partial class MainViewModel(
         }
 
         // 外部ツールによる制限変更検出
-        if (IsLimiting && !_isApplyingLimit && gpu.PowerLimit != _appliedPowerLimitWatts)
+        if (IsLimiting && !_isApplyingLimit && !_externalChangeWarningPending && gpu.PowerLimit != _appliedPowerLimitWatts)
         {
-            _dialogService.ShowWarning(
-                $"外部ツールによって電力制限値が変更されたため制限を終了しました。\n" +
-                $"（設定値: {_config.PowerLimitWatts} W → 現在値: {gpu.PowerLimit} W）",
-                "制限解除");
+            _externalChangeWarningPending = true;
             _ = RemoveLimitInternalAsync(gpu, reason: "外部ツールにより制限を解除しました", restorePowerLimit: false);
+
+            var warningMessage =
+                $"外部ツールによって電力制限値が変更されたため制限を終了しました。\n" +
+                $"（設定値: {_config.PowerLimitWatts} W → 現在値: {gpu.PowerLimit} W）";
+            _ = _applicationHost.InvokeOnUiAsync(() =>
+            {
+                try
+                {
+                    _dialogService.ShowWarning(warningMessage, "制限解除");
+                }
+                finally
+                {
+                    _externalChangeWarningPending = false;
+                }
+            });
         }
     }
 
@@ -300,7 +313,7 @@ public sealed partial class MainViewModel(
 
     private async Task ApplyLimitInternalAsync(GpuStatus gpu, string statusLabel = "制限中")
     {
-        int powerLimitWatts = _config.PowerLimitWatts;
+        int powerLimitWatts = Math.Clamp(_config.PowerLimitWatts, gpu.PowerLimitMin, gpu.PowerLimitMax);
         IsLimiting = true;
         _appliedPowerLimitWatts = powerLimitWatts;
         _isApplyingLimit = true;
@@ -336,7 +349,9 @@ public sealed partial class MainViewModel(
 
             if (restorePowerLimit)
             {
-                int restoreWatts = _config.RestoreDefaultOnUnlimit ? gpu.PowerLimitDefault : _config.RestoreToWatts;
+                int restoreWatts = Math.Clamp(
+                    _config.RestoreDefaultOnUnlimit ? gpu.PowerLimitDefault : _config.RestoreToWatts,
+                    gpu.PowerLimitMin, gpu.PowerLimitMax);
                 await _nvidiaSmi.SetPowerLimitAsync(gpu.Uuid, restoreWatts).ConfigureAwait(true);
             }
 

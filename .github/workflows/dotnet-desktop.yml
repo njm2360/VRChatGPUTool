@@ -1,0 +1,42 @@
+name: .NET Core Desktop
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+
+    env:
+      Solution_Name: VRCGPUTool.slnx
+      Test_Project_Path: VRCGPUTool.Tests\VRCGPUTool.Tests.csproj
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Build
+      run: dotnet build $env:Solution_Name --configuration $env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
+
+    - name: Execute unit tests
+      run: dotnet test $env:Test_Project_Path --configuration $env:Configuration
+      env:
+        Configuration: ${{ matrix.configuration }}
