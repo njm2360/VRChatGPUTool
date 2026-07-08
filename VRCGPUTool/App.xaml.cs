@@ -13,6 +13,7 @@ public partial class App : Application
     private const string MutexName = "VRCGPUTool_SingleInstance_Mutex";
 
     private Mutex? _mutex;
+    private bool _ownsMutex;
     private IServiceProvider? _services;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -33,6 +34,7 @@ public partial class App : Application
         };
 
         _mutex = new Mutex(true, MutexName, out bool created);
+        _ownsMutex = created;
         if (!created)
         {
             MessageBox.Show("既に起動しています。", "VRChat GPU Tool",
@@ -61,7 +63,8 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        _mutex?.ReleaseMutex();
+        if (_ownsMutex)
+            _mutex?.ReleaseMutex();
         _mutex?.Dispose();
         base.OnExit(e);
     }
