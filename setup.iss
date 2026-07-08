@@ -1,6 +1,6 @@
 #define AppName        "VRChatGPUTool"
-#define AppVersion     "3.0.0"
 #define AppExeName     "VRChatGPUTool.exe"
+#define AppVersion     GetStringFileInfo("VRCGPUTool\bin\Release\net10.0-windows\win-x64\publish\" + AppExeName, "ProductVersion")
 #define ServiceExeName "NvidiaSmiProxy.exe"
 #define ServiceName    "VRCGPUToolNvidiaSmiProxy"
 #define ServiceDisplay "VRCGPUTool NvidiaSmi Proxy"
@@ -14,7 +14,7 @@ AppPublisher=njm2360
 DefaultDirName={autopf64}\{#AppName}
 DefaultGroupName={#AppName}
 OutputDir=dist
-OutputBaseFilename=VRChatGPUTool-v{#AppVersion}-setup
+OutputBaseFilename={#AppName}-v{#AppVersion}-setup
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
