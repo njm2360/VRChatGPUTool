@@ -1343,6 +1343,87 @@ public class MainViewModelTests
     }
 
     // ─────────────────────────────────────────────────────────
+    // ProcessGpuUpdate — 定期保存
+    // ─────────────────────────────────────────────────────────
+
+    [Fact]
+    public void ProcessGpuUpdate_BeforeSaveInterval_DoesNotSaveLog()
+    {
+        var powerLogService = new Mock<IPowerLogService>();
+        powerLogService.Setup(s => s.SaveAsync(It.IsAny<HourlyPowerLog>())).Returns(Task.CompletedTask);
+
+        var tp = new TestTimeProvider(DefaultNow);
+        var vm = CreateVm(powerLogService: powerLogService, timeProvider: tp);
+        var gpu = MakeGpu("gpu0");
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_todayLog", new HourlyPowerLog { Date = DateOnly.FromDateTime(DefaultNow.UtcDateTime) });
+
+        CallProcessGpuUpdate(vm, [gpu]);
+        tp.Set(DefaultNow.AddSeconds(59));
+        CallProcessGpuUpdate(vm, [gpu]);
+
+        powerLogService.Verify(s => s.SaveAsync(It.IsAny<HourlyPowerLog>()), Times.Never);
+    }
+
+    [Fact]
+    public void ProcessGpuUpdate_AfterSaveInterval_SavesLogAndResetsTimer()
+    {
+        var powerLogService = new Mock<IPowerLogService>();
+        powerLogService.Setup(s => s.SaveAsync(It.IsAny<HourlyPowerLog>())).Returns(Task.CompletedTask);
+
+        var today = DateOnly.FromDateTime(DefaultNow.UtcDateTime);
+        var tp = new TestTimeProvider(DefaultNow);
+        var vm = CreateVm(powerLogService: powerLogService, timeProvider: tp);
+        var gpu = MakeGpu("gpu0");
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+        SetField(vm, "_todayLog", new HourlyPowerLog { Date = today });
+
+        // 1分経過 → 保存される
+        tp.Set(DefaultNow.AddMinutes(1));
+        CallProcessGpuUpdate(vm, [gpu]);
+        powerLogService.Verify(s => s.SaveAsync(It.Is<HourlyPowerLog>(l => l.Date == today)), Times.Once);
+
+        // 直後はタイマーがリセットされているため保存されない
+        tp.Set(DefaultNow.AddMinutes(1).AddSeconds(30));
+        CallProcessGpuUpdate(vm, [gpu]);
+        powerLogService.Verify(s => s.SaveAsync(It.IsAny<HourlyPowerLog>()), Times.Once);
+
+        // さらに1分経過 → 2回目の保存
+        tp.Set(DefaultNow.AddMinutes(2));
+        CallProcessGpuUpdate(vm, [gpu]);
+        powerLogService.Verify(s => s.SaveAsync(It.IsAny<HourlyPowerLog>()), Times.Exactly(2));
+    }
+
+    [Fact]
+    public void ProcessGpuUpdate_WhenDayChanges_PeriodicSaveTimerIsReset()
+    {
+        var powerLogService = new Mock<IPowerLogService>();
+        powerLogService.Setup(s => s.SaveAsync(It.IsAny<HourlyPowerLog>())).Returns(Task.CompletedTask);
+
+        var tp = new TestTimeProvider(DefaultNow);
+        var vm = CreateVm(powerLogService: powerLogService, timeProvider: tp);
+        var gpu = MakeGpu("gpu0");
+        SetField(vm, "_gpus", (IReadOnlyList<GpuStatus>)[gpu]);
+        SetField(vm, "_selectedGpuIndex", 0);
+        SetField(vm, "_selectedGpuUuid", "gpu0");
+
+        // 昨日のログをセットし、1分以上経過した状態でロールオーバーを起こす
+        var yesterday = new DateOnly(2026, 4, 12);
+        SetField(vm, "_todayLog", new HourlyPowerLog { Date = yesterday });
+        tp.Set(DefaultNow.AddMinutes(2));
+
+        CallProcessGpuUpdate(vm, [gpu]);
+
+        // ロールオーバー保存のみで、定期保存が重複して走らないこと
+        powerLogService.Verify(s => s.SaveAsync(It.IsAny<HourlyPowerLog>()), Times.Once);
+        powerLogService.Verify(s => s.SaveAsync(It.Is<HourlyPowerLog>(l => l.Date == yesterday)), Times.Once);
+    }
+
+    // ─────────────────────────────────────────────────────────
     // CheckForUpdateAsync — アップデートあり
     // ─────────────────────────────────────────────────────────
 
