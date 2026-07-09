@@ -30,8 +30,11 @@ public sealed partial class MainViewModel(
     private readonly INavigationService _navigationService = navigationService;
     private readonly TimeProvider _timeProvider = timeProvider;
 
+    private static readonly TimeSpan PowerLogSaveInterval = TimeSpan.FromMinutes(1);
+
     private AppConfig _config = new();
     private HourlyPowerLog _todayLog = new();
+    private DateTime _lastLogSaveTime = timeProvider.GetLocalNow().DateTime;
     private ElectricityProfile _electricityProfile = new();
 
     private IReadOnlyList<GpuStatus> _gpus = [];
@@ -214,13 +217,21 @@ public sealed partial class MainViewModel(
         MemClockText = $"{gpu.MemoryClock} MHz";
         GpuUtilText = $"{gpu.GpuUtilization} %";
 
-        var today = DateOnly.FromDateTime(_timeProvider.GetLocalNow().DateTime);
+        var now = _timeProvider.GetLocalNow().DateTime;
+        var today = DateOnly.FromDateTime(now);
         if (_todayLog.Date != today)
         {
             _ = _powerLogService.SaveAsync(_todayLog);
             _todayLog = new HourlyPowerLog { Date = today };
+            _lastLogSaveTime = now;
         }
-        _todayLog.Accumulate(_timeProvider.GetLocalNow().DateTime.Hour, gpu.PowerDraw);
+        _todayLog.Accumulate(now.Hour, gpu.PowerDraw);
+
+        if (now - _lastLogSaveTime >= PowerLogSaveInterval)
+        {
+            _lastLogSaveTime = now;
+            _ = _powerLogService.SaveAsync(_todayLog);
+        }
 
         CheckSchedule(gpu);
 
