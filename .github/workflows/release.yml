@@ -5,34 +5,72 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+
 jobs:
-
   release:
-
     runs-on: windows-latest
 
-    permissions:
-      contents: write
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Publish app
-      run: dotnet publish VRCGPUTool\VRCGPUTool.csproj --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=true
+      - name: Resolve version from tag
+        id: version
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $version = $env:TAG -replace '^v', ''
+          if ($version -notmatch '^\d+\.\d+\.\d+(-[0-9A-Za-z.]+)?$') {
+            throw "Unexpected tag format: $env:TAG (expected vMAJOR.MINOR.PATCH)"
+          }
+          "version=$version" >> $env:GITHUB_OUTPUT
 
-    - name: Publish service
-      run: dotnet publish NvidiaSmiProxy\NvidiaSmiProxy.csproj --configuration Release --runtime win-x64 --self-contained false -p:PublishSingleFile=true
+      - name: Test
+        run: dotnet test VRCGPUTool.Tests\VRCGPUTool.Tests.csproj --configuration Release
 
-    - name: Build installer
-      run: iscc setup.iss
+      - name: Publish app
+        run: >
+          dotnet publish VRCGPUTool\VRCGPUTool.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained false
+          -p:PublishSingleFile=true
+          -p:DebugType=none
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:IncludeSourceRevisionInInformationalVersion=false
+          --output publish\app\
 
-    - name: Upload to GitHub Releases
-      uses: softprops/action-gh-release@v2
-      with:
-        files: dist\*.exe
+      - name: Publish service
+        run: >
+          dotnet publish NvidiaSmiProxy\NvidiaSmiProxy.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained false
+          -p:PublishSingleFile=true
+          -p:DebugType=none
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:IncludeSourceRevisionInInformationalVersion=false
+          --output publish\service\
+
+      - name: Build installer
+        run: iscc setup.iss
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          $files = (Get-ChildItem dist\*.exe).FullName
+          $ghArgs = @(
+            $env:TAG
+            $files
+            '--title', $env:TAG
+            '--generate-notes'
+          )
+          if ($env:TAG -match '-') { $ghArgs += '--prerelease' }
+          gh release create @ghArgs
