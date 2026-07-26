@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   build:
@@ -34,6 +35,18 @@ jobs:
           Configuration: ${{ matrix.configuration }}
 
       - name: Test
-        run: dotnet test $env:Test_Project_Path --configuration $env:Configuration
+        run: >
+          dotnet test $env:Test_Project_Path
+          --configuration $env:Configuration
+          --settings coverage.runsettings
+          --collect:"XPlat Code Coverage"
+          --results-directory ./coverage
         env:
           Configuration: ${{ matrix.configuration }}
+
+      - name: Upload coverage to Codecov
+        if: matrix.configuration == 'Release'
+        uses: codecov/codecov-action@v7
+        with:
+          files: coverage/**/coverage.cobertura.xml
+          use_oidc: true
