@@ -5,17 +5,18 @@ on:
     branches: ["main", "develop"]
   pull_request:
     branches: ["main", "develop"]
+  workflow_dispatch:
 
 permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
     runs-on: windows-latest
 
     env:
@@ -30,22 +31,17 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Build
-        run: dotnet build $env:Solution_Name --configuration $env:Configuration
-        env:
-          Configuration: ${{ matrix.configuration }}
+        run: dotnet build $env:Solution_Name --configuration Release
 
       - name: Test
         run: >
           dotnet test $env:Test_Project_Path
-          --configuration $env:Configuration
+          --configuration Release
           --settings coverage.runsettings
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
-        env:
-          Configuration: ${{ matrix.configuration }}
 
       - name: Upload coverage to Codecov
-        if: matrix.configuration == 'Release'
         uses: codecov/codecov-action@v7
         with:
           files: coverage/**/coverage.cobertura.xml
