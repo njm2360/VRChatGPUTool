@@ -1,6 +1,6 @@
 #define AppName        "VRChatGPUTool"
 #define AppExeName     "VRChatGPUTool.exe"
-#define AppVersion     GetStringFileInfo("VRCGPUTool\bin\Release\net10.0-windows\win-x64\publish\" + AppExeName, "ProductVersion")
+#define AppVersion     GetStringFileInfo("publish\app\" + AppExeName, "ProductVersion")
 #define ServiceExeName "NvidiaSmiProxy.exe"
 #define ServiceName    "VRCGPUToolNvidiaSmiProxy"
 #define ServiceDisplay "VRCGPUTool NvidiaSmi Proxy"
@@ -31,8 +31,8 @@ Name: "japanese"; MessagesFile: "compiler:Languages\Japanese.isl"
 Name: "desktopicon"; Description: "デスクトップにショートカットを作成"; GroupDescription: "追加タスク:"
 
 [Files]
-Source: "VRCGPUTool\bin\Release\net10.0-windows\win-x64\publish\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "NvidiaSmiProxy\bin\Release\net10.0-windows\win-x64\publish\{#ServiceExeName}"; DestDir: "{app}\Service"; Flags: ignoreversion
+Source: "publish\app\{#AppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "publish\service\{#ServiceExeName}"; DestDir: "{app}\Service"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#AppName}";                    Filename: "{app}\{#AppExeName}"
