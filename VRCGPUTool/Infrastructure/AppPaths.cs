@@ -9,6 +9,8 @@ internal static class AppPaths
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                      Assembly.GetExecutingAssembly().GetName().Name!);
 
+    public static readonly string LogDir = Path.Combine(DataDir, "logs");
+
     public static readonly string ConfigFile = Path.Combine(DataDir, "config.json");
     public static readonly string ElecFile = Path.Combine(DataDir, "elec_profile.json");
     public static readonly string PowerLogDb = Path.Combine(DataDir, "powerlog.db");

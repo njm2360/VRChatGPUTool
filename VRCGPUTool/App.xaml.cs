@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using VRCGPUTool.Services;
 using VRCGPUTool.Services.Mock;
@@ -18,20 +19,11 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
-        base.OnStartup(e);
+        DispatcherUnhandledException += OnDispatcherUnhandledException;
+        AppDomain.CurrentDomain.UnhandledException += OnAppDomainUnhandledException;
+        TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
-        DispatcherUnhandledException += (_, ex) =>
-        {
-            MessageBox.Show(ex.Exception.ToString(), "未処理例外 (Dispatcher)",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            ex.Handled = true;
-            Shutdown(1);
-        };
-        AppDomain.CurrentDomain.UnhandledException += (_, ex) =>
-        {
-            MessageBox.Show(ex.ExceptionObject?.ToString(), "未処理例外 (AppDomain)",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-        };
+        base.OnStartup(e);
 
         _mutex = new Mutex(true, MutexName, out bool created);
         _ownsMutex = created;
@@ -55,10 +47,38 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.ToString(), "初期化エラー",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            Shutdown(1);
+            HandleFatal("Startup", ex);
         }
+    }
+
+    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        e.Handled = true;
+        HandleFatal("DispatcherUnhandledException", e.Exception);
+    }
+
+    private static void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
+    {
+        CrashLogger.Log("AppDomainUnhandledException", e.ExceptionObject as Exception);
+    }
+
+    private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+    {
+        CrashLogger.Log("UnobservedTaskException", e.Exception);
+    }
+
+    private void HandleFatal(string source, Exception ex)
+    {
+        CrashLogger.Log(source, ex);
+
+        MessageBox.Show(
+            $"予期しないエラーが発生しました。アプリケーションを終了します。\n\n{ex.Message}\n\n" +
+            $"エラーログ\n{CrashLogger.LogPath}",
+            "エラー",
+            MessageBoxButton.OK,
+            MessageBoxImage.Error);
+
+        Shutdown(1);
     }
 
     protected override void OnExit(ExitEventArgs e)
