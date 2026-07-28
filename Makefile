@@ -1,17 +1,16 @@
 ISCC := C:/Program Files (x86)/Inno Setup 6/ISCC.exe
 
-PUBLISH_FLAGS := -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true --nologo
+PUBLISH_FLAGS := -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true -p:DebugType=none --nologo
 
-SVC_EXE := NvidiaSmiProxy/bin/Debug/net10.0-windows/NvidiaSmiProxy.exe
-APP_EXE := VRCGPUTool/bin/Debug/net10.0-windows/VRChatGPUTool.exe
+SVC_EXE := NvidiaSmiProxy/bin/x64/Debug/net10.0-windows/NvidiaSmiProxy.exe
+APP_EXE := VRCGPUTool/bin/x64/Debug/net10.0-windows/VRChatGPUTool.exe
 
 .PHONY: all build test coverage publish installer run clean
 
 all: installer
 
 build:
-	dotnet build VRCGPUTool/VRCGPUTool.csproj --nologo
-	dotnet build NvidiaSmiProxy/NvidiaSmiProxy.csproj --nologo
+	dotnet build VRCGPUTool.slnx --nologo
 
 test:
 	dotnet test VRCGPUTool.Tests/VRCGPUTool.Tests.csproj --nologo
@@ -27,14 +26,13 @@ run: build
 
 publish:
 	dotnet publish VRCGPUTool/VRCGPUTool.csproj \
-	    $(PUBLISH_FLAGS)
+	    $(PUBLISH_FLAGS) --output publish/app/
 	dotnet publish NvidiaSmiProxy/NvidiaSmiProxy.csproj \
-	    $(PUBLISH_FLAGS)
+	    $(PUBLISH_FLAGS) --output publish/service/
 
 installer: publish
 	"$(ISCC)" setup.iss
 
 clean:
-	dotnet clean VRCGPUTool/VRCGPUTool.csproj --nologo
-	dotnet clean NvidiaSmiProxy/NvidiaSmiProxy.csproj --nologo
-	rm -rf dist
+	dotnet clean VRCGPUTool.slnx --nologo
+	rm -rf dist publish
