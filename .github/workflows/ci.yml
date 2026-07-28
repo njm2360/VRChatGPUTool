@@ -21,7 +21,6 @@ jobs:
 
     env:
       Solution_Name: VRCGPUTool.slnx
-      Test_Project_Path: VRCGPUTool.Tests\VRCGPUTool.Tests.csproj
 
     steps:
       - uses: actions/checkout@v7
@@ -35,8 +34,9 @@ jobs:
 
       - name: Test
         run: >
-          dotnet test $env:Test_Project_Path
+          dotnet test $env:Solution_Name
           --configuration Release
+          --no-build
           --settings coverage.runsettings
           --collect:"XPlat Code Coverage"
           --results-directory ./coverage
