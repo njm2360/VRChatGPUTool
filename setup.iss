@@ -55,6 +55,10 @@ Filename: "{app}\{#AppExeName}"; \
     Description: "{#AppName} を起動する"; \
     Flags: nowait postinstall skipifsilent runascurrentuser
 
+[UninstallDelete]
+; サービスのログ (ProgramData)
+Type: filesandordirs; Name: "{commonappdata}\{#AppName}"
+
 [UninstallRun]
 Filename: "{sys}\sc.exe"; \
     Parameters: "stop ""{#ServiceName}"""; \

@@ -16,9 +16,17 @@ public sealed class NvidiaSmiWorker(
         PropertyNameCaseInsensitive = true,
     };
 
+    private string? _lastPipeCreateErrorMessage;
+    private string? _lastQueryErrorMessage;
+    private bool _parseFailureWarned;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Pipe server starting.");
+
+        if (!NvidiaSmiExecutor.IsAvailable())
+            logger.LogWarning("nvidia-smi.exe not found in {Dir}. GPU commands will fail.",
+                Environment.SystemDirectory);
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -26,10 +34,20 @@ public sealed class NvidiaSmiWorker(
             try
             {
                 pipe = CreatePipeServer();
+                if (_lastPipeCreateErrorMessage is not null)
+                {
+                    _lastPipeCreateErrorMessage = null;
+                    logger.LogInformation("Pipe server creation recovered.");
+                }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to create pipe server.");
+                // 同一エラーの継続中は初回のみ記録する
+                if (ex.Message != _lastPipeCreateErrorMessage)
+                {
+                    _lastPipeCreateErrorMessage = ex.Message;
+                    logger.LogError(ex, "Failed to create pipe server.");
+                }
                 await Task.Delay(1000, stoppingToken).ConfigureAwait(false);
                 continue;
             }
@@ -123,11 +141,15 @@ public sealed class NvidiaSmiWorker(
         }
         catch
         {
+            logger.LogWarning("Invalid JSON request received: {Request}", Truncate(requestJson));
             return new PipeResponse(Ok: false, Error: "Invalid JSON request.");
         }
 
         if (req is null)
+        {
+            logger.LogWarning("Empty request received.");
             return new PipeResponse(Ok: false, Error: "Empty request.");
+        }
 
         try
         {
@@ -135,34 +157,75 @@ public sealed class NvidiaSmiWorker(
             {
                 "ping" => new PipeResponse(Ok: true),
 
-                "query" => new PipeResponse(Ok: true,
-                    Gpus: await NvidiaSmiExecutor.QueryAllGpusAsync(ct).ConfigureAwait(false)),
+                "query" => await QueryAsync(ct),
 
                 "set-power-limit" when req.Uuid is not null && req.Watts is not null =>
-                    await RunWriteAsync(() =>
+                    await RunWriteAsync($"set-power-limit {req.Watts} W ({req.Uuid})", () =>
                         NvidiaSmiExecutor.SetPowerLimitAsync(req.Uuid, req.Watts.Value, ct)),
 
                 "set-core-clock" when req.Uuid is not null && req.MinCoreClock is not null && req.MaxCoreClock is not null =>
-                    await RunWriteAsync(() =>
+                    await RunWriteAsync($"set-core-clock {req.MinCoreClock}-{req.MaxCoreClock} MHz ({req.Uuid})", () =>
                         NvidiaSmiExecutor.SetCoreClockLimitAsync(req.Uuid, req.MinCoreClock.Value, req.MaxCoreClock.Value, ct)),
 
                 "reset-core-clock" when req.Uuid is not null =>
-                    await RunWriteAsync(() =>
+                    await RunWriteAsync($"reset-core-clock ({req.Uuid})", () =>
                         NvidiaSmiExecutor.ResetCoreClockLimitAsync(req.Uuid, ct)),
 
-                _ => new PipeResponse(Ok: false, Error: $"Unknown command: {req.Cmd}"),
+                _ => UnknownCommand(req.Cmd),
             };
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "nvidia-smi command failed: {Cmd}", req.Cmd);
+            // 毎秒来る query は同一エラーの継続中は初回のみ記録する
+            bool repeated = req.Cmd == "query" && ex.Message == _lastQueryErrorMessage;
+            if (req.Cmd == "query")
+                _lastQueryErrorMessage = ex.Message;
+            if (!repeated)
+                logger.LogError(ex, "nvidia-smi command failed: {Cmd}", req.Cmd);
             return new PipeResponse(Ok: false, Error: ex.Message);
         }
     }
 
-    private static async Task<PipeResponse> RunWriteAsync(Func<Task> action)
+    private async Task<PipeResponse> QueryAsync(CancellationToken ct)
+    {
+        var (gpus, rawOutput) = await NvidiaSmiExecutor.QueryAllGpusAsync(ct).ConfigureAwait(false);
+
+        // 出力があるのに1件もパースできない場合 (Laptop GPU の [N/A] や形式変更) は初回のみ記録する
+        if (gpus.Count == 0 && !string.IsNullOrWhiteSpace(rawOutput))
+        {
+            if (!_parseFailureWarned)
+            {
+                _parseFailureWarned = true;
+                logger.LogWarning("nvidia-smi output could not be parsed: {Output}",
+                    Truncate(rawOutput.Trim(), 500));
+            }
+        }
+        else if (gpus.Count > 0)
+        {
+            _parseFailureWarned = false;
+        }
+
+        if (_lastQueryErrorMessage is not null)
+        {
+            _lastQueryErrorMessage = null;
+            logger.LogInformation("GPU query recovered.");
+        }
+        return new PipeResponse(Ok: true, Gpus: gpus);
+    }
+
+    private async Task<PipeResponse> RunWriteAsync(string description, Func<Task> action)
     {
         await action().ConfigureAwait(false);
+        logger.LogInformation("Executed {Command}", description);
         return new PipeResponse(Ok: true);
     }
+
+    private PipeResponse UnknownCommand(string cmd)
+    {
+        logger.LogWarning("Unknown or malformed command received: {Cmd}", cmd);
+        return new PipeResponse(Ok: false, Error: $"Unknown command: {cmd}");
+    }
+
+    private static string Truncate(string s, int max = 200)
+        => s.Length <= max ? s : s[..max] + "...";
 }
