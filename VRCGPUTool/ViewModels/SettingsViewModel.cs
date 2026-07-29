@@ -1,6 +1,8 @@
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
 
@@ -12,6 +14,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     private readonly IElectricityProfileService _profileService;
     private readonly ElectricityProfile _profile;
     private readonly IDialogService _dialogService;
+    private readonly ILoggerFactory? _loggerFactory;
+    private readonly ILogger _logger;
 
     [ObservableProperty] private IReadOnlyList<GpuStatus> _gpus;
     [ObservableProperty] private int _selectedGpuIndex;
@@ -33,13 +37,15 @@ public sealed partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(AppConfig config, IStartupService startupService,
         IElectricityProfileService profileService, ElectricityProfile profile,
         IReadOnlyList<GpuStatus> gpus, string selectedGpuUuid,
-        IDialogService dialogService)
+        IDialogService dialogService, ILoggerFactory? loggerFactory = null)
     {
         _startupService = startupService;
         _profileService = profileService;
         _profile = profile;
         _gpus = gpus;
         _dialogService = dialogService;
+        _loggerFactory = loggerFactory;
+        _logger = (ILogger?)loggerFactory?.CreateLogger<SettingsViewModel>() ?? NullLogger.Instance;
 
         var match = gpus.Select((g, i) => (g, i)).FirstOrDefault(t => t.g.Uuid == selectedGpuUuid);
         _selectedGpuIndex = match.g is not null ? match.i : 0;
@@ -87,7 +93,8 @@ public sealed partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void OpenPriceSetting(Window owner)
     {
-        var vm = new UnitPriceSettingViewModel(_profileService, _profile);
+        var vm = new UnitPriceSettingViewModel(_profileService, _profile,
+            _loggerFactory?.CreateLogger<UnitPriceSettingViewModel>());
         var window = new Views.UnitPriceSettingWindow { DataContext = vm, Owner = owner };
         window.ShowDialog();
     }
@@ -114,6 +121,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to update startup registration (enable: {Enable})", LaunchAtStartup);
             _dialogService.ShowWarning($"スタートアップ設定の保存に失敗しました:\n{ex.Message}");
         }
 

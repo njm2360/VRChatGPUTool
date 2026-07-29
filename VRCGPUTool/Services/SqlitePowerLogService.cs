@@ -3,6 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using VRCGPUTool.Infrastructure;
 using VRCGPUTool.Models;
 
@@ -12,16 +14,20 @@ public sealed class SqlitePowerLogService : IPowerLogService
 {
     private readonly string _dbPath;
     private readonly string _jsonDir;
+    private readonly ILogger<SqlitePowerLogService> _logger;
 
     private readonly object _initLock = new();
     private Task? _initTask;
 
-    public SqlitePowerLogService() : this(AppPaths.PowerLogDb, AppPaths.PowerLogDir) { }
+    public SqlitePowerLogService(ILogger<SqlitePowerLogService> logger)
+        : this(AppPaths.PowerLogDb, AppPaths.PowerLogDir, logger) { }
 
-    internal SqlitePowerLogService(string dbPath, string jsonDir)
+    internal SqlitePowerLogService(string dbPath, string jsonDir,
+        ILogger<SqlitePowerLogService>? logger = null)
     {
         _dbPath = dbPath;
         _jsonDir = jsonDir;
+        _logger = logger ?? NullLogger<SqlitePowerLogService>.Instance;
     }
 
     private Task EnsureInitializedAsync()
@@ -48,6 +54,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         }
         catch (Exception ex) when (ex is SqliteException or IOException or UnauthorizedAccessException)
         {
+            _logger.LogError(ex, "Failed to load power log for {Date}. Returning empty log.", date);
             return new HourlyPowerLog { Date = date };
         }
     }
@@ -62,6 +69,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         catch (Exception ex) when (ex is SqliteException or IOException or UnauthorizedAccessException)
         {
             // DB・ファイル起因の失敗のみ空ログにフォールバック (バグは表面化させる)
+            _logger.LogError(ex, "Failed to load power logs for {Month:yyyy-MM}. Returning empty month.", month);
             return CreateEmptyMonth(month);
         }
     }
@@ -151,6 +159,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         }
 
         tx.Commit();
+        _logger.LogInformation("Migrated {Count} legacy JSON power log file(s) to SQLite.", migratedFiles.Count);
 
         foreach (string file in migratedFiles)
             try { File.Delete(file); } catch { }
@@ -163,7 +172,7 @@ public sealed class SqlitePowerLogService : IPowerLogService
         catch { }
     }
 
-    private static string? TryReadFile(string file)
+    private string? TryReadFile(string file)
     {
         try
         {
@@ -171,12 +180,14 @@ public sealed class SqlitePowerLogService : IPowerLogService
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            _logger.LogWarning(ex, "Failed to read legacy power log file. Skipping: {File}", file);
             return null;
         }
     }
 
-    private static void MarkCorrupt(string file)
+    private void MarkCorrupt(string file)
     {
+        _logger.LogWarning("Corrupt legacy power log file quarantined: {File}", file);
         try { File.Move(file, file + ".corrupt", overwrite: true); } catch { }
     }
 

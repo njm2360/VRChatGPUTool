@@ -1,10 +1,12 @@
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace VRCGPUTool.Services;
 
-public sealed class GitHubUpdateCheckService : IUpdateCheckService
+public sealed class GitHubUpdateCheckService(
+    ILogger<GitHubUpdateCheckService> logger) : IUpdateCheckService
 {
     private const string LatestReleaseUrl =
         "https://api.github.com/repos/njm2360/VRChatGPUTool/releases/latest";
@@ -32,13 +34,15 @@ public sealed class GitHubUpdateCheckService : IUpdateCheckService
             string versionStr = release.TagName.TrimStart('v');
             if (!Version.TryParse(versionStr, out var latestVersion)) return null;
 
-            return latestVersion > currentVersion
-                ? new UpdateInfo(release.TagName, release.Body ?? "")
-                : null;
+            if (latestVersion <= currentVersion) return null;
+
+            logger.LogInformation("Update available: {Tag} (current: {Current})", release.TagName, currentVersion);
+            return new UpdateInfo(release.TagName, release.Body ?? "");
         }
-        catch
+        catch (Exception ex)
         {
             // ネットワークエラーはアップデート確認の失敗として静かに無視する
+            logger.LogWarning(ex, "Update check failed.");
             return null;
         }
     }

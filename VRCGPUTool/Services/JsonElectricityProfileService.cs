@@ -1,12 +1,13 @@
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using VRCGPUTool.Infrastructure;
 using VRCGPUTool.Models;
 
 namespace VRCGPUTool.Services;
 
-public sealed class JsonElectricityProfileService : IElectricityProfileService
+public sealed class JsonElectricityProfileService(ILogger<JsonElectricityProfileService> logger) : IElectricityProfileService
 {
     private static readonly string FileName = AppPaths.ElecFile;
 
@@ -26,6 +27,7 @@ public sealed class JsonElectricityProfileService : IElectricityProfileService
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            logger.LogError(ex, "Failed to read electricity profile. Starting with defaults (saving suppressed): {Path}", FileName);
             _suppressSave = true;
             return new ElectricityProfile();
         }
@@ -35,31 +37,35 @@ public sealed class JsonElectricityProfileService : IElectricityProfileService
             var profile = JsonSerializer.Deserialize<ElectricityProfile>(json, JsonOptions);
             return profile ?? new ElectricityProfile();
         }
-        catch (JsonException)
+        catch (JsonException ex)
         {
             // 既存ファイルを退避してからデフォルト値で起動
+            logger.LogError(ex, "Electricity profile is corrupt. Backing up and starting with defaults: {Path}", FileName);
             BackupExistingFile();
             return new ElectricityProfile();
         }
     }
 
-    private static void BackupExistingFile()
+    private void BackupExistingFile()
     {
         try
         {
             if (File.Exists(FileName))
                 File.Copy(FileName, FileName + ".bak", overwrite: true);
         }
-        catch
+        catch (Exception ex)
         {
-            // 退避失敗は無視
+            logger.LogWarning(ex, "Failed to back up corrupt electricity profile: {Path}", FileName);
         }
     }
 
     public async Task SaveAsync(ElectricityProfile profile)
     {
         if (_suppressSave)
+        {
+            logger.LogWarning("Electricity profile save skipped (suppressed by earlier read failure).");
             return;
+        }
 
         Directory.CreateDirectory(AppPaths.DataDir);
         string json = JsonSerializer.Serialize(profile, JsonOptions);

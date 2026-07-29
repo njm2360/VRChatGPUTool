@@ -1,5 +1,6 @@
 using System.Reflection;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
@@ -87,7 +88,8 @@ public class MainViewModelTests
             dialogService.Object,
             applicationHost.Object,
             navigationService.Object,
-            timeProvider ?? new TestTimeProvider(DefaultNow));
+            timeProvider ?? new TestTimeProvider(DefaultNow),
+            NullLogger<MainViewModel>.Instance);
     }
 
     private static void SetField(MainViewModel vm, string name, object value)

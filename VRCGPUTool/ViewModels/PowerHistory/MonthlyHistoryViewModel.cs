@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
@@ -13,6 +16,7 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
     private readonly PowerLogCsvExporter _exporter;
     private readonly Func<HourlyPowerLog> _getLiveLog;
     private readonly ElectricityProfile _profile;
+    private readonly ILogger _logger;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(MonthText))]
@@ -34,12 +38,14 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
         IPowerLogService powerLogService,
         PowerLogCsvExporter exporter,
         Func<HourlyPowerLog> getLiveLog,
-        ElectricityProfile profile)
+        ElectricityProfile profile,
+        ILogger? logger = null)
     {
         _powerLogService = powerLogService;
         _exporter = exporter;
         _getLiveLog = getLiveLog;
         _profile = profile;
+        _logger = logger ?? NullLogger.Instance;
         var today = DateOnly.FromDateTime(DateTime.Today);
         _selectedMonth = new DateOnly(today.Year, today.Month, 1);
         _ = LoadDayBarsAsync();
@@ -76,7 +82,17 @@ public sealed partial class MonthlyHistoryViewModel : ObservableObject
             DefaultExt = ".csv",
         };
         if (dialog.ShowDialog() != true) return;
-        await _exporter.ExportMonthToCsvAsync(SelectedMonth, dialog.FileName);
+
+        try
+        {
+            await _exporter.ExportMonthToCsvAsync(SelectedMonth, dialog.FileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CSV export failed: {File}", dialog.FileName);
+            MessageBox.Show($"CSVエクスポートに失敗しました:\n{ex.Message}", "エラー",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     internal Task ReloadAsync() => LoadDayBarsAsync();

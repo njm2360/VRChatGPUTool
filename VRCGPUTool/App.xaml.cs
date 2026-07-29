@@ -1,8 +1,11 @@
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
+using VRCGPUTool.Infrastructure;
 using VRCGPUTool.Services;
-using VRCGPUTool.Services.Mock;
 using VRCGPUTool.ViewModels;
 using VRCGPUTool.ViewModels.PowerHistory;
 using VRCGPUTool.Views;
@@ -25,10 +28,15 @@ public partial class App : Application
 
         base.OnStartup(e);
 
+        Log.Logger = CreateLogger();
+        Log.Information("Application starting (version {Version})",
+            Assembly.GetExecutingAssembly().GetName().Version);
+
         _mutex = new Mutex(true, MutexName, out bool created);
         _ownsMutex = created;
         if (!created)
         {
+            Log.Information("Another instance is already running. Exiting.");
             MessageBox.Show("既に起動しています。", "VRChat GPU Tool",
                 MessageBoxButton.OK, MessageBoxImage.Information);
             Shutdown();
@@ -59,21 +67,26 @@ public partial class App : Application
 
     private static void OnAppDomainUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        CrashLogger.Log("AppDomainUnhandledException", e.ExceptionObject as Exception);
+        var ex = e.ExceptionObject as Exception;
+        CrashLogger.Log("AppDomainUnhandledException", ex);
+        Log.Fatal(ex, "Unhandled exception in AppDomain (IsTerminating: {IsTerminating})", e.IsTerminating);
+        Log.CloseAndFlush();
     }
 
     private static void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
         CrashLogger.Log("UnobservedTaskException", e.Exception);
+        Log.Error(e.Exception, "Unobserved task exception.");
     }
 
     private void HandleFatal(string source, Exception ex)
     {
         CrashLogger.Log(source, ex);
+        Log.Fatal(ex, "Fatal error ({Source}). Shutting down.", source);
 
         MessageBox.Show(
             $"予期しないエラーが発生しました。アプリケーションを終了します。\n\n{ex.Message}\n\n" +
-            $"エラーログ\n{CrashLogger.LogPath}",
+            $"エラーログ\n{AppPaths.LogDir}",
             "エラー",
             MessageBoxButton.OK,
             MessageBoxImage.Error);
@@ -86,12 +99,29 @@ public partial class App : Application
         if (_ownsMutex)
             _mutex?.ReleaseMutex();
         _mutex?.Dispose();
+
+        Log.Information("Application exiting (code {ExitCode})", e.ApplicationExitCode);
+        Log.CloseAndFlush();
+
         base.OnExit(e);
     }
+
+    private static Serilog.Core.Logger CreateLogger() =>
+        new LoggerConfiguration()
+            .MinimumLevel.Information()
+            .WriteTo.File(
+                Path.Combine(AppPaths.LogDir, "app-.log"),
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 14,
+                fileSizeLimitBytes: 10 * 1024 * 1024,
+                outputTemplate: "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
 
     private static ServiceProvider BuildServiceProvider()
     {
         var services = new ServiceCollection();
+
+        services.AddLogging(builder => builder.AddSerilog(Log.Logger));
 
         // Services
 
