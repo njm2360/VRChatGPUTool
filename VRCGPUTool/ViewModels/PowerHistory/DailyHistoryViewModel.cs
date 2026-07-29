@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Win32;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
@@ -12,6 +15,7 @@ public sealed partial class DailyHistoryViewModel : ObservableObject
     private readonly IPowerLogService _powerLogService;
     private readonly PowerLogCsvExporter _exporter;
     private readonly Func<HourlyPowerLog> _getLiveLog;
+    private readonly ILogger _logger;
 
     private readonly ElectricityProfile _profile;
 
@@ -38,11 +42,13 @@ public sealed partial class DailyHistoryViewModel : ObservableObject
         IPowerLogService powerLogService,
         PowerLogCsvExporter exporter,
         Func<HourlyPowerLog> getLiveLog,
-        ElectricityProfile profile)
+        ElectricityProfile profile,
+        ILogger? logger = null)
     {
         _powerLogService = powerLogService;
         _exporter = exporter;
         _getLiveLog = getLiveLog;
+        _logger = logger ?? NullLogger.Instance;
         _selectedDate = getLiveLog().Date;
         _profile = profile;
 
@@ -78,8 +84,17 @@ public sealed partial class DailyHistoryViewModel : ObservableObject
 
         if (dialog.ShowDialog() != true) return;
 
-        var log = await _powerLogService.LoadForDateAsync(SelectedDate);
-        await _exporter.ExportDayToCsvAsync(log, dialog.FileName);
+        try
+        {
+            var log = await _powerLogService.LoadForDateAsync(SelectedDate);
+            await _exporter.ExportDayToCsvAsync(log, dialog.FileName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CSV export failed: {File}", dialog.FileName);
+            MessageBox.Show($"CSVエクスポートに失敗しました:\n{ex.Message}", "エラー",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     internal async Task ReloadAsync()

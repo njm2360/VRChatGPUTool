@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using Microsoft.Extensions.Logging;
 using VRCGPUTool.Models;
 using VRCGPUTool.ViewModels;
 using VRCGPUTool.ViewModels.PowerHistory;
@@ -11,8 +12,11 @@ public sealed class WpfNavigationService(
     IStartupService startupService,
     IElectricityProfileService electricityProfileService,
     IDialogService dialogService,
-    PowerLogCsvExporter exporter) : INavigationService
+    PowerLogCsvExporter exporter,
+    ILoggerFactory loggerFactory) : INavigationService
 {
+    private readonly ILogger<WpfNavigationService> _logger = loggerFactory.CreateLogger<WpfNavigationService>();
+
     private PowerHistoryWindow? _powerHistoryWindow;
 
     public SettingsDialogResult? ShowSettingsDialog(
@@ -22,7 +26,7 @@ public sealed class WpfNavigationService(
         ElectricityProfile electricityProfile)
     {
         var vm = new SettingsViewModel(config, startupService, electricityProfileService, electricityProfile,
-            gpus, selectedGpuUuid, dialogService);
+            gpus, selectedGpuUuid, dialogService, loggerFactory);
         var window = new SettingsWindow { DataContext = vm, Owner = Application.Current.MainWindow };
 
         if (window.ShowDialog() != true) return null;
@@ -56,12 +60,22 @@ public sealed class WpfNavigationService(
             return;
         }
 
-        var vm = new PowerHistoryViewModel(logService, exporter, todayLogGetter, profile);
+        var vm = new PowerHistoryViewModel(logService, exporter, todayLogGetter, profile, loggerFactory);
         _powerHistoryWindow = new PowerHistoryWindow { DataContext = vm };
         _powerHistoryWindow.Closed += (_, _) => _powerHistoryWindow = null;
         _powerHistoryWindow.Show();
     }
 
     public void OpenUrl(string url)
-        => Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to open URL: {Url}", url);
+            dialogService.ShowWarning($"ブラウザを起動できませんでした:\n{ex.Message}");
+        }
+    }
 }

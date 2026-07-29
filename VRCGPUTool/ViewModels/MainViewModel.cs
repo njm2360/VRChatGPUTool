@@ -1,6 +1,7 @@
 using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.Logging;
 using VRCGPUTool.Models;
 using VRCGPUTool.Services;
 using static VRCGPUTool.Services.ScheduleEvaluator;
@@ -17,8 +18,10 @@ public sealed partial class MainViewModel(
     IDialogService dialogService,
     IApplicationHost applicationHost,
     INavigationService navigationService,
-    TimeProvider timeProvider) : ObservableObject, IAsyncDisposable
+    TimeProvider timeProvider,
+    ILogger<MainViewModel> logger) : ObservableObject, IAsyncDisposable
 {
+    private readonly ILogger<MainViewModel> _logger = logger;
     private readonly INvidiaSmiService _nvidiaSmi = nvidiaSmi;
     private readonly IConfigService _configService = configService;
     private readonly IPowerLogService _powerLogService = powerLogService;
@@ -45,6 +48,7 @@ public sealed partial class MainViewModel(
     private Task? _pollingTask;
 
     private int _lastCheckedMinute = -1;
+    private string? _lastPollErrorMessage;
     private int _appliedPowerLimitWatts;
     private bool _isApplyingLimit;
     private bool _externalChangeWarningPending;
@@ -92,6 +96,7 @@ public sealed partial class MainViewModel(
         StatusText = "サービス接続確認中...";
         if (!_nvidiaSmi.IsAvailable())
         {
+            _logger.LogError("NvidiaSmiProxy service is not reachable. Shutting down.");
             _dialogService.ShowError(
                 "Nvidia-Smi-Proxyに接続できませんでした。\n" +
                 "サービスが起動しているか確認してください。");
@@ -109,11 +114,14 @@ public sealed partial class MainViewModel(
         var gpus = await _nvidiaSmi.QueryAllGpusAsync().ConfigureAwait(true);
         if (gpus.Count == 0)
         {
+            _logger.LogError("No NVIDIA GPU detected. Shutting down.");
             _dialogService.ShowError("NVIDIA GPUが検出されませんでした。");
             _applicationHost.Shutdown();
             return;
         }
 
+        _logger.LogInformation("Detected {Count} GPU(s): {Names}",
+            gpus.Count, string.Join(", ", gpus.Select(g => g.Name)));
         _gpus = gpus;
         ApplyLimitCommand.NotifyCanExecuteChanged();
         RemoveLimitCommand.NotifyCanExecuteChanged();
@@ -137,6 +145,8 @@ public sealed partial class MainViewModel(
 
         _pollingTask = RunPollingLoopAsync(_cts.Token);
         _ = RunClockLoopAsync(_cts.Token);
+
+        _logger.LogInformation("Initialization complete.");
     }
 
     // ─────────────────────────────────────────
@@ -164,11 +174,25 @@ public sealed partial class MainViewModel(
             try
             {
                 var gpus = await _nvidiaSmi.QueryAllGpusAsync(ct).ConfigureAwait(false);
+
+                if (_lastPollErrorMessage is not null)
+                {
+                    _lastPollErrorMessage = null;
+                    _logger.LogInformation("GPU polling recovered.");
+                }
+
                 await _applicationHost.InvokeOnUiAsync(() => ProcessGpuUpdate(gpus));
             }
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { return; }
             catch (Exception ex)
             {
+                // 同一エラーの継続中は初回のみ記録する
+                if (ex.Message != _lastPollErrorMessage)
+                {
+                    _lastPollErrorMessage = ex.Message;
+                    _logger.LogError(ex, "GPU polling failed.");
+                }
+
                 await _applicationHost.InvokeOnUiAsync(() =>
                     StatusText = $"GPUの読み取りエラー: {ex.Message}");
             }
@@ -193,6 +217,7 @@ public sealed partial class MainViewModel(
             else
             {
                 // GPUが取り外されたケース
+                _logger.LogWarning("Selected GPU disconnected: {Uuid}", _selectedGpuUuid);
                 if (IsLimiting)
                 {
                     IsLimiting = false;
@@ -221,7 +246,7 @@ public sealed partial class MainViewModel(
         var today = DateOnly.FromDateTime(now);
         if (_todayLog.Date != today)
         {
-            _ = _powerLogService.SaveAsync(_todayLog);
+            SaveInBackground(_powerLogService.SaveAsync(_todayLog), "power log");
             _todayLog = new HourlyPowerLog { Date = today };
             _lastLogSaveTime = now;
         }
@@ -230,7 +255,7 @@ public sealed partial class MainViewModel(
         if (now - _lastLogSaveTime >= PowerLogSaveInterval)
         {
             _lastLogSaveTime = now;
-            _ = _powerLogService.SaveAsync(_todayLog);
+            SaveInBackground(_powerLogService.SaveAsync(_todayLog), "power log");
         }
 
         CheckSchedule(gpu);
@@ -245,6 +270,9 @@ public sealed partial class MainViewModel(
         // 外部ツールによる制限変更検出
         if (IsLimiting && !_isApplyingLimit && !_externalChangeWarningPending && gpu.PowerLimit != _appliedPowerLimitWatts)
         {
+            _logger.LogWarning(
+                "Power limit changed externally (applied: {Applied} W, current: {Current} W). Releasing limit.",
+                _appliedPowerLimitWatts, gpu.PowerLimit);
             _externalChangeWarningPending = true;
             _ = RemoveLimitInternalAsync(gpu, reason: "外部ツールにより制限を解除しました", restorePowerLimit: false);
 
@@ -331,15 +359,22 @@ public sealed partial class MainViewModel(
         try
         {
             if (_config.CoreClockLimitEnabled)
+            {
                 await _nvidiaSmi.SetCoreClockLimitAsync(gpu.Uuid, 200, _config.CoreClockMaxMhz).ConfigureAwait(true);
+                _logger.LogInformation("Applied core clock limit 200-{MaxMhz} MHz to {Uuid}",
+                    _config.CoreClockMaxMhz, gpu.Uuid);
+            }
 
             await _nvidiaSmi.SetPowerLimitAsync(gpu.Uuid, powerLimitWatts).ConfigureAwait(true);
+            _logger.LogInformation("Applied power limit {Watts} W to {Uuid} ({Label})",
+                powerLimitWatts, gpu.Uuid, statusLabel);
 
             StatusText = $"{statusLabel} ({powerLimitWatts} W)";
             UpdateScheduleSummary();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to apply limits to {Uuid}", gpu.Uuid);
             IsLimiting = false;
             _appliedPowerLimitWatts = 0;
             StatusText = $"制限の適用に失敗しました: {ex.Message}";
@@ -356,7 +391,10 @@ public sealed partial class MainViewModel(
         try
         {
             if (_config.CoreClockLimitEnabled)
+            {
                 await _nvidiaSmi.ResetCoreClockLimitAsync(gpu.Uuid).ConfigureAwait(true);
+                _logger.LogInformation("Reset core clock limit on {Uuid}", gpu.Uuid);
+            }
 
             if (restorePowerLimit)
             {
@@ -364,14 +402,18 @@ public sealed partial class MainViewModel(
                     _config.RestoreDefaultOnUnlimit ? gpu.PowerLimitDefault : _config.RestoreToWatts,
                     gpu.PowerLimitMin, gpu.PowerLimitMax);
                 await _nvidiaSmi.SetPowerLimitAsync(gpu.Uuid, restoreWatts).ConfigureAwait(true);
+                _logger.LogInformation("Restored power limit {Watts} W on {Uuid}", restoreWatts, gpu.Uuid);
             }
 
             _autoLimitDetector.Reset();
+            _logger.LogInformation("Removed limit from {Uuid} ({Reason})",
+                gpu.Uuid, reason ?? "manual");
             StatusText = reason ?? "制限を解除しました";
             UpdateScheduleSummary();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Failed to remove limits from {Uuid}", gpu.Uuid);
             IsLimiting = true;
             StatusText = $"制限解除に失敗しました: {ex.Message}";
         }
@@ -390,7 +432,7 @@ public sealed partial class MainViewModel(
         result.ApplyTo(_config);
         var match = _gpus.Select((g, i) => (g, i)).FirstOrDefault(t => t.g.Uuid == _config.SelectedGpuUuid);
         SetSelectedGpuIndex(match.g is not null ? match.i : 0);
-        _ = _configService.SaveAsync(_config);
+        SaveInBackground(_configService.SaveAsync(_config), "config");
 
         // 制限中に制限値が変更された場合は即時再適用
         if (IsLimiting && GetSelectedGpu() is { } gpu)
@@ -409,7 +451,7 @@ public sealed partial class MainViewModel(
 
         _config.Schedules = newSlots;
         UpdateScheduleSummary();
-        _ = _configService.SaveAsync(_config);
+        SaveInBackground(_configService.SaveAsync(_config), "config");
 
         // 変更後のスケジュールで現在時刻がアクティブかどうか
         bool shouldLimit = _config.Schedules.Any(s => s.Enabled && IsSlotActiveNow(s, now));
@@ -434,6 +476,22 @@ public sealed partial class MainViewModel(
 
     [RelayCommand]
     private void DismissUpdate() => AvailableUpdate = null;
+
+    // ─────────────────────────────────────────
+    // Persistence
+    // ─────────────────────────────────────────
+
+    private async void SaveInBackground(Task saveTask, string target)
+    {
+        try
+        {
+            await saveTask.ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Background save failed: {Target}", target);
+        }
+    }
 
     // ─────────────────────────────────────────
     // Update Check
@@ -462,7 +520,14 @@ public sealed partial class MainViewModel(
         // 設定を保存
         _config.SelectedGpuUuid = _selectedGpuUuid;
 
-        await _configService.SaveAsync(_config).ConfigureAwait(false);
-        await _powerLogService.SaveAsync(_todayLog).ConfigureAwait(false);
+        try
+        {
+            await _configService.SaveAsync(_config).ConfigureAwait(false);
+            await _powerLogService.SaveAsync(_todayLog).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to save state during shutdown.");
+        }
     }
 }

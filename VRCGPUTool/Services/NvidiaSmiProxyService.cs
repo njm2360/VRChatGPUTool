@@ -2,12 +2,14 @@ using System.IO;
 using System.IO.Pipes;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using VRCGPUTool.Models;
 using VRCGPUTool.Shared;
 
 namespace VRCGPUTool.Services;
 
-public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
+public sealed class NvidiaSmiProxyService(
+    ILogger<NvidiaSmiProxyService> logger) : INvidiaSmiService, IAsyncDisposable
 {
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
@@ -19,6 +21,7 @@ public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
     private NamedPipeClientStream? _pipe;
     private StreamReader? _reader;
     private StreamWriter? _writer;
+    private string? _lastSendErrorMessage;
 
     public bool IsAvailable()
     {
@@ -69,28 +72,41 @@ public sealed class NvidiaSmiProxyService : INvidiaSmiService, IAsyncDisposable
         await _lock.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            await EnsureConnectedAsync(ct).ConfigureAwait(false);
-
+            PipeResponse response;
             try
             {
+                await EnsureConnectedAsync(ct).ConfigureAwait(false);
+
                 try
                 {
-                    return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                    response = await ExchangeAsync(request, ct).ConfigureAwait(false);
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
                     // 接続が切れていたら再接続して1回リトライ
+                    logger.LogWarning(ex, "Pipe connection lost. Reconnecting and retrying: {Cmd}", request.Cmd);
                     ResetConnection();
                     await EnsureConnectedAsync(ct).ConfigureAwait(false);
-                    return await ExchangeAsync(request, ct).ConfigureAwait(false);
+                    response = await ExchangeAsync(request, ct).ConfigureAwait(false);
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 // 交換に失敗した接続は応答がずれる可能性があるため破棄
                 ResetConnection();
+
+                // 同一エラーの継続中は初回のみ記録する (シャットダウン起因のキャンセルは除外)
+                if ((ex is not OperationCanceledException || !ct.IsCancellationRequested)
+                    && ex.Message != _lastSendErrorMessage)
+                {
+                    _lastSendErrorMessage = ex.Message;
+                    logger.LogWarning(ex, "Pipe request failed: {Cmd}", request.Cmd);
+                }
                 throw;
             }
+
+            _lastSendErrorMessage = null;
+            return response;
         }
         finally
         {
