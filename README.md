@@ -9,6 +9,9 @@
 
 VRChatを起動したまま寝落ちしてしまう人のためのGPU電力制限ツールです。指定した時間帯になったら、nvidia-smi経由でGPUに電力制限をかけて電気代を抑えます。
 
+<img height="460" alt="Main Window" src="https://github.com/user-attachments/assets/28a5943e-8e60-43dc-be5b-3daf19c207ef" />
+<img height="380" alt="Schedule Window" src="https://github.com/user-attachments/assets/0308d06f-b6a8-4af9-b3bc-285755b2f7c2" />
+
 ## ダウンロード
 
 [Releases](https://github.com/njm2360/VRChatGputool/releases/latest) からインストーラー(`VRChatGPUTool-vX.Y.Z-setup.exe`)をダウンロードしてください。
