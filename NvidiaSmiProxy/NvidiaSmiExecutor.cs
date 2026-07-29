@@ -29,12 +29,13 @@ public sealed partial class NvidiaSmiExecutor
 
     public static bool IsAvailable() => File.Exists(NvidiaSmiPath);
 
-    public static async Task<IReadOnlyList<GpuStatusDto>> QueryAllGpusAsync(CancellationToken ct = default)
+    public static async Task<(IReadOnlyList<GpuStatusDto> Gpus, string RawOutput)> QueryAllGpusAsync(
+        CancellationToken ct = default)
     {
         string query = string.Join(",", QueryColumns);
         string output = await RunAsync($"--query-gpu={query} --format=csv,noheader,nounits", ct)
             .ConfigureAwait(false);
-        return ParseOutput(output);
+        return (ParseOutput(output), output);
     }
 
     public static Task SetPowerLimitAsync(string uuid, int watts, CancellationToken ct = default)
